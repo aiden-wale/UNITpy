@@ -1,0 +1,4 @@
+[project]
+name = "uonidtoolbox"
+version = "0.1.0"
+description = "University of Newcastle Identification Toolbox"
