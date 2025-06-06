@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of startNL</title>
+  <meta name="keywords" content="startNL">
+  <meta name="description" content="STARTNL - function to initialise estimate of any nonlinear components">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; startNL.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>startNL
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>STARTNL - function to initialise estimate of any nonlinear components</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function M = startNL(Z,M) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> STARTNL - function to initialise estimate of any nonlinear components
+ of the model structure that are not initialised by the user.  This
+ function is not meant to be called by a user - instead it is just an 
+ auxiliary function that is used internally by other routines; 
+ most importantly EST.m
+
+ Usage is:
+
+ M = startNL(Z,M)
+
+ written by Brett Ninness, School of EE &amp; CS
+                           University of Newcastle
+                           Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="startM.html" class="code" title="function M = startM(varargin)">startM</a>	STARTM - function to initialise a model structure in case user has been</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% STARTNL - function to initialise estimate of any nonlinear components</span>
+0002 <span class="comment">% of the model structure that are not initialised by the user.  This</span>
+0003 <span class="comment">% function is not meant to be called by a user - instead it is just an</span>
+0004 <span class="comment">% auxiliary function that is used internally by other routines;</span>
+0005 <span class="comment">% most importantly EST.m</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Usage is:</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% M = startNL(Z,M)</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% written by Brett Ninness, School of EE &amp; CS</span>
+0012 <span class="comment">%                           University of Newcastle</span>
+0013 <span class="comment">%                           Australia.</span>
+0014 
+0015 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0016 
+0017 
+0018 <a name="_sub0" href="#_subfunctions" class="code">function M = startNL(Z,M)</a>
+0019 
+0020 <span class="keyword">if</span> ~isfield(M,<span class="string">'in'</span>),
+0021  <span class="keyword">for</span> k=1:M.nu,
+0022   M.in(k).type = <span class="string">'linear'</span>;
+0023  <span class="keyword">end</span>
+0024 <span class="keyword">elseif</span> isempty(M.in),
+0025  <span class="keyword">for</span> k=1:M.nu,
+0026   M.in(k).type = <span class="string">'linear'</span>;
+0027  <span class="keyword">end</span>
+0028 <span class="keyword">else</span>
+0029  <span class="keyword">for</span> k=1:M.nu,
+0030   <span class="keyword">if</span> ~isfield(M.in(k),<span class="string">'type'</span>),
+0031    M.in(k).type = <span class="string">'linear'</span>;
+0032   <span class="keyword">end</span>
+0033  <span class="keyword">end</span>
+0034 <span class="keyword">end</span>
+0035 <span class="keyword">if</span> ~isfield(M,<span class="string">'out'</span>),
+0036  M.out.type = <span class="string">'linear'</span>;
+0037 <span class="keyword">elseif</span> ~isfield(M.out,<span class="string">'type'</span>),
+0038  M.out.type = <span class="string">'linear'</span>;
+0039 <span class="keyword">end</span>
+0040 <span class="keyword">if</span> M.nu == 0,
+0041  M.in = [];
+0042 <span class="keyword">end</span>
+0043 <span class="keyword">if</span> M.ny == 0,
+0044  M.out = [];
+0045 <span class="keyword">end</span>
+0046 
+0047 
+0048 <span class="comment">%Loop over input nonlinearities to specify default values</span>
+0049 <span class="keyword">for</span> k=1:M.nu <span class="comment">% Loop over all inputs setting defaults</span>
+0050  <span class="keyword">switch</span> M.in(k).type,
+0051   <span class="keyword">case</span> <span class="string">'linear'</span>
+0052    M.in(k).eta  = [];
+0053    M.in(k).neta = 0;
+0054    
+0055   <span class="keyword">case</span> <span class="string">'hinge'</span>
+0056    <span class="comment">% If hinging hyperplane non-linearity, then remove spurious specs for other types.</span>
+0057    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'upper'</span>) M.in(k).upper = [];   <span class="keyword">end</span>;
+0058    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'lower'</span>) M.in(k).lower = [];   <span class="keyword">end</span>;
+0059    <span class="keyword">if</span> (~isfield(M.in(k),<span class="string">'eta'</span>) || (isfield(M.in(k),<span class="string">'eta'</span>) &amp;&amp; isempty(M.in(k).eta)))
+0060     M.in(k).eta = [0.05,1,-0.05,-1,-0.05,1];  <span class="comment">% Tiny Deadzone default</span>
+0061    <span class="keyword">else</span>
+0062     <span class="keyword">if</span> rem(length(M.in(k).eta),2)
+0063      error(<span class="string">'Initial guess in M.in.eta must contain pairs of parameters and hence must be of even length'</span>);
+0064     <span class="keyword">end</span>
+0065    <span class="keyword">end</span>
+0066    M.in(k).neta = length(M.in(k).eta);
+0067    
+0068   <span class="keyword">case</span> <span class="string">'poly'</span>
+0069    <span class="comment">% If polynomial non-linearity, then remove spurious specs for other types.</span>
+0070    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'upper'</span>) M.in(k).upper = []; <span class="keyword">end</span>
+0071    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'lower'</span>) M.in(k).lower = []; <span class="keyword">end</span>
+0072    <span class="keyword">if</span> ( ~isfield(M.in(k),<span class="string">'eta'</span>) | (isfield(M.in(k),<span class="string">'eta'</span>) &amp; isempty(M.in(k).eta) ) )
+0073     M.in(k).eta = [1,zeros(1,11)]; <span class="comment">% Linear function default</span>
+0074    <span class="keyword">elseif</span> (length(M.in(k).eta)==1)  <span class="comment">% Polynomial order the only specification?</span>
+0075     M.in(k).eta = [1;zeros(floor(M.in(k).eta)-1,1)];
+0076    <span class="keyword">end</span>
+0077    M.in(k).neta = length(M.in(k).eta);
+0078    
+0079   <span class="keyword">case</span> {<span class="string">'saturation'</span>,<span class="string">'deadzone'</span>}
+0080    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'eta'</span>) M.in(k).eta = []; <span class="keyword">end</span>;
+0081    <span class="keyword">if</span> ~isfield(M.in(k),<span class="string">'lower'</span>), M.in(k).lower = []; <span class="keyword">end</span>
+0082    <span class="keyword">if</span> ~isfield(M.in(k),<span class="string">'upper'</span>), M.in(k).upper = []; <span class="keyword">end</span>
+0083    <span class="keyword">if</span> [isempty(M.in(k).lower) isempty(M.in(k).upper)]
+0084     M.in(k).upper = 0.5; M.in(k).lower = -0.5; M.in(k).neta = 2;
+0085    <span class="keyword">elseif</span> [~isempty(M.in(k).lower) ~isempty(M.in(k).upper)]
+0086     <span class="comment">%  Sanity check its specs for saturation and deadzone non-linearities</span>
+0087     <span class="keyword">if</span> (M.in(k).lower&gt;M.in(k).upper)
+0088      error(sprintf(<span class="string">'Must have M.in.lower &lt; M.in.upper on input #%d'</span>,k));
+0089     <span class="keyword">end</span>;
+0090     M.in(k).neta = 2;
+0091    <span class="keyword">else</span>
+0092     <span class="keyword">if</span> ~isempty(M.in(k).lower)
+0093      M.in(k).upper = -M.in(k).lower; M.in(k).neta = 1;
+0094     <span class="keyword">else</span>
+0095      M.in(k).lower = -M.in(k).upper; M.in(k).neta = 1;
+0096     <span class="keyword">end</span>;
+0097    <span class="keyword">end</span>
+0098    
+0099   <span class="keyword">otherwise</span>
+0100    error([<span class="string">'Error: Input non-linearity on input '</span>,int2str(k),<span class="string">' must be one of linear, saturation, deadzone, hinge or poly'</span>]);
+0101  <span class="keyword">end</span>  <span class="comment">% End of loop over all the inputs</span>
+0102 <span class="keyword">end</span>
+0103 
+0104 <span class="comment">%Now set defaults for output nonlinearity</span>
+0105 <span class="keyword">switch</span> M.out.type,
+0106  <span class="keyword">case</span> <span class="string">'linear'</span>
+0107   M.out.eta  = [];
+0108   M.out.neta = 0;
+0109   
+0110  <span class="keyword">case</span> <span class="string">'hinge'</span>
+0111   <span class="comment">% If hinging hyperplane non-linearity, then remove spurious specs for other types.</span>
+0112   <span class="keyword">if</span> isfield(M.out,<span class="string">'upper'</span>) M.out = rmfield(M.out,<span class="string">'upper'</span>);   <span class="keyword">end</span>;
+0113   <span class="keyword">if</span> isfield(M.out,<span class="string">'lower'</span>) M.out = rmfield(M.out,<span class="string">'lower'</span>);   <span class="keyword">end</span>;
+0114   <span class="keyword">if</span> ~isfield(M.out,<span class="string">'eta'</span>)  M.out.eta = [0,1,0,0,0,0];  <span class="keyword">end</span>;  <span class="comment">% Linear default</span>
+0115   M.out.neta = length(M.out.eta);
+0116   
+0117  <span class="keyword">case</span> <span class="string">'poly'</span>
+0118   <span class="comment">% If polynomial model for input non-linearity, then remove spurious specs for other types.</span>
+0119   <span class="keyword">if</span> isfield(M.out,<span class="string">'upper'</span>) M.out = rmfield(M.out,<span class="string">'upper'</span>); <span class="keyword">end</span>;
+0120   <span class="keyword">if</span> isfield(M.out,<span class="string">'lower'</span>) M.out = rmfield(M.out,<span class="string">'lower'</span>); <span class="keyword">end</span>;
+0121   <span class="keyword">if</span> ~isfield(M.out,<span class="string">'eta'</span>)
+0122    M.out.eta = [0.1,1,0.1,0.1,0.01,0.01];
+0123   <span class="keyword">elseif</span> (length(M.out.eta)==1)  <span class="comment">% Polynomial order the only specification?</span>
+0124    M.out.eta(k) = [1;zeros(floor(M.out.eta)-1,1)];
+0125   <span class="keyword">end</span>;
+0126   M.out.neta = length(M.out.eta);
+0127   
+0128  <span class="keyword">case</span> {<span class="string">'saturation'</span>,<span class="string">'deadzone'</span>}
+0129   <span class="keyword">if</span> isfield(M.out,<span class="string">'eta'</span>) M.out = rmfield(M.out,<span class="string">'eta'</span>); <span class="keyword">end</span>;
+0130   <span class="keyword">if</span> [~isfield(M.out,<span class="string">'lower'</span>) ~isfield(M.out,<span class="string">'upper'</span>)]
+0131    M.out.upper = 0.1; M.out.lower = -0.1;   M.out.neta = 2;
+0132   <span class="keyword">elseif</span> [isfield(M.out,<span class="string">'lower'</span>) isfield(M.out,<span class="string">'upper'</span>)]
+0133    <span class="comment">%  Sanity check its specs for saturation and deadzone non-linearities</span>
+0134    <span class="keyword">if</span> (M.out.lower&gt;M.out.upper) error(<span class="string">'Must have M.out.lower &lt; M.out.upper'</span>); <span class="keyword">end</span>;
+0135    M.out.neta = 2;
+0136   <span class="keyword">else</span>
+0137    <span class="keyword">if</span> isfield(M.out,<span class="string">'lower'</span>)
+0138     M.out.upper = -M.out.lower; M.out.neta = 1;
+0139    <span class="keyword">else</span>
+0140     M.out.lower = -M.out.upper; M.out.neta = 1;
+0141    <span class="keyword">end</span>;
+0142   <span class="keyword">end</span>
+0143   
+0144  <span class="keyword">otherwise</span>
+0145   error([<span class="string">'Error: Output non-linearity must be one of linear, saturation, deadzone, hinge or poly'</span>]);
+0146 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

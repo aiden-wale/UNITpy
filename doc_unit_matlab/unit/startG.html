@@ -1,0 +1,459 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of startG</title>
+  <meta name="keywords" content="startG">
+  <meta name="description" content="STARTG - function to initialise estimate of dynamics model in case user">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; startG.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>startG
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>STARTG - function to initialise estimate of dynamics model in case user</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function M = startG(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> STARTG - function to initialise estimate of dynamics model in case user
+ did not specify it.  This function is not meant to be called by a user -
+ instead it is just an auxiliary function that is used internally by other
+ routines; most importantly EST.m
+
+ Usage is:
+
+ M = startG(Z,M,OPT)
+
+ written by Brett Ninness, School of EE &amp; CS
+                           University of Newcastle
+                       Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>	Function to calculate quadratic cost</li><li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>	This routine takes a record of input-output data [y,u] and fits</li><li><a href="checkZM.html" class="code" title="function [flag,message] = checkZM(Z,M)">checkZM</a>	</li><li><a href="d2c.html" class="code" title="function G=d2c(M)">d2c</a>	D2C: Function to convert discrete time model structure to continuous</li><li><a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>	Delta operator version of filter.  That is, given a vector of inputs u() to</li><li><a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>	Computes ARX model:</li><li><a href="m2theta.html" class="code" title="function theta = m2theta(M);">m2theta</a>	M2THETA - function to convert from model structure definition to stacked</li><li><a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>	This function estimates a state-space model for a possibly</li><li><a href="stab.html" class="code" title="function z = stab(a,op,delta);">stab</a>	STAB - Function which stabilises a polynomial with respect to the</li><li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li><li><a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>	This function accepts a data structure and tries to interpret what type</li><li><a href="subspace.html" class="code" title="function G = subspace(Z,M,OPT)">subspace</a>	Function that calls underlying subspace algorithms depending on data</li><li><a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% STARTG - function to initialise estimate of dynamics model in case user</span>
+0002 <span class="comment">% did not specify it.  This function is not meant to be called by a user -</span>
+0003 <span class="comment">% instead it is just an auxiliary function that is used internally by other</span>
+0004 <span class="comment">% routines; most importantly EST.m</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Usage is:</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% M = startG(Z,M,OPT)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% written by Brett Ninness, School of EE &amp; CS</span>
+0011 <span class="comment">%                           University of Newcastle</span>
+0012 <span class="comment">%                       Australia.</span>
+0013 
+0014 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0015 
+0016 <a name="_sub0" href="#_subfunctions" class="code">function M = startG(Z,M,OPT)</a>
+0017 
+0018 <span class="comment">% Extract input and output from data matrix</span>
+0019 OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT);
+0020 Z   = <a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>(Z);
+0021 [y,u,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0022 
+0023 <span class="comment">% Check that model supports data</span>
+0024 [flag,message] = <a href="checkZM.html" class="code" title="function [flag,message] = checkZM(Z,M)">checkZM</a>(Z,M);
+0025 <span class="keyword">if</span> flag, error(message); <span class="keyword">end</span>
+0026 
+0027 <span class="comment">% Make sure input, output and state dimension come from the model.</span>
+0028 nu = M.nu;
+0029 ny = M.ny;
+0030 nx = M.nx;
+0031 
+0032 <span class="comment">% Detect if gui is running</span>
+0033 gui = 0; guih = [];
+0034 <span class="keyword">if</span> isfield(OPT,<span class="string">'gui'</span>),
+0035  <span class="keyword">if</span> ~isempty(OPT.gui)
+0036   gui  = 1;         <span class="comment">%GUI is running</span>
+0037   guih = OPT.gui;   <span class="comment">%GUI handle</span>
+0038  <span class="keyword">end</span>
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="keyword">if</span> nu&gt;0 <span class="comment">% Only initialise I/O dynamics if there are some to estimate!</span>
+0042 
+0043  <span class="comment">% OK, now initialise estimate of dynamics if an initial estimate has not been specified</span>
+0044  <span class="comment">% Firstly, if multi-output, ss or bilinear model, then must use subspace method</span>
+0045  <span class="keyword">if</span> (M.ny&gt;1 | any(strcmpi(M.type,{<span class="string">'ss'</span>,<span class="string">'bilin'</span>,<span class="string">'bilinear'</span>})))
+0046   <span class="keyword">if</span> ~isfield(M,<span class="string">'ss'</span>) <span class="comment">% Do not overwrite any initial state space system guess</span>
+0047    opt=OPT; opt.alg=<span class="string">'n4sid'</span>;
+0048    <span class="keyword">switch</span> Z.type
+0049     <span class="keyword">case</span> <span class="string">'time'</span>
+0050      <span class="keyword">if</span> OPT.dsp,
+0051       <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Finding initialisation for estimate of Dynamics via Subspace ID...'</span>,gui,guih)
+0052      <span class="keyword">end</span>
+0053      <span class="keyword">if</span> Z.T==0 || M.op==<span class="string">'s'</span>,
+0054       M.T    = mean(diff(Z.t));
+0055       M.op   = <span class="string">'q'</span>;
+0056       m      = <a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>(Z,M,OPT);
+0057       sys    = ss(m.ss.A,m.ss.B,m.ss.C,m.ss.D,m.T);
+0058       sys    = <a href="d2c.html" class="code" title="function G=d2c(M)">d2c</a>(sys,<span class="string">'tustin'</span>);
+0059       m.ss.A = sys.A; 
+0060       m.ss.B = sys.B; 
+0061       m.ss.C = sys.C;
+0062       <span class="keyword">if</span> M.estK,
+0063        <span class="keyword">try</span>
+0064         [junk1,junk2,K]=care(m.ss.A',m.ss.C',eye(M.nx),1000*eye(M.ny));
+0065         m.ss.K = K';
+0066        <span class="keyword">catch</span>
+0067         m.ss.K = zeros(M.nx,M.ny);
+0068        <span class="keyword">end</span>
+0069       <span class="keyword">else</span>
+0070        m.ss.K = [];
+0071       <span class="keyword">end</span>
+0072       m.estD = 0; <span class="comment">%we do not allow for a D term in continuous model</span>
+0073       m.ss.D = []; 
+0074       <span class="keyword">if</span> M.estX1,
+0075        m.ss.X1 = zeros(M.nx,1);
+0076       <span class="keyword">else</span>
+0077        m.ss.X1 = [];
+0078       <span class="keyword">end</span>
+0079       m.op   = <span class="string">'s'</span>; 
+0080       m.T    = Z.T;
+0081      <span class="keyword">else</span>
+0082       m = <a href="subspace.html" class="code" title="function G = subspace(Z,M,OPT)">subspace</a>(Z,M,OPT);
+0083      <span class="keyword">end</span>
+0084     <span class="keyword">case</span> <span class="string">'frequency'</span>
+0085      <span class="keyword">if</span> OPT.dsp,
+0086       <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Finding initialisation for estimate of Dynamics via Freq. Dom. Subspace ID...'</span>,gui,guih)
+0087      <span class="keyword">end</span>
+0088      m = <a href="subspace.html" class="code" title="function G = subspace(Z,M,OPT)">subspace</a>(Z,M,OPT);
+0089     <span class="keyword">otherwise</span>
+0090      error(<span class="string">'Data type (Z.type) not known'</span>);
+0091    <span class="keyword">end</span>
+0092    m.type=M.type; M=m; <span class="comment">% Make sure (possible bilinear type) is not overwritten</span>
+0093    <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'bilin'</span>,<span class="string">'bilinear'</span>})),
+0094     M.ss.F = zeros(m.nx,m.nx*m.nu); M.ss.G = zeros(m.ny,m.nx*m.nu);
+0095    <span class="keyword">end</span>
+0096   <span class="keyword">else</span> <span class="comment">% OK, some ss bits are specified, but all of them?</span>
+0097    nx = M.nx; nu = M.nu; ny = M.ny;
+0098    <span class="keyword">if</span> isfield(M,<span class="string">'ss'</span>),
+0099     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'A'</span>),  M.ss.A  = zeros(nx);       <span class="keyword">end</span>
+0100     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'B'</span>),  M.ss.B  = zeros(nx,nu);    <span class="keyword">end</span>
+0101     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'C'</span>),  M.ss.C  = zeros(ny,nx);    <span class="keyword">end</span>
+0102     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'D'</span>),  M.ss.D  = zeros(ny,nu);    <span class="keyword">end</span>
+0103     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'Q'</span>),  M.ss.Q  = eye(nx)/10;    <span class="keyword">end</span>
+0104     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'S'</span>),  M.ss.S  = zeros(nx,ny);    <span class="keyword">end</span>
+0105     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'R'</span>),  M.ss.R  = eye(ny)/1000;    <span class="keyword">end</span>
+0106     <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'X1'</span>), M.ss.X1 = zeros(nx,1);     <span class="keyword">end</span>
+0107     <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'bilin'</span>,<span class="string">'bilinear'</span>})),
+0108      <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'F'</span>),  M.ss.F  = zeros(nx,nx*nu); <span class="keyword">end</span>
+0109      <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'G'</span>),  M.ss.G  = zeros(ny,nx*nu); <span class="keyword">end</span>
+0110     <span class="keyword">end</span>
+0111    <span class="keyword">end</span>
+0112    <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'K'</span>)
+0113     <span class="comment">% Compute Kalman Gain for innovations form representation</span>
+0114     <span class="keyword">try</span>,
+0115      [P,dd,K] = dare(M.ss.A',M.ss.C',M.ss.Q,M.ss.R);
+0116      M.ss.K   = K';
+0117     <span class="keyword">catch</span>
+0118      K        = zeros(nx,ny);
+0119     <span class="keyword">end</span>
+0120    <span class="keyword">end</span>;
+0121   <span class="keyword">end</span>;
+0122 
+0123  
+0124  <span class="keyword">else</span>  <span class="comment">%We are looking at a transfer function model</span>
+0125 
+0126   <span class="comment">%Is it time or frequency domain data?</span>
+0127   <span class="keyword">switch</span> Z.type,
+0128 
+0129    <span class="keyword">case</span> <span class="string">'time'</span>,
+0130     <span class="comment">%For each input, check if an initial parameter</span>
+0131     <span class="comment">%guess was supplied and estimate one if not. This is done based on the</span>
+0132     <span class="comment">%order information in M.nA and M.nB</span>
+0133     
+0134     <span class="comment">%  Make initialisation fast</span>
+0135     opt      = OPT; 
+0136     opt.fast = 1; 
+0137     
+0138     Msv = M;
+0139     
+0140     <span class="comment">%Must handle BJ and OE models separately because they allow</span>
+0141     <span class="comment">%a different A poly for each input, this means that we must</span>
+0142     <span class="comment">%estimate a SISO model for each input. For all other cases,</span>
+0143     <span class="comment">%we can estimate just the one A polynomial.</span>
+0144     <span class="keyword">switch</span> M.type
+0145      <span class="keyword">case</span> {<span class="string">'bj'</span>,<span class="string">'oe'</span>}
+0146       <span class="comment">%Loop over inputs</span>
+0147       <span class="keyword">for</span> ku = 1:M.nu,
+0148        <span class="comment">%Determine if we should estimate for this pair</span>
+0149        <span class="comment">%based on what was supplied in M.A and M.B</span>
+0150        estimate = 0; <span class="comment">%Initially don't estimate anything</span>
+0151        <span class="keyword">if</span> M.nA(ku) ~= size(M.A,2)-1,
+0152         estimate = 1;
+0153        <span class="keyword">end</span>
+0154        <span class="keyword">if</span> M.nB(ku) ~= size(M.B,2)-1,
+0155         estimate = 1;
+0156        <span class="keyword">end</span>
+0157        
+0158        <span class="keyword">if</span> estimate,
+0159         <span class="keyword">if</span> OPT.dsp
+0160          <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Finding initial dynamics model via Steiglitz-McBride...'</span>,gui,guih);
+0161         <span class="keyword">end</span>
+0162             
+0163         <span class="comment">% Get initial ARX estimate of order specified for i/o model we are up to</span>
+0164         ZZ    = Z;
+0165         ZZ.u  = ZZ.u(:,ku);
+0166         ZZ.nu = 1;
+0167         MM    = M;
+0168         MM.nB = MM.nB(ku);
+0169         MM.B  = MM.nB;
+0170         MM.nA = MM.nA(ku);
+0171         MM.A  = MM.nA;
+0172         MM.nu = 1;
+0173         MM.ny = 1;
+0174         MM.op = <span class="string">'q'</span>;  <span class="comment">% M.op could be 's', but we definitely want MM.op='q';</span>
+0175         
+0176         <span class="comment">% If we are getting an initial estimate for an eventual</span>
+0177         <span class="comment">% CT model, we get better results now with relative degree zero</span>
+0178         <span class="keyword">if</span> (M.op==<span class="string">'s'</span>)   
+0179          MM.nB = MM.nA;   
+0180         <span class="keyword">end</span>;
+0181         
+0182         <span class="comment">%Now call barx to get estimate</span>
+0183         g       = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>(ZZ,MM,opt);
+0184         gsave   = g;
+0185            
+0186         <span class="comment">%Make sure the A polynomial is stable</span>
+0187         g.A = <a href="stab.html" class="code" title="function z = stab(a,op,delta);">stab</a>(g.A,g.op,g.T);
+0188         
+0189         <span class="comment">%Now save the cost function value so that we</span>
+0190         <span class="comment">%can determine which iteration of the SM method</span>
+0191         <span class="comment">%gives best results</span>
+0192         mm      = g;
+0193         mm.type = <span class="string">'oe'</span>;
+0194         mm.C    = 1;
+0195         mm.D    = 1;
+0196         costold = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(ZZ,<a href="m2theta.html" class="code" title="function theta = m2theta(M);">m2theta</a>(mm),opt,mm,0);
+0197         mi      = 1;
+0198         
+0199         <span class="keyword">if</span> OPT.dsp,
+0200          <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'it#: %3i   MSE cost: %3.5e'</span>,0,costold),gui,guih);
+0201         <span class="keyword">end</span>
+0202         
+0203         <span class="comment">% Then prefilter and estimate again to minimize noise induced bias</span>
+0204         <span class="comment">% error and also implicit high frequency distortion in fit.</span>
+0205         <span class="keyword">for</span> k=1:OPT.smits <span class="comment">% Usually only once around is needed, 4 =&gt; robustness to rare cases</span>
+0206          <span class="keyword">if</span> (M.op==<span class="string">'q'</span>)
+0207           yf = filter(sum(g.A),g.A,ZZ.y);
+0208           uf = filter(sum(g.A),g.A,ZZ.u);
+0209          <span class="keyword">else</span>
+0210           yf = <a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>(g.A(end),g.A,ZZ.y,M.T);
+0211           uf = <a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>(g.A(end),g.A,ZZ.u,M.T);
+0212          <span class="keyword">end</span>;
+0213          <span class="comment">% Could have estimated an unstable system in this first pass - check for this</span>
+0214          <span class="keyword">if</span> any(isnan(yf)) error(<span class="string">'Unstable initialisation generated - initialise another way'</span>); <span class="keyword">end</span>;
+0215          MM.delay = 0;
+0216          g        = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>([yf,uf],MM,opt);
+0217          
+0218          <span class="comment">%Make sure the A polynomial is stable</span>
+0219          g.A = <a href="stab.html" class="code" title="function z = stab(a,op,delta);">stab</a>(g.A,g.op,g.T);
+0220          
+0221          <span class="comment">%Get new cost</span>
+0222          mm      = g;
+0223          mm.type = <span class="string">'oe'</span>;
+0224          mm.C    = 1;
+0225          mm.D    = 1;
+0226          costnew = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(ZZ,<a href="m2theta.html" class="code" title="function theta = m2theta(M);">m2theta</a>(mm),opt,mm,0);
+0227          
+0228          <span class="keyword">if</span> OPT.dsp,
+0229           <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'it#: %3i   MSE cost: %3.5e'</span>,k,costnew),gui,guih);
+0230          <span class="keyword">end</span>
+0231          
+0232          <span class="keyword">if</span> costnew&lt;costold, costold=costnew; gsave=g; mi=k; <span class="keyword">end</span>
+0233         <span class="keyword">end</span>
+0234         
+0235         <span class="comment">%Select best initial point out of gsave according to lowest cost function</span>
+0236         g = gsave;
+0237         <span class="keyword">if</span> OPT.dsp
+0238          <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'Best results achieved using %i iteration(s)'</span>,mi),gui,guih)
+0239         <span class="keyword">end</span>
+0240         <span class="keyword">if</span> ku==1,
+0241          Msv = M;
+0242          mna = max(Msv.nA);
+0243          mnb = max(Msv.nB);
+0244          Msv.A = [g.A zeros(1,mna-Msv.nA(ku))];
+0245          Msv.B = [g.B zeros(1,mnb-Msv.nB(ku))];
+0246         <span class="keyword">else</span>
+0247          Msv.A = [Msv.A; [g.A zeros(1,mna-Msv.nA(ku))]];
+0248          Msv.B = [Msv.B; [g.B zeros(1,mnb-Msv.nB(ku))]];
+0249         <span class="keyword">end</span>
+0250        <span class="keyword">end</span>  <span class="comment">% Test on whether we need to estimate or not for initial value</span>
+0251       <span class="keyword">end</span>   <span class="comment">% For loop over number of inputs</span>
+0252       M = Msv;
+0253       
+0254       <span class="keyword">if</span> strcmp(M.op,<span class="string">'s'</span>) 
+0255        <span class="comment">% Heads up - we've got a live one - continuous time TF</span>
+0256        <span class="comment">% model from time domain data wanted - achieve via grey box ss</span>
+0257    
+0258        M.theta   = [M.B(1:end)';M.A(2:end)'];
+0259        M.t2m     = <span class="string">'t2m_soe'</span>;
+0260        M.type    = <span class="string">'ss'</span>;
+0261        M.par     = <span class="string">'grey'</span>;
+0262        M.alg     = <span class="string">'gn'</span>;
+0263        M.finishM = <span class="string">'finishMctstf'</span>;
+0264        M = feval(M.t2m,M,M.theta);
+0265        
+0266        <span class="keyword">if</span> estimate   <span class="comment">% If this model was estimated, it was a DT one</span>
+0267          nB = M.nB; M.nB = M.nA;     <span class="comment">% I also had zero relative degre</span>
+0268          M = feval(M.t2m,M,M.theta); <span class="comment">% Convert to ss form</span>
+0269          M.T = mean(diff(Z.t));      <span class="comment">% Could be irregularly sampled</span>
+0270          M = <a href="d2c.html" class="code" title="function G=d2c(M)">d2c</a>(M); <span class="comment">% Convert the DT model to a CT initial one</span>
+0271          M.nB = nB;  <span class="comment">% Recall the orginal user specified relative degree</span>
+0272          M.B = M.B(end-M.nB:end);  <span class="comment">% CT model rel degree not necessarily 1</span>
+0273          M.theta   = [M.B(1:end)';M.A(2:end)'];
+0274        <span class="keyword">end</span>; 
+0275       <span class="keyword">end</span>; 
+0276       
+0277      <span class="keyword">otherwise</span> <span class="comment">% M.type must be ar, arma, arx, armax, fir</span>
+0278       <span class="comment">%Determine if we should estimate for this pair</span>
+0279       <span class="comment">%based on what was supplied in M.A and M.B</span>
+0280       estimate = 0; <span class="comment">%Initially don't estimate anything</span>
+0281       <span class="keyword">if</span> M.nA ~= size(M.A,2)-1,
+0282        estimate = 1;
+0283       <span class="keyword">end</span>
+0284       <span class="keyword">if</span> max(M.nB) ~= size(M.B,2)-1,
+0285        estimate = 1;
+0286       <span class="keyword">end</span>
+0287        
+0288       <span class="keyword">if</span> estimate,
+0289        <span class="keyword">if</span> OPT.dsp
+0290         <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Finding initial dynamics model via Steiglitz-McBride...'</span>,gui,guih);
+0291        <span class="keyword">end</span>    
+0292        <span class="comment">% Now call barx to get estimate</span>
+0293        g       = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>(Z,M,opt);
+0294        gsave   = g;
+0295             
+0296        <span class="comment">%Now save the cost function value so that we</span>
+0297        <span class="comment">%can determine which iteration of the SM method</span>
+0298        <span class="comment">%gives best results</span>
+0299        mm      = g;
+0300        mm.type = <span class="string">'oe'</span>;
+0301        mm.C    = 1;
+0302        mm.D    = 1;
+0303        mm.A    = mm.A(ones(M.nu,1),:);
+0304        costold = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(Z,<a href="m2theta.html" class="code" title="function theta = m2theta(M);">m2theta</a>(mm),opt,mm,0);
+0305        mi      = 1;
+0306        
+0307        <span class="comment">% Then prefilter and estimate again to minimize noise induced bias</span>
+0308        <span class="comment">% error and also implicit high frequency distortion in fit.</span>
+0309        <span class="keyword">for</span> k=1:OPT.smits <span class="comment">% Usually only once around is needed, 4 =&gt; robustness to rare cases</span>
+0310         <span class="keyword">if</span> (M.op==<span class="string">'q'</span>)
+0311          yf = filter(sum(g.A),g.A,Z.y);
+0312          uf = filter(sum(g.A),g.A,Z.u);
+0313         <span class="keyword">else</span>
+0314          yf = <a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>(g.A(end),g.A,Z.y,M.T);
+0315          <span class="keyword">for</span> knu=1:M.nu
+0316           uf(:,knu) = <a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>(g.A(end),g.A,u(:,knu),M.T);
+0317          <span class="keyword">end</span>;
+0318         <span class="keyword">end</span>;
+0319         <span class="comment">% Could have estimated an unstable system in this first pass - check for this</span>
+0320         <span class="keyword">if</span> any(isnan(yf)) error(<span class="string">'Unstable initialisation generated - initialise another way'</span>); <span class="keyword">end</span>;
+0321         MM       = M;
+0322         MM.delay = 0;
+0323         g        = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>([yf,uf],M,opt);
+0324         mm       = g;
+0325         mm.type  = <span class="string">'oe'</span>;
+0326         mm.C     = 1;
+0327         mm.D     = 1;
+0328         mm.A     = mm.A(ones(M.nu,1),:);
+0329         costnew  = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(Z,<a href="m2theta.html" class="code" title="function theta = m2theta(M);">m2theta</a>(mm),opt,mm,0);
+0330         
+0331         <span class="keyword">if</span> costnew&lt;costold, costold=costnew; gsave=g; mi=k; <span class="keyword">end</span>
+0332        <span class="keyword">end</span>
+0333         
+0334        <span class="comment">%Select best initial point out of gsave according to lowest cost function</span>
+0335        g = gsave;
+0336        <span class="keyword">if</span> OPT.dsp
+0337         <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'Best results achieved using %i iteration(s)'</span>,mi),gui,guih)
+0338        <span class="keyword">end</span>
+0339        M.A = g.A;
+0340        M.B = g.B;
+0341       <span class="keyword">end</span>
+0342     
+0343     <span class="keyword">end</span>  <span class="comment">% end switch over model types</span>
+0344 
+0345    <span class="keyword">case</span> <span class="string">'frequency'</span>
+0346     <span class="comment">% Extract out relevant vectors from input data</span>
+0347     [F,w,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z); F=squeeze(F); F=F(:); M.wmax = max(w);
+0348     
+0349     <span class="comment">%  Establish frequency domain variable appropriate to time domain operator</span>
+0350     <span class="keyword">if</span> (M.op==<span class="string">'q'</span>), 
+0351      ww = exp(j*M.w*M.T);
+0352     <span class="keyword">elseif</span> (M.op==<span class="string">'d'</span>), 
+0353      ww = (exp(j*M.w*M.T)-ones(size(M.w)))/M.T;
+0354     <span class="keyword">else</span>
+0355      ww = j*M.w; 
+0356     <span class="keyword">end</span>
+0357 
+0358     <span class="comment">%  Is frequency normalisation necessary?</span>
+0359     M.normw=0;  
+0360     <span class="keyword">if</span> [M.op == <span class="string">'s'</span>, OPT.basis ~= <span class="string">'ortho'</span>], 
+0361      M.normw = 1; 
+0362     <span class="keyword">end</span>
+0363 
+0364     <span class="comment">% Check to see of only integer orders where specified as initial guesses</span>
+0365     <span class="comment">% for dynamics: if so get initial estimate by fitting ARX model structure.</span>
+0366 
+0367     <span class="keyword">if</span> [length(M.A)&lt;2  floor(M.A(:)')==M.A(:)']
+0368      <span class="comment">% Get initial ARX estimate of specified order;</span>
+0369      g     = <a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>(Z,M,OPT); 
+0370      M.th0 = g.th; 
+0371      M.X   = g.X;
+0372      M.A   = g.A; 
+0373      M.B   = g.B; 
+0374      M.n   = length(g.B);
+0375     <span class="keyword">else</span>  <span class="comment">% Otherwise, re-express initial guess wrt chosen basis</span>
+0376      ff = polyval(M.B,ww)./polyval(M.A,ww);  <span class="comment">% Response of initial guess</span>
+0377      <span class="comment">% Use farx to translate this initial guess to requested basis.</span>
+0378      g     = <a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>([ff(:),M.w(:)],M,OPT); 
+0379      M.th0 = g.th; 
+0380      M.X   = g.X;
+0381      M.A   = g.A; 
+0382      M.B   = g.B; 
+0383      M.n   = length(g.B);
+0384     <span class="keyword">end</span>;
+0385     M.theta = M.th0;
+0386 
+0387   <span class="keyword">end</span> <span class="comment">%End of switch on data type.</span>
+0388  <span class="keyword">end</span>; <span class="comment">% End of test on multiple output | ss type</span>
+0389 <span class="keyword">else</span>
+0390  M.B = 0.0; 
+0391  M.A = 1.0;
+0392 <span class="keyword">end</span>;
+0393 
+0394 
+0395 
+0396 
+0397 
+0398 
+0399 
+0400 
+0401</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

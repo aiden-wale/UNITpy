@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kf</title>
+  <meta name="keywords" content="kf">
+  <meta name="description" content="KF. This function is the square-root implementation of the Kalman">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; kf.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>kf
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>KF. This function is the square-root implementation of the Kalman</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = kf(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">
+ KF. This function is the square-root implementation of the Kalman
+ Filter as per
+
+ [1] Gibson and Ninness, &quot;RobustMaximum-Likelihood Estimation of Multivariable
+     Dynamic Systems&quot;, Automatica, , 41(10):1667?1682, October 2005.
+
+ *NOTE*: Covariance information is returned in SQUAREROOT form
+
+ Model is assumed to be of the form,
+
+ x(t+1) = A(t)x(t) + B(t)u(t) + w(t),   [w(t)]    (    [ Q(t)    S(t) ] )
+                                        [    ] ~ N( 0, [              ] )
+   y(t) = C(t)x(t) + D(t)u(t) + v(t),   [v(t)]    (    [ S^T(t)  R(t) ] )
+
+ A call to this function should look like
+
+       G = ks(Z,M,OPT);
+
+ Where
+
+            Z:  Input-Output data in one of two forms.  The standard form
+                is for it to be a record with elements Z.y and Z.u, each
+                of which are matrices with number of rows equal to the
+                number of data samples, and number of columns equal (respectively)
+                to the number of outputs and the number of inputs.  On
+                the other hand, Z can be a matrix of the form Z = [y,u]
+                where it is assumed that y is a column vector of output
+                measurements and u is a matrix whose columns are the
+                input measurements; in this latter MISO models are
+                being considered.
+
+             M: Data structure which defines the above model:
+  M.ss.A,B,C,D: Possibly time-varying system matrices; for each matrix, it is
+                assumed that the time index is the third dimension, e.g.
+                A(:,:,t) is the state transition matrix at time t. If the
+                third dimension is equal to one, then time-invariant
+                matrices are assumed for that case.
+
+    M.ss.Q,S,R: Possibly time-varying noise covariance matrices; for each
+                matrix, it is assumed that the time index is the third
+                dimension. If the third dimension is equal to one, then
+                time-invariant matrices are assumed for that case.
+
+    M.ss.X1,P1: Initial state mean (X1) and its covariance matrix (P1),
+                respectively.
+
+             G: returned structure with the following fields
+          G.xp: predicted states, i.e. E[x(t) | y_1,..,y_{t-1}]
+          G.xf: filtered states, i.e.  E[x(t) | y_1,..,y_{t}]
+
+          G.Pp: *SQUAREROOT* of predicted state covariance matrix, i.e.
+                  Pp(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t-1}}
+          G.Pf: *SQUAREROOT* of filtered state covariance matrix
+                  Pf(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t}}
+          
+          G.yp: predicted output estimate
+          G.yf: filtered output estimate
+          G.pe: prediction error
+          G.fe: filter error
+
+          G.LL: negative log-likelihood
+
+   written by Brett Ninness  School of EE &amp; CS
+              Adrian Wills   University of Newcastle</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="rksqrtv.html" class="code" title="function G = rksqrtv(Z,M,OPT)">rksqrtv</a>	Square-root implementation of Kalman Filter/Smoother as per</li><li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_kf.html" class="code" title="">demo_kf</a>	Running this demos signal estimation using the</li><li><a href="demo_sir.html" class="code" title="">demo_sir</a>	Running this demos signal estimation using Sequential</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%</span>
+0002 <span class="comment">% KF. This function is the square-root implementation of the Kalman</span>
+0003 <span class="comment">% Filter as per</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% [1] Gibson and Ninness, &quot;RobustMaximum-Likelihood Estimation of Multivariable</span>
+0006 <span class="comment">%     Dynamic Systems&quot;, Automatica, , 41(10):1667?1682, October 2005.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% *NOTE*: Covariance information is returned in SQUAREROOT form</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Model is assumed to be of the form,</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% x(t+1) = A(t)x(t) + B(t)u(t) + w(t),   [w(t)]    (    [ Q(t)    S(t) ] )</span>
+0013 <span class="comment">%                                        [    ] ~ N( 0, [              ] )</span>
+0014 <span class="comment">%   y(t) = C(t)x(t) + D(t)u(t) + v(t),   [v(t)]    (    [ S^T(t)  R(t) ] )</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% A call to this function should look like</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%       G = ks(Z,M,OPT);</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Where</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%            Z:  Input-Output data in one of two forms.  The standard form</span>
+0023 <span class="comment">%                is for it to be a record with elements Z.y and Z.u, each</span>
+0024 <span class="comment">%                of which are matrices with number of rows equal to the</span>
+0025 <span class="comment">%                number of data samples, and number of columns equal (respectively)</span>
+0026 <span class="comment">%                to the number of outputs and the number of inputs.  On</span>
+0027 <span class="comment">%                the other hand, Z can be a matrix of the form Z = [y,u]</span>
+0028 <span class="comment">%                where it is assumed that y is a column vector of output</span>
+0029 <span class="comment">%                measurements and u is a matrix whose columns are the</span>
+0030 <span class="comment">%                input measurements; in this latter MISO models are</span>
+0031 <span class="comment">%                being considered.</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%             M: Data structure which defines the above model:</span>
+0034 <span class="comment">%  M.ss.A,B,C,D: Possibly time-varying system matrices; for each matrix, it is</span>
+0035 <span class="comment">%                assumed that the time index is the third dimension, e.g.</span>
+0036 <span class="comment">%                A(:,:,t) is the state transition matrix at time t. If the</span>
+0037 <span class="comment">%                third dimension is equal to one, then time-invariant</span>
+0038 <span class="comment">%                matrices are assumed for that case.</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">%    M.ss.Q,S,R: Possibly time-varying noise covariance matrices; for each</span>
+0041 <span class="comment">%                matrix, it is assumed that the time index is the third</span>
+0042 <span class="comment">%                dimension. If the third dimension is equal to one, then</span>
+0043 <span class="comment">%                time-invariant matrices are assumed for that case.</span>
+0044 <span class="comment">%</span>
+0045 <span class="comment">%    M.ss.X1,P1: Initial state mean (X1) and its covariance matrix (P1),</span>
+0046 <span class="comment">%                respectively.</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">%             G: returned structure with the following fields</span>
+0049 <span class="comment">%          G.xp: predicted states, i.e. E[x(t) | y_1,..,y_{t-1}]</span>
+0050 <span class="comment">%          G.xf: filtered states, i.e.  E[x(t) | y_1,..,y_{t}]</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%          G.Pp: *SQUAREROOT* of predicted state covariance matrix, i.e.</span>
+0053 <span class="comment">%                  Pp(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t-1}}</span>
+0054 <span class="comment">%          G.Pf: *SQUAREROOT* of filtered state covariance matrix</span>
+0055 <span class="comment">%                  Pf(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t}}</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%          G.yp: predicted output estimate</span>
+0058 <span class="comment">%          G.yf: filtered output estimate</span>
+0059 <span class="comment">%          G.pe: prediction error</span>
+0060 <span class="comment">%          G.fe: filter error</span>
+0061 <span class="comment">%</span>
+0062 <span class="comment">%          G.LL: negative log-likelihood</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%   written by Brett Ninness  School of EE &amp; CS</span>
+0065 <span class="comment">%              Adrian Wills   University of Newcastle</span>
+0066 
+0067 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0068 
+0069 <a name="_sub0" href="#_subfunctions" class="code">function G = kf(Z,M,OPT)</a>
+0070 
+0071 <span class="comment">% Now get default options</span>
+0072 <span class="keyword">if</span> nargin&lt;3, OPT = []; <span class="keyword">end</span>
+0073 OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT);
+0074 
+0075 <span class="comment">% Extract data and sizes</span>
+0076 [y,u,p,m,N] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0077 y = y';
+0078 
+0079 <span class="comment">% If we have no measurements then we cant filter</span>
+0080 <span class="keyword">if</span> p&lt;1,
+0081  error(<span class="string">'According to the data, there are no outputs. Nothing to do.'</span>)
+0082 <span class="keyword">end</span>
+0083 
+0084 <span class="comment">% Figure out what parts of model are specified and set the rest to defaults</span>
+0085 <span class="keyword">if</span> ~exist(<span class="string">'M'</span>)
+0086  error(<span class="string">'Need to specify initial model structure M!'</span>);
+0087 <span class="keyword">elseif</span> isfield(M,<span class="string">'ss'</span>)
+0088  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'A'</span>),   error(<span class="string">'Need to specify M.ss.A!'</span>);              <span class="keyword">end</span>
+0089  <span class="comment">% Get state dimension</span>
+0090  n = size(M.ss.A,1);
+0091  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'C'</span>),   error(<span class="string">'Need to specify M.ss.C!'</span>);              <span class="keyword">end</span>
+0092  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'B'</span>),   M.ss.B  = zeros(n,m);                          <span class="keyword">end</span>
+0093  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'D'</span>),   M.ss.D  = zeros(p,m);                          <span class="keyword">end</span>
+0094  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'R'</span>),   M.ss.R  = eye(p,p);                            <span class="keyword">end</span>
+0095  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'Q'</span>),   M.ss.Q  = 0.001*eye(n,n);                      <span class="keyword">end</span>
+0096  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'S'</span>),   M.ss.S  = zeros(n,p);                          <span class="keyword">end</span>
+0097  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'X1'</span>),  M.ss.X1 = zeros(n,1);                          <span class="keyword">end</span>
+0098  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'P1'</span>),  M.ss.P1 = eye(n,n);                            <span class="keyword">end</span>
+0099  <span class="keyword">if</span> ~isfield(M,<span class="string">'op'</span>),     M.op    = <span class="string">'q'</span>;                                 <span class="keyword">end</span>
+0100  <span class="keyword">if</span> ~isfield(M,<span class="string">'T'</span>),      M.T     = 1;                                   <span class="keyword">end</span>
+0101  <span class="keyword">if</span> ~isfield(M,<span class="string">'delay'</span>),  M.delay = zeros(m,1);                          <span class="keyword">end</span>
+0102  <span class="keyword">if</span> ~isfield(M,<span class="string">'type'</span>),   M.type  = <span class="string">'ss'</span>;                                <span class="keyword">end</span>
+0103 <span class="keyword">else</span>
+0104  error(<span class="string">'Need to specify model in M.ss fields'</span>);
+0105 <span class="keyword">end</span>
+0106 
+0107 <span class="comment">% Check for input or not and adjust everything else to suit</span>
+0108 <span class="keyword">if</span> m&gt;0,
+0109  <span class="comment">% Include delays specified in model structure on inputs</span>
+0110  <span class="keyword">for</span> r=1:m
+0111   u(:,r) = [zeros(M.delay(r),1);u(1:N-M.delay(r),r)];
+0112  <span class="keyword">end</span>
+0113  u = u';
+0114 <span class="keyword">else</span>
+0115  u = zeros(0,N);
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="comment">% Run some checks for bilinear systems</span>
+0119 <span class="keyword">if</span> m&lt;1 &amp; strfind(M.type,<span class="string">'bilin'</span>), <span class="comment">% If there is no input, then the system is not bilinear between input and state, which is all we support</span>
+0120  M.type = <span class="string">'ss'</span>; 
+0121 <span class="keyword">end</span>
+0122 <span class="keyword">if</span> strfind(M.type,<span class="string">'bilin'</span>),
+0123  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'F'</span>), M.ss.F = zeros(n,n*max(1,m)); <span class="keyword">end</span>
+0124  <span class="keyword">if</span> ~isfield(M.ss,<span class="string">'G'</span>), M.ss.G = zeros(p,n*max(1,m)); <span class="keyword">end</span>
+0125 <span class="keyword">end</span>
+0126 
+0127 <span class="comment">% Copy all details of model into output</span>
+0128 G = M;  
+0129 
+0130 <span class="comment">% Set OPT.smoothing so that only filtering is done</span>
+0131 OPT.smoothing = 0;
+0132 
+0133 <span class="comment">% If the system is a bilinear system then adjust the A and C matrices</span>
+0134 <span class="keyword">if</span> strfind(M.type,<span class="string">'bilin'</span>),
+0135  A = zeros(n,n,N);
+0136  C = zeros(p,n,N);
+0137  <span class="keyword">for</span> t=1:N,
+0138   uu       = kron(u(:,t),eye(max(1,m)));
+0139   A(:,:,t) = M.ss.A + M.ss.F*uu;
+0140   C(:,:,t) = M.ss.C + M.ss.G*uu;
+0141  <span class="keyword">end</span>
+0142  M.ss.A = A;
+0143  M.ss.C = C;
+0144 <span class="keyword">end</span>
+0145 
+0146 
+0147 <span class="comment">% Now call the Kalman Filter/Smoother routine</span>
+0148 Z.y = y;
+0149 Z.u = u;
+0150 G   = <a href="rksqrtv.html" class="code" title="function G = rksqrtv(Z,M,OPT)">rksqrtv</a>(Z,M,OPT);
+0151 
+0152 <span class="comment">% For the purposes of backward compatibility</span>
+0153 G.ss.X  = G.ss.xf;
+0154 G.ss.Xt = G.ss.xf;
+0155 G.ss.Xf = G.ss.xf;
+0156 G.ss.Xp = G.ss.xp;
+0157</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

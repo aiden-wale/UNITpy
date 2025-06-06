@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of m2theta</title>
+  <meta name="keywords" content="m2theta">
+  <meta name="description" content="M2THETA - function to convert from model structure definition to stacked">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; m2theta.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>m2theta
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>M2THETA - function to convert from model structure definition to stacked</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function theta = m2theta(M); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> M2THETA - function to convert from model structure definition to stacked
+ parameter vector theta.  This function is not meant to ever be
+ called by a user - instead it is just an auxiliary function that is
+ used internally by other routines; most importantly EST.m
+
+ Note - a key point is that it extracts only those parameters from the
+ model structure that need to be found by iterative search.  Those that
+ may be found in closed form (eg, parameters of linear FIR and ARX
+ dynamics) are ignored.
+
+ Usage is:
+
+ theta = m2theta(M)
+
+ Where
+
+ M     = Model structure definition in MATLAB structure.
+ theta = parameters in M stacked into vector.
+
+ written by Brett Ninness, School of EE &amp; CS
+            Adrian Wills   University of Newcastle
+                              Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="details.html" class="code" title="function handle = details(varargin)">details</a>	DETAILS: This function summarises details about a model structure.</li><li><a href="gn.html" class="code" title="function G = gn(Z,M,OPT);">gn</a>	This function calls underlying gradient-based search algorithms, based on</li><li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li><li><a href="showdist.html" class="code" title="function showdist(varargin)">showdist</a>	SHOWDIST: Function to plot marginal distributions of parameters.</li><li><a href="startG.html" class="code" title="function M = startG(Z,M,OPT)">startG</a>	STARTG - function to initialise estimate of dynamics model in case user</li><li><a href="validate.html" class="code" title="function [handle, cost, pe] = validate(varargin)">validate</a>	This function is used to compare the predictive performance of an</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% M2THETA - function to convert from model structure definition to stacked</span>
+0002 <span class="comment">% parameter vector theta.  This function is not meant to ever be</span>
+0003 <span class="comment">% called by a user - instead it is just an auxiliary function that is</span>
+0004 <span class="comment">% used internally by other routines; most importantly EST.m</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Note - a key point is that it extracts only those parameters from the</span>
+0007 <span class="comment">% model structure that need to be found by iterative search.  Those that</span>
+0008 <span class="comment">% may be found in closed form (eg, parameters of linear FIR and ARX</span>
+0009 <span class="comment">% dynamics) are ignored.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Usage is:</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% theta = m2theta(M)</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Where</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% M     = Model structure definition in MATLAB structure.</span>
+0018 <span class="comment">% theta = parameters in M stacked into vector.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% written by Brett Ninness, School of EE &amp; CS</span>
+0021 <span class="comment">%            Adrian Wills   University of Newcastle</span>
+0022 <span class="comment">%                              Australia.</span>
+0023 
+0024 <span class="comment">% Copyright (C) Brett Ninness</span>
+0025 
+0026 <a name="_sub0" href="#_subfunctions" class="code">function theta = m2theta(M);</a>
+0027 
+0028 <span class="keyword">if</span> ~isfield(M,<span class="string">'par'</span>), M.par=<span class="string">'unknown'</span>; <span class="keyword">end</span>
+0029 
+0030 th = [];  <span class="comment">% Nuthin in parameter vector to start with</span>
+0031 
+0032 <span class="keyword">if</span> strcmp(lower(M.type),<span class="string">'ss'</span>)  <span class="comment">% State space structure is easy.</span>
+0033  <span class="keyword">switch</span> M.par,
+0034   <span class="keyword">case</span> {<span class="string">'grey'</span>}
+0035    th = M.theta;
+0036    
+0037   <span class="keyword">case</span> {<span class="string">'full'</span>,<span class="string">'unknown'</span>,<span class="string">'ddlc'</span>,<span class="string">'struct'</span>}
+0038    <span class="keyword">if</span> M.T==0,
+0039     nx = size(M.ss.A,1); ny = size(M.ss.C,1);
+0040     Qi = find(tril(ones(nx)));
+0041     Ri = find(tril(ones(ny)));
+0042     th = [th;M.ss.A(:);M.ss.B(:);M.ss.C(:);M.ss.D(:);M.ss.Q(Qi);M.ss.S(:);M.ss.R(Ri)];
+0043    <span class="keyword">else</span>
+0044     th = [th;M.ss.A(:);M.ss.B(:);M.ss.C(:);M.ss.D(:);M.ss.K(:);M.ss.X1(:)];
+0045    <span class="keyword">end</span>
+0046 
+0047   <span class="keyword">case</span> <span class="string">'blkdiag'</span>
+0048    n   = size(M.ss.A,1); 
+0049    <span class="keyword">for</span> i=1:2:n, 
+0050     th(i)=M.ss.A(i,i); 
+0051     th(i+1)=M.ss.A(i,i+1); 
+0052    <span class="keyword">end</span>
+0053    th=[th(:);M.ss.B(:);M.ss.C(:);M.ss.D(:)];
+0054  <span class="keyword">end</span>
+0055  [np,nz]  = size(M.ss.A); <span class="comment">% np=max #poles, nz= max #zeros</span>
+0056  [dum,nu] = size(M.ss.B); <span class="comment">% nu=#inputs,</span>
+0057    
+0058 <span class="keyword">elseif</span> strcmp(lower(M.type),<span class="string">'bilin'</span>) | strcmp(lower(M.type),<span class="string">'bilinear'</span>)
+0059  <span class="keyword">switch</span> M.par,
+0060   <span class="keyword">case</span> {<span class="string">'full'</span>,<span class="string">'unknown'</span>,<span class="string">'ddlc'</span>}
+0061    th=[th;M.ss.A(:);M.ss.B(:);M.ss.C(:);M.ss.D(:);M.ss.K(:);M.ss.F(:);M.ss.G(:);M.ss.X1(:)];
+0062 
+0063   <span class="keyword">case</span> <span class="string">'struct'</span>
+0064    th = [
+0065          M.ss.A(logical(M.ss.Ai));<span class="keyword">...</span>
+0066          M.ss.B(logical(M.ss.Bi));<span class="keyword">...</span>
+0067          M.ss.C(logical(M.ss.Ci));<span class="keyword">...</span>
+0068          M.ss.D(logical(M.ss.Di));<span class="keyword">...</span>
+0069          M.ss.K(logical(M.ss.Ki));<span class="keyword">...</span>
+0070          M.ss.F(logical(M.ss.Fi));<span class="keyword">...</span>
+0071          M.ss.G(logical(M.ss.Gi));<span class="keyword">...</span>
+0072          M.ss.X1(logical(M.ss.X1i))];
+0073  <span class="keyword">end</span>
+0074  
+0075  [np,nz]  = size(M.ss.A); <span class="comment">% np=max #poles, nz= max #zeros</span>
+0076  [dum,nu] = size(M.ss.B); <span class="comment">% nu=#inputs,</span>
+0077 <span class="keyword">else</span>
+0078  nu = M.nu;  <span class="comment">% nu=#inputs, np=max #poles+1</span>
+0079  np = M.nA;
+0080  nz = M.nB;
+0081  <span class="comment">% First put description of linear dynamics into parameter vector</span>
+0082  <span class="comment">% if [~strcmp(lower(M.type),'fir'), ~strcmp(lower(M.type),'arx')]</span>
+0083  <span class="comment">% Stack in parameterisation of numerators</span>
+0084  <span class="keyword">for</span> r=1:nu,
+0085   <span class="comment">% If only estimating a non-linearity, then scalar gain B(1) normalised</span>
+0086   <span class="comment">% to B(1)=1 =&gt; no need to include in parameter vector, otherwise do so.</span>
+0087   <span class="keyword">if</span> (strcmp(M.in(r).type,<span class="string">'linear'</span>) | nz&gt;0),
+0088    th = [th;M.B(r,1:M.nB(r)+1)'];
+0089   <span class="keyword">end</span>
+0090  <span class="keyword">end</span>
+0091 
+0092  <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'ar'</span>,<span class="string">'arma'</span>,<span class="string">'arx'</span>,<span class="string">'armax'</span>})), nud = 1; <span class="keyword">else</span>, nud = nu; <span class="keyword">end</span>
+0093  
+0094  <span class="comment">% Stack in parameterisation of denominators</span>
+0095  <span class="keyword">for</span> r=1:nud th = [th;M.A(r,2:M.nA(r)+1)']; <span class="keyword">end</span>;
+0096 
+0097  <span class="comment">% Stack in noise model</span>
+0098  <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'arma'</span>,<span class="string">'armax'</span>,<span class="string">'bj'</span>})), th = [th;M.C(2:length(M.C))']; <span class="keyword">end</span>
+0099  <span class="keyword">if</span> strcmpi(M.type,<span class="string">'bj'</span>) th = [th;M.D(2:length(M.D))']; <span class="keyword">end</span>
+0100 
+0101  <span class="comment">% end;  % End of test on whether there are parameters in linear model to go into theta</span>
+0102 <span class="keyword">end</span>; <span class="comment">% End of test on whether ss model structure or not</span>
+0103 
+0104 <span class="comment">%  Put description of input non-linearity into parameter vector</span>
+0105 nonlin = [];
+0106 <span class="keyword">for</span> k=1:nu <span class="comment">% Loop over all inputs</span>
+0107  <span class="keyword">if</span> ~strcmp(lower(M.in(k).type),<span class="string">'linear'</span>) <span class="comment">%  First Check if input non-linearity is in model</span>
+0108   <span class="keyword">if</span> (M.in(k).neta == 1)  <span class="comment">% Is a symmetric deadzone or saturation the case?</span>
+0109    nonlin = [nonlin;M.in(k).upper];
+0110   <span class="keyword">else</span>
+0111    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'lower'</span>) nonlin = [nonlin;M.in(k).lower];  <span class="keyword">end</span>;
+0112    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'upper'</span>) nonlin = [nonlin;M.in(k).upper];  <span class="keyword">end</span>;
+0113    <span class="keyword">if</span> isfield(M.in(k),<span class="string">'eta'</span>)   nonlin = [nonlin;M.in(k).eta(:)]; <span class="keyword">end</span>;
+0114   <span class="keyword">end</span>;
+0115  <span class="keyword">end</span>;
+0116 <span class="keyword">end</span>;
+0117 
+0118 <span class="comment">%  Put description of output non-linearity into parameter vector</span>
+0119 <span class="keyword">if</span> ~strcmp(lower(M.out.type),<span class="string">'linear'</span>) <span class="comment">%  First Check if input non-linearity is in model</span>
+0120  <span class="keyword">if</span> (M.out.neta == 1)  <span class="comment">% Is a symmetric deadzone or saturation the case?</span>
+0121   nonlin = [nonlin;M.out.upper];
+0122  <span class="keyword">else</span>
+0123   <span class="keyword">if</span> isfield(M.out,<span class="string">'lower'</span>) nonlin = [nonlin;M.out.lower];  <span class="keyword">end</span>;
+0124   <span class="keyword">if</span> isfield(M.out,<span class="string">'upper'</span>) nonlin = [nonlin;M.out.upper];  <span class="keyword">end</span>;
+0125   <span class="keyword">if</span> isfield(M.out,<span class="string">'eta'</span>)   nonlin = [nonlin;M.out.eta(:)]; <span class="keyword">end</span>;
+0126  <span class="keyword">end</span>;
+0127 <span class="keyword">end</span>;
+0128 
+0129 <span class="comment">% Stack parameterisation of static nonlinearities</span>
+0130 theta = [th;nonlin];
+0131 
+0132 
+0133 
+0134</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

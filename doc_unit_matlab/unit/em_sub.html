@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of em_sub</title>
+  <meta name="keywords" content="em_sub">
+  <meta name="description" content="EM_SUB: Subroutine called by EM.m that computes">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; em_sub.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>em_sub
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>EM_SUB: Subroutine called by EM.m that computes</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = em_sub(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   EM_SUB: Subroutine called by EM.m that computes
+   expectation-maximisation steps for state space model 
+   structures.  This routine is not meant to be directly called by the
+   user - call EM.m instead which sets up all the information that needs
+   to be passed to EM_SUB.m
+
+    written by Brett Ninness,   School of EE &amp; CS
+               Adrian Wills,    University of Newcastle
+                                Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="ks.html" class="code" title="function G = ks(Z,M,OPT)">ks</a>	KS. This function is the square-root implementation of the Kalman</li><li><a href="rchol.html" class="code" title="function [A] = rchol(A);">rchol</a>	A function for computing the Cholesky factorisation,</li><li><a href="rfbs.html" class="code" title="function X = rfbs(B,A,uplow)">rfbs</a>	RFBS:  Solve AX=B for x when A is either lower or upper triangular by</li><li><a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="em.html" class="code" title="function G = em(Z,M,OPT);">em</a>	EM: Function to find maximum likelihood estimates of state space mdoel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%   EM_SUB: Subroutine called by EM.m that computes</span>
+0002 <span class="comment">%   expectation-maximisation steps for state space model</span>
+0003 <span class="comment">%   structures.  This routine is not meant to be directly called by the</span>
+0004 <span class="comment">%   user - call EM.m instead which sets up all the information that needs</span>
+0005 <span class="comment">%   to be passed to EM_SUB.m</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%    written by Brett Ninness,   School of EE &amp; CS</span>
+0008 <span class="comment">%               Adrian Wills,    University of Newcastle</span>
+0009 <span class="comment">%                                Australia.</span>
+0010 
+0011 <span class="comment">% Copyright (C) Brett Ninness, Adrian Wills</span>
+0012 
+0013 <a name="_sub0" href="#_subfunctions" class="code">function G = em_sub(Z,M,OPT)</a>
+0014 
+0015 <span class="comment">% Detect if gui is running</span>
+0016 gui = 0; guih = [];
+0017 <span class="keyword">if</span> isfield(OPT,<span class="string">'gui'</span>),
+0018  <span class="keyword">if</span> ~isempty(OPT.gui)
+0019   gui  = 1;         <span class="comment">%GUI is running</span>
+0020   guih = OPT.gui;   <span class="comment">%GUI handle</span>
+0021  <span class="keyword">end</span>
+0022 <span class="keyword">end</span>
+0023 
+0024 <span class="comment">% Start the display of information if desired</span>
+0025 <span class="keyword">if</span> OPT.dsp, 
+0026  <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Cost: Negative Log-Likelihood'</span>,gui,guih);
+0027 <span class="keyword">end</span>
+0028 sglines=<span class="string">'----------------------------------------------------------------------------'</span>;
+0029 
+0030 <span class="comment">% Extract sizes of input and output from data matrix</span>
+0031 [y,u,ny,nu,N] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z); y = y';
+0032 
+0033 <span class="comment">% Include delays specified in model structure on inputs</span>
+0034 <span class="keyword">for</span> r=1:nu,
+0035  u(:,r) = [zeros(M.delay(r),1);u(1:N-M.delay(r),r)];
+0036 <span class="keyword">end</span>
+0037 u = u';
+0038 
+0039 <span class="comment">% Need to determine what type of state space system we are dealing with and</span>
+0040 <span class="comment">% if all the necessary matrices are present</span>
+0041 <span class="keyword">if</span> findstr(M.type,<span class="string">'bilin'</span>),
+0042  bilin = 1;
+0043 <span class="keyword">else</span>
+0044  bilin = 0;
+0045 <span class="keyword">end</span>
+0046 
+0047 <span class="comment">% If we don't have an input then we can't estimate all parts of a bilinear</span>
+0048 <span class="comment">% model and we can't estimate B and D</span>
+0049 <span class="keyword">if</span> numel(u)==0 || nu==0,
+0050  bilin = 0; isBD = 0; u = zeros(0,N);
+0051 <span class="keyword">else</span>
+0052  isBD = 1;
+0053 <span class="keyword">end</span>
+0054 
+0055 <span class="comment">% In what follows, a matrix H which is the expected value of</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%   [      x(t)     ]   [      x(t)     ]'</span>
+0058 <span class="comment">%   [      u(t)     ]   [      u(t)     ]</span>
+0059 <span class="comment">%   [kron(u(t),x(t))] * [kron(u(t),x(t))]</span>
+0060 <span class="comment">%   [     x(t+1)    ]   [     x(t+1)    ]</span>
+0061 <span class="comment">%   [      y(t)     ]   [      y(t)     ]</span>
+0062 <span class="comment">%</span>
+0063 <span class="comment">% conditioned on the observed data will be computed in the E-step, and</span>
+0064 <span class="comment">% the M-step will be implemented by factorising this same matrix.</span>
+0065 <span class="comment">%</span>
+0066 <span class="comment">% Implementing the E-step will be achieved simply by callingthe Kalman</span>
+0067 <span class="comment">% smoother routine with the optional flag OPT.ksem set:</span>
+0068 OPT.ksem = 1;
+0069 
+0070 <span class="comment">% Get state dimension</span>
+0071 nx = size(M.ss.A,1);
+0072 
+0073 <span class="comment">% Now setup indices into H based on Bilinear or not</span>
+0074 R1i = 1 : nx+nu+bilin*nu*nx;
+0075 R2i = nx+nu+bilin*nu*nx+1 : nx+nu+bilin*nu*nx + nx + ny; 
+0076 
+0077 <span class="comment">% If initial A is unstable, then stabilize.</span>
+0078 <span class="keyword">if</span> max(abs(eig(M.ss.A)))&gt;1.0,
+0079  <span class="keyword">try</span>,
+0080   [XX,LL,KK] = dare(M.ss.A',M.ss.C',M.ss.Q,M.ss.R,M.ss.S);
+0081   M.ss.A     = M.ss.A-KK'*M.ss.C;
+0082  <span class="keyword">catch</span>
+0083   [XX,LL,KK] = dare(M.ss.A',M.ss.C',eye(nx),eye(size(M.ss.R)));
+0084   M.ss.A     = M.ss.A-KK'*M.ss.C;
+0085  <span class="keyword">end</span>
+0086 <span class="keyword">end</span>
+0087 
+0088 <span class="comment">% Save M into g, which will be updated at each iteration</span>
+0089 G = M;
+0090 
+0091 <span class="comment">% Start main loop for EM method</span>
+0092 cnt = 0;  LLold = 1e300;
+0093 <span class="keyword">while</span> 1, 
+0094  <span class="comment">% E- step</span>
+0095  <span class="comment">% Implemented Kalman Smoother routine with OPT.ksem set to tell it to</span>
+0096  <span class="comment">% return H matrix described above.</span>
+0097  G      = <a href="ks.html" class="code" title="function G = ks(Z,M,OPT)">ks</a>(Z,G,OPT);
+0098  
+0099  <span class="comment">% M-step - implemented by Cholesky factorisation of H</span>
+0100  R      = triu(<a href="rchol.html" class="code" title="function [A] = rchol(A);">rchol</a>(G.H));
+0101  Gamma  = <a href="rfbs.html" class="code" title="function X = rfbs(B,A,uplow)">rfbs</a>(R(R1i,R2i),R(R1i,R1i),0)';
+0102  Pi     = (R(R2i,R2i)'*R(R2i,R2i))/N;
+0103  
+0104  <span class="comment">% Extract A,B,C,D,F,G system matrices</span>
+0105  G.ss.A = Gamma(1:nx,1:nx);
+0106  G.ss.C = Gamma(nx+1:nx+ny,1:nx);
+0107  <span class="keyword">if</span> isBD,
+0108   G.ss.B = Gamma(1:nx,nx+1:nx+nu);
+0109   G.ss.D = Gamma(nx+1:nx+ny,nx+1:nx+nu);
+0110  <span class="keyword">end</span>
+0111  <span class="keyword">if</span> bilin,
+0112   G.ss.F = Gamma(1:nx,nx+nu+1:nx+nu+nu*nx);
+0113   G.ss.G = Gamma(nx+1:nx+ny,nx+nu+1:nx+nu+nu*nx);
+0114  <span class="keyword">end</span>
+0115  
+0116  <span class="comment">% Extract Q,S,R covariance matrices</span>
+0117  G.ss.Q  = Pi(1:nx,1:nx);
+0118  G.ss.S  = Pi(1:nx,nx+1:nx+ny);
+0119  G.ss.R  = Pi(nx+1:nx+ny,nx+1:nx+ny);
+0120  
+0121  <span class="comment">% Extract initial state estimate X1 with cov P1</span>
+0122  G.ss.X1 = G.ss.xs(:,1);
+0123  G.ss.P1 = G.ss.Ps(:,:,1)'*G.ss.Ps(:,:,1);
+0124  
+0125  <span class="comment">% Update the iteration counter</span>
+0126  cnt = cnt + 1;
+0127  
+0128  <span class="comment">% Print iteration information to the screen</span>
+0129  <span class="keyword">if</span> OPT.dsp,
+0130   <span class="keyword">if</span> cnt==1,
+0131    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0132    str1=sprintf(<span class="string">'%s%13s'</span>,<span class="string">'Iter#'</span>,<span class="string">'Cost'</span>);
+0133    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(str1,gui,guih);
+0134   <span class="keyword">end</span>
+0135   <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'%5i%13.3e'</span>,cnt,G.LL),gui,guih);
+0136  <span class="keyword">end</span>
+0137  
+0138  <span class="comment">% Check the stopping criteria</span>
+0139  <span class="keyword">if</span> abs(G.LL-LLold) &lt; OPT.mdec*(abs(G.LL)+abs(LLold)), 
+0140   G.whystop = <span class="string">'Termination due to Log-likelihood difference less than OPT.mdec'</span>;
+0141   <span class="keyword">if</span> OPT.dsp,
+0142    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0143    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(G.whystop,gui,guih);
+0144    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0145   <span class="keyword">end</span>
+0146   <span class="keyword">break</span>; 
+0147  <span class="keyword">end</span>
+0148  <span class="keyword">if</span> cnt &gt;= OPT.miter,
+0149   G.whystop = <span class="string">'Termination due to number of iterations exceeding OPT.miter'</span>;
+0150   <span class="keyword">if</span> OPT.dsp,
+0151    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0152    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(G.whystop,gui,guih);
+0153    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0154   <span class="keyword">end</span>
+0155   <span class="keyword">break</span>;
+0156  <span class="keyword">end</span>
+0157  LLold = G.LL; <span class="comment">% Store the old log-likelihood</span>
+0158  
+0159  
+0160  <span class="comment">% Store parts of G that we want and remove the rest</span>
+0161  gg=M;
+0162  gg.ss.A=G.ss.A;
+0163  gg.ss.C=G.ss.C;
+0164  gg.ss.Q=G.ss.Q;
+0165  gg.ss.S=G.ss.S;
+0166  gg.ss.R=G.ss.R;
+0167  gg.ss.P1=G.ss.P1;
+0168  gg.ss.X1=G.ss.X1;
+0169  <span class="keyword">if</span> isBD,
+0170   gg.ss.B = G.ss.B;
+0171   gg.ss.D = G.ss.D;
+0172  <span class="keyword">end</span>
+0173  <span class="keyword">if</span> bilin,
+0174   gg.ss.F = G.ss.F;
+0175   gg.ss.G = G.ss.G;
+0176  <span class="keyword">end</span>
+0177  
+0178  clear G;
+0179  G=gg;
+0180 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

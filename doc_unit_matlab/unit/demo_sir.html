@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_sir</title>
+  <meta name="keywords" content="demo_sir">
+  <meta name="description" content="Running this demos signal estimation using Sequential">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_sir.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_sir
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demos signal estimation using Sequential</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demos signal estimation using Sequential 
+  Important Re-Sampling (SIR) - also known as particle 
+  filtering.  This is done for a linear Gaussian system 
+  the approximate SIR filter can be compared to the exact
+  Kalman filter answer.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="kf.html" class="code" title="function G = kf(Z,M,OPT)">kf</a>	KF. This function is the square-root implementation of the Kalman</li><li><a href="sir.html" class="code" title="function G = sir(Z,M,OPT);">sir</a>	SIR.  This function implements a Sequential Importance Resampler (SIR),</li><li><a href="ssmod.html" class="code" title="function [q,X,yp,PY]=ssmod(Z,M,OPT,X)">ssmod</a>	Function to compute the probability updates</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demos signal estimation using Sequential</span>
+0002 <span class="comment">%  Important Re-Sampling (SIR) - also known as particle</span>
+0003 <span class="comment">%  filtering.  This is done for a linear Gaussian system</span>
+0004 <span class="comment">%  the approximate SIR filter can be compared to the exact</span>
+0005 <span class="comment">%  Kalman filter answer.</span>
+0006 
+0007 clear; close all;  
+0008 <span class="keyword">global</span> dm;  <span class="keyword">if</span> isempty(dm),  clear <span class="keyword">global</span> dm;  dm=0; <span class="keyword">end</span>
+0009 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0010 <span class="keyword">global</span> trans;
+0011 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0012 
+0013 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%  Specify Experiment Conditions</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0018 
+0019 T = 1;       <span class="comment">% Sampling Period</span>
+0020 N = 50;      <span class="comment">% Number of samples</span>
+0021 var = 1e-2;  <span class="comment">% White Measurement Noise variance</span>
+0022 
+0023 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%  Specify Linear System - randomly drawn</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0028 
+0029 randflag = 0;  <span class="comment">% Set to 1 if you want a randomly chosen system</span>
+0030 
+0031 <span class="keyword">if</span> randflag
+0032  nx=10; nu=1; ny=1; sysd=drss(nx,ny,nu);
+0033  [M.ss.A,M.ss.B,M.ss.C,M.ss.D] = ssdata(sysd); 
+0034 <span class="keyword">else</span>
+0035  den = real(poly([-0.1,-1,-0.2,-0.3,-0.5,-0.05+j*3,-0.05-j*3]));
+0036  num = 10*den(length(den));
+0037  [M.ss.A,M.ss.B,M.ss.C,M.ss.D] =tf2ss(num,den); 
+0038  [M.ss.A,M.ss.B] = c2d(M.ss.A,M.ss.B,T); 
+0039  nx = size(M.ss.A,1); nu = 1; ny = 1;
+0040 <span class="keyword">end</span>;
+0041  
+0042 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%  Simulate a data record</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0047 
+0048 <span class="keyword">if</span> randflag
+0049  u = randn(nu,N); t = 0:1:N-1;
+0050  y = lsim(sysd,u);
+0051  noise = sqrt(var)*randn(N,ny);
+0052  Z.y = y(:)+noise(:); Z.u = u;
+0053 <span class="keyword">else</span>  
+0054  t = 0:1:N-1;
+0055  u = sign(sin(10*pi*t/N)); 
+0056  y = M.ss.C*ltitr(M.ss.A,M.ss.B,u(:)).'+M.ss.D*u; 
+0057  noise = sqrt(var)*randn(N,ny);
+0058  Z.y=y(:)+noise(:); Z.u=u(:);
+0059 <span class="keyword">end</span>;
+0060 
+0061 
+0062 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%  Specify Model Structure</span>
+0065 <span class="comment">%</span>
+0066 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0067 
+0068 M.T = T; M.op = <span class="string">'q'</span>;  
+0069 M.ss.R = var;             <span class="comment">% Measurement Noise Variance</span>
+0070 M.ss.Q = 0.001*eye(nx);   <span class="comment">% State Noise variance</span>
+0071 M.ss.X0= zeros(nx,1);      <span class="comment">% Prior mean on initial state</span>
+0072 M.ss.P0= eye(nx);        <span class="comment">% Covariance on initial state</span>
+0073 
+0074 M.model=@<a href="ssmod.html" class="code" title="function [q,X,yp,PY]=ssmod(Z,M,OPT,X)">ssmod</a>;           <span class="comment">% Handle to function that specifies</span>
+0075                           <span class="comment">% model for particle filter (SIR) alg.</span>
+0076 
+0077 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0078 <span class="comment">%</span>
+0079 <span class="comment">%  Specify Optional parts about how</span>
+0080 <span class="comment">%  estimation procedure runs</span>
+0081 <span class="comment">%</span>
+0082 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0083 
+0084 OPT.alg  = <span class="string">'sqroot'</span>;    <span class="comment">% Use square root forms of algorithms</span>
+0085 OPT.allP = 0;           <span class="comment">% Don't store and hand back state covariances</span>
+0086 OPT.pnum = 500;         <span class="comment">% Number of particles</span>
+0087 
+0088 
+0089 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0090 <span class="comment">%</span>
+0091 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0092 <span class="comment">%</span>
+0093 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0094 
+0095 g = <a href="sir.html" class="code" title="function G = sir(Z,M,OPT);">sir</a>(Z,M,OPT);   <span class="comment">% Approximate SIR-based predictor and filter</span>
+0096 G = <a href="kf.html" class="code" title="function G = kf(Z,M,OPT)">kf</a>(Z,M,OPT);    <span class="comment">% Exact Kalman predictor and filter</span>
+0097 
+0098 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0099 <span class="comment">%</span>
+0100 <span class="comment">%  Display the results</span>
+0101 <span class="comment">%</span>
+0102 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0103 
+0104 <span class="keyword">if</span> dsp
+0105  h=plot([Z.y(:),y(:),G.yf(:),g.yf(:)]);
+0106  grid
+0107  title(<span class="string">'Observed data versus Kalman Predictor, and Particle predictor'</span>)
+0108  legend(<span class="string">'Observed'</span>,<span class="string">'Noise Free data'</span>,<span class="string">'Kalman Filter'</span>,<span class="string">'Particle Filter'</span>)
+0109  set(h,<span class="string">'Linewidth'</span>,2);   
+0110 <span class="keyword">end</span>;
+0111 
+0112 <span class="keyword">if</span> dm
+0113  disp(<span class="string">'  '</span>)
+0114  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0115  disp(<span class="string">'  '</span>)
+0116  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0117  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0118  disp(<span class="string">' '</span>)
+0119  keyboard; 
+0120 <span class="keyword">end</span>;
+0121 
+0122 
+0123 
+0124</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

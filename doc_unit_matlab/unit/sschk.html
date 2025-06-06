@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of sschk</title>
+  <meta name="keywords" content="sschk">
+  <meta name="description" content="SSCHK: Takes a model structure and dimensions of a multivariable data">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; sschk.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>sschk
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SSCHK: Takes a model structure and dimensions of a multivariable data</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [M,nx] = sschk(M,nu,ny); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  SSCHK: Takes a model structure and dimensions of a multivariable data 
+  record and sanity checks them, plus also manipulates them so as to be 
+  appropriate for an underlying mex file implementation of an EM algorithm.
+  There is no conceivable reason why a user should ever call this function.
+  It is designed to be completely internal to the workings of other routines.
+
+  Usage is 
+
+  [m,nx] = sschk(M,nu,ny);
+ 
+  where:
+
+   M         : An initial state space model structure specification.  
+               Only the terms M.ss.A -- M.ss.G are of interest.
+   m         : An output model structure that is for purely internal 
+               use with regard to underlying mex files.  Basically, it is 
+               the M.ss.A--M.ss.G terms in M with the .ss. stripped out, 
+               also with some sanity checking.
+   nx:       : The state dimension of the model structure specified in M &amp; m.
+   ny        : The number of outputs, which is the column dimension of
+               Z.y if Z is a record, or it is equal to 1 if Z is a matrix;
+   nu        : The number of inputs, which is the column dimension of 
+               Z.u if Z is a record, or it is the column dimension of Z
+               minus 1 if Z is a matrix.
+
+
+   written by Brett Ninness, School of EE &amp; CS
+              Adrian Wills   University of Newcastle
+                               Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="em.html" class="code" title="function G = em(Z,M,OPT);">em</a>	EM: Function to find maximum likelihood estimates of state space mdoel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  SSCHK: Takes a model structure and dimensions of a multivariable data</span>
+0002 <span class="comment">%  record and sanity checks them, plus also manipulates them so as to be</span>
+0003 <span class="comment">%  appropriate for an underlying mex file implementation of an EM algorithm.</span>
+0004 <span class="comment">%  There is no conceivable reason why a user should ever call this function.</span>
+0005 <span class="comment">%  It is designed to be completely internal to the workings of other routines.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  Usage is</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  [m,nx] = sschk(M,nu,ny);</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%  where:</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%   M         : An initial state space model structure specification.</span>
+0014 <span class="comment">%               Only the terms M.ss.A -- M.ss.G are of interest.</span>
+0015 <span class="comment">%   m         : An output model structure that is for purely internal</span>
+0016 <span class="comment">%               use with regard to underlying mex files.  Basically, it is</span>
+0017 <span class="comment">%               the M.ss.A--M.ss.G terms in M with the .ss. stripped out,</span>
+0018 <span class="comment">%               also with some sanity checking.</span>
+0019 <span class="comment">%   nx:       : The state dimension of the model structure specified in M &amp; m.</span>
+0020 <span class="comment">%   ny        : The number of outputs, which is the column dimension of</span>
+0021 <span class="comment">%               Z.y if Z is a record, or it is equal to 1 if Z is a matrix;</span>
+0022 <span class="comment">%   nu        : The number of inputs, which is the column dimension of</span>
+0023 <span class="comment">%               Z.u if Z is a record, or it is the column dimension of Z</span>
+0024 <span class="comment">%               minus 1 if Z is a matrix.</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0028 <span class="comment">%              Adrian Wills   University of Newcastle</span>
+0029 <span class="comment">%                               Australia.</span>
+0030 
+0031 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0032  
+0033 <a name="_sub0" href="#_subfunctions" class="code">function [M,nx] = sschk(M,nu,ny);</a>
+0034 
+0035 <span class="comment">% Get number of states in model</span>
+0036 <span class="keyword">if</span> ~isfield(M,<span class="string">'A'</span>) error(<span class="string">'System matrix A must be supplied'</span>); <span class="keyword">else</span> nx=size(M.A,1); <span class="keyword">end</span>;
+0037 
+0038 <span class="comment">% Check for presence and appropriate dimensions of other system matrices</span>
+0039 <span class="keyword">if</span> ~isfield(M,<span class="string">'C'</span>)
+0040  error(<span class="string">'Initial estimate M.ss.C must be supplied'</span>);
+0041 <span class="keyword">elseif</span> size(M.C,1)~=ny
+0042  error(<span class="string">'Height of M.ss.C matrix is inconsistent with number of outputs'</span>);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">if</span> ~isfield(M,<span class="string">'B'</span>)
+0046  <span class="keyword">if</span> nu&gt;0 error(<span class="string">'Initial estimate M.ss.B must be supplied'</span>); <span class="keyword">else</span> M.B = zeros(nx,nu); <span class="keyword">end</span>;
+0047 <span class="keyword">elseif</span> [nu&gt;0,size(M.B,2)~=nu] error(<span class="string">'Width of M.ss.B matrix is inconsistent with number of inputs'</span>); <span class="keyword">end</span>;
+0048 
+0049 <span class="keyword">if</span> ~isfield(M,<span class="string">'D'</span>)
+0050  <span class="keyword">if</span> nu&gt;0 error(<span class="string">'Initial estimate for M.ss.D must be supplied'</span>);
+0051   <span class="keyword">else</span> M.D = zeros(ny,nu); <span class="keyword">end</span>;
+0052 <span class="keyword">elseif</span> size(M.D)~=[ny,nu]
+0053   error(<span class="string">'Dimension of M.ss.D matrix is inconsistent with M.ss.B and M.ss.C'</span>);
+0054 <span class="keyword">end</span>
+0055 
+0056 <span class="comment">% Add in defaults for bilinear component specifications if required</span>
+0057 <span class="keyword">if</span> strcmp(M.type,{<span class="string">'bilin'</span>,<span class="string">'bilinear'</span>})
+0058  <span class="keyword">if</span> ~isfield(M,<span class="string">'F'</span>) M.F = zeros(nx,nx*nu);
+0059   <span class="keyword">elseif</span> isempty(M.F) M.F = zeros(nx,nx*nu);
+0060    <span class="keyword">elseif</span> size(M.F)~=[nx,nx*nu],
+0061     error(<span class="string">'The size of M.ss.F is not consistent with M.ss.A and M.ss.B'</span>);
+0062  <span class="keyword">end</span>;
+0063 
+0064  <span class="keyword">if</span> ~isfield(M,<span class="string">'G'</span>) M.G = zeros(ny,nx*nu); 
+0065   <span class="keyword">elseif</span> isempty(M.G) M.G = zeros(ny,nx*nu); 
+0066    <span class="keyword">elseif</span> size(M.G)~=[ny,nx*nu]
+0067     error(<span class="string">'The size of M.ss.G is not consistent with M.ss.C, M.ss.A and M.ss.B'</span>);
+0068  <span class="keyword">end</span>
+0069 <span class="keyword">end</span>;
+0070 
+0071 <span class="comment">% Initialise estimates of state and measurement noise covariance matrices (if necessary)</span>
+0072 <span class="keyword">if</span> ~isfield(M,<span class="string">'Q'</span>)  M.Q = 10*eye(nx);
+0073  <span class="keyword">elseif</span> isempty(M.Q) M.Q = 10*eye(nx);
+0074  <span class="keyword">else</span> 
+0075  <span class="keyword">if</span> size(M.Q)~=size(M.A) 
+0076   error(<span class="string">'The covariance matrix Q is not consistent with A'</span>); 
+0077  <span class="keyword">end</span>;
+0078 <span class="keyword">end</span>
+0079 
+0080 <span class="keyword">if</span> ~isfield(M,<span class="string">'S'</span>) M.S = zeros(nx,ny); 
+0081  <span class="keyword">elseif</span> isempty(M.S) M.S = zeros(nx,ny); 
+0082   <span class="keyword">else</span> <span class="keyword">if</span> size(M.S)~=size(M.C') error(<span class="string">'The S matrix is not consistent with A and C'</span>); <span class="keyword">end</span>;
+0083 <span class="keyword">end</span>
+0084 
+0085 <span class="keyword">if</span> ~isfield(M,<span class="string">'R'</span>) M.R = 0.1*eye(ny);
+0086  <span class="keyword">elseif</span> isempty(M.R) M.R = 0.1*eye(ny);
+0087   <span class="keyword">else</span> <span class="keyword">if</span> size(M.R)~=[ny,ny] error(<span class="string">'The covariance matrix R is not consistent with C'</span>); <span class="keyword">end</span>;
+0088 <span class="keyword">end</span>
+0089 
+0090 <span class="comment">% Initialise estimates of initial state and its covariance (if necessary)</span>
+0091 <span class="keyword">if</span> ~isfield(M,<span class="string">'P1'</span>) M.P1 = 10*eye(nx);
+0092  <span class="keyword">elseif</span> isempty(M.P1) M.P1 = 10*eye(nx);
+0093   <span class="keyword">else</span> <span class="keyword">if</span> size(M.P1)~=size(M.A) error(<span class="string">'The covariance matrix P1 is not consistent with A'</span>); <span class="keyword">end</span>;
+0094 <span class="keyword">end</span>
+0095 
+0096 <span class="keyword">if</span> ~isfield(M,<span class="string">'mu'</span>) M.mu = zeros(nx,1);
+0097  <span class="keyword">elseif</span> isempty(M.mu),
+0098   <span class="keyword">else</span> <span class="keyword">if</span> size(M.mu)~=[nx,1] error(<span class="string">'The initial state mu is not consistent with A'</span>); <span class="keyword">end</span>;
+0099 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

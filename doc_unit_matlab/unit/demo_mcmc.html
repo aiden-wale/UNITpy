@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_mcmc</title>
+  <meta name="keywords" content="demo_mcmc">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_mcmc.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_mcmc
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>	KDE: Univariate probability density estimation via kernel method,</li><li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li><li><a href="showdist.html" class="code" title="function showdist(varargin)">showdist</a>	SHOWDIST: Function to plot marginal distributions of parameters.</li><li><a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>	SHOWNYQ: This routine takes the results of an identification experiment and</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear; close all;  
+0002 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0003 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0004 <span class="keyword">global</span> trans;
+0005 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0006 OPT.dsp = dsp;
+0007 
+0008 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%  Specify Experiment Conditions</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0013 
+0014 T = 1;                  <span class="comment">% Sampling Period</span>
+0015 N = 20;                 <span class="comment">% Number of samples</span>
+0016 var = 1e-2;             <span class="comment">% White Measurement Noise variance</span>
+0017 ueps = sqrt(3*var);     <span class="comment">% Equivalent Uniform density bounds</span>
+0018 dens = <span class="string">'uniform'</span>;       <span class="comment">% Could be `gaussian' or 'uniform';</span>
+0019 w = logspace(-3,pi,500);
+0020 ww = exp(j*w);
+0021 
+0022 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  Specify True Linear System</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0027 
+0028 
+0029 mtype = 1;
+0030 <span class="keyword">switch</span> mtype
+0031  <span class="keyword">case</span> 1  <span class="comment">% Simple first order system</span>
+0032   delay = 0;
+0033   aq = [1,-0.8];
+0034   bq = [zeros(1,delay),sum(aq)];
+0035   cq = [];
+0036   dq = [];
+0037  <span class="keyword">case</span> 2  <span class="comment">% Simple second order system</span>
+0038   delay = 0;
+0039   aq = poly([0.8,0.5]);
+0040   bq = [zeros(1,delay),sum(aq)/4 3*sum(aq)/4];
+0041   cq = [];
+0042   dq = [];
+0043  <span class="keyword">case</span> 3  <span class="comment">% Resonant 2nd order system</span>
+0044   delay = 0;
+0045   xi = [0.95*exp(j*pi/3),0.95*exp(-j*pi/3)]; <span class="comment">% z-domain poles</span>
+0046   aq = real(poly(xi)); 
+0047   bq = [1,-0.5];
+0048   bq = bq*sum(aq)/sum(bq);
+0049   cq = [];
+0050   dq = [];        
+0051  <span class="keyword">case</span> 4  <span class="comment">% Resonant 4th order system</span>
+0052   delay = 0;
+0053   bq = poly([-8.0722,-0.8672,0.0948]);
+0054   aq = real(poly([0.75*exp(j*pi/3),0.75*exp(-j*pi/3),0.95*exp(j*pi/12),0.95*exp(-j*pi/12)])); 
+0055   aq = real(poly([0.99*exp(j*pi/3),0.99*exp(-j*pi/3),0.99*exp(j*pi/12),0.99*exp(-j*pi/12)]));   
+0056   bq = bq*sum(aq)/sum(bq);
+0057   cq = [];
+0058   dq = [];        
+0059  <span class="keyword">case</span> 5  <span class="comment">% Non-resonant 4th order system</span>
+0060   delay = 0;
+0061   bq = [0,0,1];
+0062   aq = real(poly([0.15*exp(j*pi/12),0.15*exp(-j*pi/12),0.5,0.8])); 
+0063   bq = bq*sum(aq)/sum(bq);
+0064   cq = [];
+0065   dq = [];        
+0066  <span class="keyword">case</span> 6 <span class="comment">% Resonant 4th order system used in paper</span>
+0067   delay = 0;
+0068   xi = [0.75*exp(j*pi/3),0.75*exp(-j*pi/3),0.95*exp(j*pi/12),0.95*exp(-j*pi/12)]; 
+0069   den = real(poly(log(xi))); 
+0070   num = den(length(den));
+0071   [bq,aq] = c2dm(num,den,1,<span class="string">'zoh'</span>);
+0072   cq =[]; 
+0073   dq = [];
+0074  <span class="keyword">case</span> 7  <span class="comment">% Åström system</span>
+0075   delay = 0;
+0076   aq = [1,-1.5,0.7];  
+0077   bq = [1,0.5];  bq = bq*sum(aq)/sum(bq);
+0078   cq = [];
+0079   dq = [];  
+0080 <span class="keyword">end</span>
+0081 
+0082 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">%  Simulate a data record</span>
+0085 <span class="comment">%</span>
+0086 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0087 
+0088 u = randn(1,N);
+0089 u = ones(1,N); u(floor(N/2):end) = zeros(1,length(u(floor(N/2):end)));
+0090 <span class="keyword">if</span> strcmp(lower(dens),<span class="string">'gaussian'</span>)
+0091  noise = sqrt(var)*randn(size(u));
+0092 <span class="keyword">elseif</span> strcmp(lower(dens),<span class="string">'uniform'</span>)
+0093  noise = 2*ueps*(rand(size(u))-0.5*ones(size(u)));
+0094 <span class="keyword">end</span>;
+0095 y = filter(bq,aq,u);  
+0096 Z.y = y(:)+noise(:);  Z.u=u;
+0097 
+0098 
+0099 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">%  Specify Model Structure</span>
+0102 <span class="comment">%</span>
+0103 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0104 
+0105 M.w = logspace(-3,pi,1000);  M.T=T; M.op=<span class="string">'q'</span>; 
+0106 M.A = length(aq)-1; M.B = length(bq)-1; M.delay=delay;
+0107 
+0108 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">%  Specify Optional parts about how</span>
+0111 <span class="comment">%  estimation procedure runs</span>
+0112 <span class="comment">%</span>
+0113 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0114 
+0115 OPT.dsp  = dsp;    <span class="comment">% Display the results</span>
+0116 OPT.Mmax = 1e4;    <span class="comment">% Run Mmax Metropolis-Hastings iterations</span>
+0117 OPT.dens = dens;   <span class="comment">% Tell the MH method the true density</span>
+0118 OPT.n=0;           <span class="comment">% Throw away OPT.n initial data samples</span>
+0119 
+0120 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0121 <span class="comment">%</span>
+0122 <span class="comment">%  Estimate a model</span>
+0123 <span class="comment">%</span>
+0124 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0125 
+0126 gest = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,OPT);
+0127 
+0128 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0129 <span class="comment">%</span>
+0130 <span class="comment">%  Compute Posterior Distributions using MCMC methods and plot them</span>
+0131 <span class="comment">%</span>
+0132 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0133 
+0134 ginit = gest;                <span class="comment">% Initialise Markov Chain iterations at PEM estimate</span>
+0135 
+0136 OPT.var = 10*var;
+0137 OPT.sampler = <span class="string">'slice'</span>;       <span class="comment">% Selects slice sampler</span>
+0138                              <span class="comment">%OPT.sampler = 'metropolis'; % Selects</span>
+0139                              <span class="comment">%Metropolis-Hastings sampler</span>
+0140 
+0141 
+0142 
+0143 G = <a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>(Z,ginit,OPT);   <span class="comment">% Run MCMC algorithm to get samples from posterior</span>
+0144 
+0145 <span class="keyword">if</span> dsp
+0146  Gt.A = aq;
+0147  Gt.B = bq;
+0148  Gt.T = T;
+0149  Gt.w = gest.w;
+0150  Gt.disp.legend = <span class="string">'True Response'</span>;
+0151  
+0152  <a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>(Gt,gest,G); 
+0153  
+0154  figure(2)
+0155  <a href="showdist.html" class="code" title="function showdist(varargin)">showdist</a>(G);                  <span class="comment">% Plot posteriors as smoothed versions of</span>
+0156  
+0157  <span class="keyword">if</span> (mtype==1)  <span class="comment">%  For the simplest case we will profile true values vs posteriors</span>
+0158   figure(2)
+0159   hold on
+0160    plot([aq(2),aq(2)],[0,max(G.pa.p)],<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'linewidth'</span>,2);
+0161    text(1.08*aq(2),0.95*max(G.pa.p),<span class="string">'True Value'</span>,<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'FontSize'</span>,16)   
+0162   hold off
+0163   figure(3)
+0164   hold on
+0165    plot([bq(1),bq(1)],[0,max(G.pb.p)],<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'linewidth'</span>,2);
+0166    text(1.08*aq(2),0.95*max(G.pb.p),<span class="string">'True Value'</span>,<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'FontSize'</span>,16)     
+0167   hold off
+0168  <span class="keyword">end</span>;
+0169  
+0170  
+0171  [h.p,h.x]=hist(G.varlog,113); <span class="comment">% Get sample histograms of measurement</span>
+0172                                <span class="comment">% noise variance</span>
+0173  hest = <a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                <span class="comment">% Smooth it via kernel density estimation</span>
+0174  
+0175  figure               
+0176  plot(hest.x,hest.p,<span class="string">'linewidth'</span>,2);
+0177  title(<span class="string">'Posterior distribution for noise variance'</span>)
+0178  hold on;
+0179  plot([var,var],[0,max(hest.p)],<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'linewidth'</span>,2);
+0180  hold off;
+0181  text(1.08*var,0.95*max(hest.p),<span class="string">'True Value'</span>,<span class="string">'color'</span>,<span class="string">'red'</span>,<span class="string">'FontSize'</span>,16)
+0182 <span class="keyword">end</span>;                         
+0183 
+0184 
+0185 echo off;
+0186 
+0187 <span class="keyword">if</span> dm
+0188  disp(<span class="string">'  '</span>)
+0189  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0190  disp(<span class="string">'  '</span>)
+0191  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0192  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0193  disp(<span class="string">' '</span>)
+0194  keyboard; 
+0195 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

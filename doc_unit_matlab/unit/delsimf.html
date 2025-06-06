@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of delsimf</title>
+  <meta name="keywords" content="delsimf">
+  <meta name="description" content="Delta operator version of dlsim.  That is, given a vector of inputs u() to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; delsimf.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>delsimf
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Delta operator version of dlsim.  That is, given a vector of inputs u() to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y = delsimf(num,den,u,delta,y0) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Delta operator version of dlsim.  That is, given a vector of inputs u() to
+  a plant expressed in delta operator transfer function form:
+
+  G(d) =     b_m d^m + ... b_1 d + b_0             d = q-1
+               -------------------------                -----
+                a_n d^n + ... a_1 d + a_0                delta
+
+  and with sampling period delta, work out the vector of outputs of the 
+  plant with zero initial conditions.  Usage is
+
+  y = delsimf(num,den,u,delta,y0)
+
+  where
+  
+  numd     = [b_m,...,b_0],  
+  dend     = [a_n,...,a_0].
+  delta    = sampling period in seconds
+  y0       = for n^th order system, y0 is a specification for the
+         initial conditions y_0, y_1,...,y_{n-1}
+
+  This m file performs an identical function to delsim.m, but does it much
+  faster via the use of c code compiled to a mex function.
+
+  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.
+                            University of Newcastle
+                            Australia</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="delsimeng.html" class="code" title="function y=delsimeng(u,a,b,c,d,x,delta)">delsimeng</a>	Function to perform filtering according to delta operator state space</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>	Delta operator version of filter.  That is, given a vector of inputs u() to</li><li><a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>	This function estimates a state-space model for a possibly</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Delta operator version of dlsim.  That is, given a vector of inputs u() to</span>
+0002 <span class="comment">%  a plant expressed in delta operator transfer function form:</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  G(d) =     b_m d^m + ... b_1 d + b_0             d = q-1</span>
+0005 <span class="comment">%               -------------------------                -----</span>
+0006 <span class="comment">%                a_n d^n + ... a_1 d + a_0                delta</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%  and with sampling period delta, work out the vector of outputs of the</span>
+0009 <span class="comment">%  plant with zero initial conditions.  Usage is</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%  y = delsimf(num,den,u,delta,y0)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%  where</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%  numd     = [b_m,...,b_0],</span>
+0016 <span class="comment">%  dend     = [a_n,...,a_0].</span>
+0017 <span class="comment">%  delta    = sampling period in seconds</span>
+0018 <span class="comment">%  y0       = for n^th order system, y0 is a specification for the</span>
+0019 <span class="comment">%         initial conditions y_0, y_1,...,y_{n-1}</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%  This m file performs an identical function to delsim.m, but does it much</span>
+0022 <span class="comment">%  faster via the use of c code compiled to a mex function.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.</span>
+0025 <span class="comment">%                            University of Newcastle</span>
+0026 <span class="comment">%                            Australia</span>
+0027 
+0028 <span class="comment">% Copyright (C) Brett Ninness</span>
+0029 
+0030 <a name="_sub0" href="#_subfunctions" class="code">function y = delsimf(num,den,u,delta,y0)</a>
+0031 
+0032 <span class="keyword">if</span> nargin&lt;5 y0=[]; <span class="keyword">end</span>;
+0033 
+0034 MaxCount = length(u);
+0035 X = zeros(length(den) - 1,1);
+0036 
+0037 <span class="comment">%Put num, den into state-space form px=Ax+Bu (num and den are in descending powers of p)</span>
+0038 [a,b,c,d] = tf2ss(num,den);
+0039 
+0040 <span class="keyword">if</span> (length(y0)&gt;0)
+0041  ad = eye(size(a))+delta*a;  bd = b*delta;
+0042  T = c;  M = d*eye(size(a));
+0043  <span class="keyword">for</span> m=2:length(y0) T = [T;T(m-1,:)*ad]; <span class="keyword">end</span>;
+0044  h = T*bd;  h = [d;h(1:length(y0)-1)]; 
+0045  M = toeplitz(h,[d,zeros(1,length(h)-1)]);
+0046  uu = u(1:length(y0)); uu = uu(:);
+0047  [U,S,V] = svd(T);
+0048  jj = diag(S)&gt;1e-12; jj = jj(:);
+0049  S1 = inv(S(jj,jj)); V1T = V(:,jj); U1 = U(:,jj');
+0050  x =  V1T*S1*U1'*(y0(:) - M*uu);
+0051 <span class="keyword">else</span>
+0052    x = 0*ones(size(b));
+0053 <span class="keyword">end</span>;
+0054 
+0055 <span class="comment">% Pass to fast mex file engine to improve speed relative to Matlab</span>
+0056 <span class="comment">% interpreted loop</span>
+0057 y = <a href="delsimeng.html" class="code" title="function y=delsimeng(u,a,b,c,d,x,delta)">delsimeng</a>(u,a,b,c,d,x,delta);
+0058 
+0059 
+0060 
+0061 
+0062 
+0063 
+0064</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

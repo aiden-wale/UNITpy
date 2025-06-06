@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_recfir</title>
+  <meta name="keywords" content="demo_recfir">
+  <meta name="description" content="Running this demos estimation of FIR model structure">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_recfir.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_recfir
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demos estimation of FIR model structure</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demos estimation of FIR model structure
+  using recursive least squares algoritm</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demos estimation of FIR model structure</span>
+0002 <span class="comment">%  using recursive least squares algoritm</span>
+0003 
+0004 clear; close all;  
+0005 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> trans;
+0008 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0009 
+0010 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Specify Experiment Conditions</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0015 
+0016 T = 0.1;    <span class="comment">% Sampling period in seconds</span>
+0017 N=1000;     <span class="comment">% Number of data sample to generate</span>
+0018 var = 1e-4; <span class="comment">% Measurement noise variance</span>
+0019 
+0020 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  Specify true linear System</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0025 
+0026 bq = impulse(c2d(tf(1,real(poly([-1 -3+j -3-j]))),0.1,<span class="string">'zoh'</span>));
+0027 
+0028 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%  Simulate a data record</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0033 
+0034 u     = randn(1,N);
+0035 noise = sqrt(var)*randn(size(u));
+0036 y     = filter(bq,1,u)+noise; 
+0037 Z.y   = y; 
+0038 Z.u   = u;
+0039 
+0040 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0041 <span class="comment">%</span>
+0042 <span class="comment">%  Specify Model Structure</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0045 
+0046 Mq.w    = logspace(log10(0.001/T),log10(pi/T),1000); 
+0047 Mq.T    = T; 
+0048 Mq.nB   = length(bq)-1;
+0049 Mq.type = <span class="string">'fir'</span>;
+0050 
+0051 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0052 <span class="comment">%</span>
+0053 <span class="comment">%  Specify Optional parts about how</span>
+0054 <span class="comment">%  estimation procedure runs</span>
+0055 <span class="comment">%</span>
+0056 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0057 
+0058 OPT.dsp = dsp;
+0059 OPT.n=0; 
+0060 OPT.alg.type = <span class="string">'rls'</span>;
+0061 
+0062 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0065 <span class="comment">%</span>
+0066 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0067 
+0068 Gq = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,Mq,OPT);
+0069 
+0070 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0071 <span class="comment">%</span>
+0072 <span class="comment">%  Plot the results</span>
+0073 <span class="comment">%</span>
+0074 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0075 
+0076 <span class="keyword">if</span> dsp,
+0077     ww = exp(j*Mq.w*T);
+0078     Gt = polyval(bq,ww)./polyval(1,ww);
+0079     subplot(211)
+0080     h=semilogx(Mq.w,20*log10(abs([Gt(:),Gq.G(:)])));
+0081     set(h,<span class="string">'Linewidth'</span>,2);
+0082     title(<span class="string">'True and Estimated Frequency Responses'</span>)
+0083     grid
+0084     legend(<span class="string">'Gt'</span>,<span class="string">'Gq'</span>);
+0085     subplot(212)
+0086     h=plot(Gq.th_hist)';
+0087     set(h,<span class="string">'Linewidth'</span>,2);
+0088     grid
+0089     title(<span class="string">'Time evolution of Parameter Estimates'</span>)
+0090 <span class="keyword">end</span>
+0091 
+0092 echo off;
+0093 
+0094 <span class="keyword">if</span> dm
+0095  disp(<span class="string">'  '</span>)
+0096  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0097  disp(<span class="string">'  '</span>)
+0098  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0099  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0100  disp(<span class="string">' '</span>)
+0101  keyboard; 
+0102 <span class="keyword">end</span>;
+0103 
+0104 clear OPT;
+0105 
+0106 
+0107 
+0108 
+0109 
+0110</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

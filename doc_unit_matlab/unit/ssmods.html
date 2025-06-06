@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ssmods</title>
+  <meta name="keywords" content="ssmods">
+  <meta name="description" content="Function to compute the probability updates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; ssmods.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>ssmods
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to compute the probability updates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [varargout]=ssmods(mode,Z,M,OPT,X,X1) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   Function to compute the probability updates
+
+   x_{t+1} ~ p_1(x_{t+1}|x_t)
+       y_t ~ p_2(y_t|x_t)
+
+   for the linear time invariant model
+
+    x_{t+1} = Ax_t + Bu_(t-delay) + Lw_t
+    y_t = Cx_t + Du_(t-delay) + v_t
+
+   Where w_t and v_t are zero mean vector white Gaussian processes with covariances
+
+   E(w_tw_t^T) = Q, E(v_tv_t^T) = R, E(w_tv_t^T) = S
+
+   and y_t, u_t are observed output and input processes.  This function
+   is intended for possible use with the SIR.m sequential importance
+   resampler routine.
+
+
+   Usage is:  [q,yp,X2] = ssmods(mode,Z,M,OPT,X,X1);
+
+   where
+   
+
+     mode==0:  the function returns the state dimension in 
+               q (i.e. q = state dimension), all other output
+               arguments are ignored.
+
+     mode==1:  the returned value q is an array of probabilities:
+
+               q(i) = p_2(y_t|x_t^i)
+
+               where x_t^i is specified by the i'th column of X.  
+               That is, it is the i'th particle at time t.
+
+               yp is a column vector of expected model output(s) for 
+               the given particles X, i.e.
+
+               yp = E{ y_t | X }
+
+               output argumnet X2 is ignored.
+
+     mode==2:  this should have exactly the same functionality as for
+               mode 1, with the addition that the returned matrix X2 
+               are sample realisations of particles x_{t+1}^i according 
+               to the model 
+
+               x_{t+1} ~ p_1(x_{t+1}|x_t)
+
+               That is, for each column of X, and with the i'th 
+               one representing a realisation of the particle x_t^i, 
+               a new particle x_{t+1}^i is formed by drawing from the
+               probability distribution 
+
+               x_{t+1}^i ~ p_1(.|x_t^i).
+
+     mode==3:  the returned value q is an array of
+               probabilities:
+
+               q(i) = p_1( x^i_{t+1|N} | x^i_{t|t} )
+
+               where x^i_{t+1|N} is the i'th column of X1 and
+               x^i_{t|t} is the i'th colummn of X.
+
+               yp(:,i) should contain the prediction x^i_{t+1|t}
+
+               output argument X2 is ignored.
+
+     mode==4:  the returned variable q is an array of
+               probabilities:
+
+               q(i) = p_1( x^i_{t+1|N} | x^i_{t+1|t} )
+
+               where x^i_{t+1|N} is the i'th column of X1 and
+               x^i_{t+1|t} is the i'th colummn of X (provided 
+               by the previous call with mode==3)
+
+               yp and X2 output arguments are ignored.
+
+   Z:          Input-Output data in one of two forms.  The standard form 
+               is for it to be a record with elements Z.y and Z.u, each
+               of which are matrices with number of rows equal to the
+               number of data samples, and number of columns equal (respectively)
+               to the number of outputs and the number of inputs.  On
+               the other hand, Z can be a matrix of the form Z = [y,u] 
+               where it is assumed that y is a column vector of output 
+               measurements and u is a matrix whose columns are the
+               input measurements; in this latter MISO models are 
+               being considered.  
+
+   M:          Data structure which defines the above model:
+
+               As an example of how to write func, see ssmods.m which
+               implements the LTI model detailed above.
+
+
+   OPT:        Data structure which defines options for the estimation
+               algorithm as follows:
+    OPT.pnum   Number of particles to use.  Default is OPT.pnum=100.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%   Function to compute the probability updates</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%   x_{t+1} ~ p_1(x_{t+1}|x_t)</span>
+0004 <span class="comment">%       y_t ~ p_2(y_t|x_t)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   for the linear time invariant model</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%    x_{t+1} = Ax_t + Bu_(t-delay) + Lw_t</span>
+0009 <span class="comment">%    y_t = Cx_t + Du_(t-delay) + v_t</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Where w_t and v_t are zero mean vector white Gaussian processes with covariances</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%   E(w_tw_t^T) = Q, E(v_tv_t^T) = R, E(w_tv_t^T) = S</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%   and y_t, u_t are observed output and input processes.  This function</span>
+0016 <span class="comment">%   is intended for possible use with the SIR.m sequential importance</span>
+0017 <span class="comment">%   resampler routine.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%   Usage is:  [q,yp,X2] = ssmods(mode,Z,M,OPT,X,X1);</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%   where</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%     mode==0:  the function returns the state dimension in</span>
+0026 <span class="comment">%               q (i.e. q = state dimension), all other output</span>
+0027 <span class="comment">%               arguments are ignored.</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%     mode==1:  the returned value q is an array of probabilities:</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">%               q(i) = p_2(y_t|x_t^i)</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%               where x_t^i is specified by the i'th column of X.</span>
+0034 <span class="comment">%               That is, it is the i'th particle at time t.</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">%               yp is a column vector of expected model output(s) for</span>
+0037 <span class="comment">%               the given particles X, i.e.</span>
+0038 <span class="comment">%</span>
+0039 <span class="comment">%               yp = E{ y_t | X }</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%               output argumnet X2 is ignored.</span>
+0042 <span class="comment">%</span>
+0043 <span class="comment">%     mode==2:  this should have exactly the same functionality as for</span>
+0044 <span class="comment">%               mode 1, with the addition that the returned matrix X2</span>
+0045 <span class="comment">%               are sample realisations of particles x_{t+1}^i according</span>
+0046 <span class="comment">%               to the model</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">%               x_{t+1} ~ p_1(x_{t+1}|x_t)</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%               That is, for each column of X, and with the i'th</span>
+0051 <span class="comment">%               one representing a realisation of the particle x_t^i,</span>
+0052 <span class="comment">%               a new particle x_{t+1}^i is formed by drawing from the</span>
+0053 <span class="comment">%               probability distribution</span>
+0054 <span class="comment">%</span>
+0055 <span class="comment">%               x_{t+1}^i ~ p_1(.|x_t^i).</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%     mode==3:  the returned value q is an array of</span>
+0058 <span class="comment">%               probabilities:</span>
+0059 <span class="comment">%</span>
+0060 <span class="comment">%               q(i) = p_1( x^i_{t+1|N} | x^i_{t|t} )</span>
+0061 <span class="comment">%</span>
+0062 <span class="comment">%               where x^i_{t+1|N} is the i'th column of X1 and</span>
+0063 <span class="comment">%               x^i_{t|t} is the i'th colummn of X.</span>
+0064 <span class="comment">%</span>
+0065 <span class="comment">%               yp(:,i) should contain the prediction x^i_{t+1|t}</span>
+0066 <span class="comment">%</span>
+0067 <span class="comment">%               output argument X2 is ignored.</span>
+0068 <span class="comment">%</span>
+0069 <span class="comment">%     mode==4:  the returned variable q is an array of</span>
+0070 <span class="comment">%               probabilities:</span>
+0071 <span class="comment">%</span>
+0072 <span class="comment">%               q(i) = p_1( x^i_{t+1|N} | x^i_{t+1|t} )</span>
+0073 <span class="comment">%</span>
+0074 <span class="comment">%               where x^i_{t+1|N} is the i'th column of X1 and</span>
+0075 <span class="comment">%               x^i_{t+1|t} is the i'th colummn of X (provided</span>
+0076 <span class="comment">%               by the previous call with mode==3)</span>
+0077 <span class="comment">%</span>
+0078 <span class="comment">%               yp and X2 output arguments are ignored.</span>
+0079 <span class="comment">%</span>
+0080 <span class="comment">%   Z:          Input-Output data in one of two forms.  The standard form</span>
+0081 <span class="comment">%               is for it to be a record with elements Z.y and Z.u, each</span>
+0082 <span class="comment">%               of which are matrices with number of rows equal to the</span>
+0083 <span class="comment">%               number of data samples, and number of columns equal (respectively)</span>
+0084 <span class="comment">%               to the number of outputs and the number of inputs.  On</span>
+0085 <span class="comment">%               the other hand, Z can be a matrix of the form Z = [y,u]</span>
+0086 <span class="comment">%               where it is assumed that y is a column vector of output</span>
+0087 <span class="comment">%               measurements and u is a matrix whose columns are the</span>
+0088 <span class="comment">%               input measurements; in this latter MISO models are</span>
+0089 <span class="comment">%               being considered.</span>
+0090 <span class="comment">%</span>
+0091 <span class="comment">%   M:          Data structure which defines the above model:</span>
+0092 <span class="comment">%</span>
+0093 <span class="comment">%               As an example of how to write func, see ssmods.m which</span>
+0094 <span class="comment">%               implements the LTI model detailed above.</span>
+0095 <span class="comment">%</span>
+0096 <span class="comment">%</span>
+0097 <span class="comment">%   OPT:        Data structure which defines options for the estimation</span>
+0098 <span class="comment">%               algorithm as follows:</span>
+0099 <span class="comment">%    OPT.pnum   Number of particles to use.  Default is OPT.pnum=100.</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">%</span>
+0102 <span class="comment">%</span>
+0103 
+0104 <span class="comment">% Copyright (C) Brett Ninness</span>
+0105 
+0106 <a name="_sub0" href="#_subfunctions" class="code">function [varargout]=ssmods(mode,Z,M,OPT,X,X1)</a>
+0107  
+0108 nx = size(M.ss.A,1);  <span class="comment">% Determine state dimension</span>
+0109 
+0110 <span class="keyword">if</span> mode==0, 
+0111     varargout(1)={nx};
+0112     <span class="keyword">return</span>;
+0113 <span class="keyword">end</span>
+0114 
+0115 <span class="keyword">if</span> mode==1 | mode==2,
+0116     <span class="comment">% Compute Measurement update weights q_t^i = p(y_t|x^i_t|t-i)</span>
+0117     yp = M.ss.C*X(:,:)+M.ss.D*repmat(Z.u(:),1,OPT.pnum);
+0118     pe=repmat(Z.y(:),1,OPT.pnum)-yp;
+0119  
+0120  PY=pe*pe'/OPT.pnum;
+0121  
+0122     qpe = pe.*(M.ss.R\pe);
+0123     <span class="keyword">if</span> size(qpe,1)&gt;1 qpe=sum(qpe); <span class="keyword">end</span>;
+0124     q=exp(-qpe/2); q=q/sum(q);        
+0125 
+0126     <span class="comment">% Pass back predicted y based on passed in (predicted) state</span>
+0127     yp=mean(yp,2);
+0128 
+0129     varargout(1)={q}; varargout(2)={yp};
+0130  
+0131     varargout(3)={PY};
+0132  
+0133     <span class="keyword">if</span> mode==2,
+0134         <span class="comment">% Now do time update of particles x^i_t+1|t \sim p(x_t+1|x_t^i)</span>
+0135         X=M.ss.A*X+M.ss.B*repmat(Z.u(:),1,OPT.pnum)+sqrtm(M.ss.Q)*randn(nx,OPT.pnum);
+0136         varargout(3)={X};
+0137     <span class="keyword">end</span>
+0138     <span class="keyword">return</span>;
+0139 <span class="keyword">end</span>
+0140 
+0141 <span class="keyword">if</span> mode==3,
+0142     <span class="comment">% Perform prediction x_{t+1|t}</span>
+0143     X=M.ss.A*X+M.ss.B*repmat(Z.u(:),1,OPT.pnum);
+0144     pe=X1-X; qpe=sum(pe.*(M.ss.Q\pe),1);
+0145     q=exp(-qpe/2); q=q/sum(q);
+0146     varargout(1)={q}; varargout(2)={X};
+0147 <span class="keyword">end</span>
+0148 
+0149 <span class="keyword">if</span> mode==4,
+0150     <span class="comment">% Calc p_1(x_{t+1|N} | x^i_{t+1|t})</span>
+0151     pe=X1-X; qpe=sum(pe.*(M.ss.Q\pe),1);
+0152     q=exp(-qpe/2);
+0153     q=q/sum(q);
+0154     varargout(1)={q};
+0155 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

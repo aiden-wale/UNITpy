@@ -1,0 +1,493 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of theta2m</title>
+  <meta name="keywords" content="theta2m">
+  <meta name="description" content="THETA2M - function to convert from stacked parameter vector to model">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; theta2m.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>theta2m
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>THETA2M - function to convert from stacked parameter vector to model</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [G,SD] = theta2m(theta,M,fast) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> THETA2M - function to convert from stacked parameter vector to model
+ structure form.  This function is not meant to ever be
+ called by a user - instead it is just an auxiliary function that is
+ used internally by other routines; most importantly EST.m
+
+ To be more exact, this function takes an initial specification M of a
+ model structure together with further parameters theta.  The two are
+ blended to form a final model structure G, theta is assumed to
+ parameterise only those parts of G that cannot be estimated in closed
+ form.
+
+ Therefore, for a linear OE structure, M only specifies model
+ orders, and theta is the parameters of all the dynamics.  However, for
+ an ARX or FIR, all the linear dynamics would already be specified in M,
+ and theta would only specify any non-linear dynamics
+
+ This separation might seem artificial, but in fact is important for the
+ case where we run an iterative procedure for finding estimates of
+ non-linear parts, but get estimate of linear part at each iteration in
+ closed form.
+
+ SD is a structure with vector elements containing the standard
+ deviations of estimated parameters.  These are formed from M.P, the
+ covariance matrix of *all* estimated parameters, whether found in
+ closed form or via an iterative procedure.
+
+ Usage is:
+
+ [G,SD] = theta2m(theta,M,fast)
+
+ Where
+
+ M     = Model structure definition in MATLAB structure.
+ theta = Parameters in M stacked into vector.
+ fast  = Flag, which if set to one, does not bother with conversion
+         between tf and ss forms. Default is fast=0;
+
+ G     = parameters in theta put into model structure of form
+         defined by M.
+ SD    = Standard deviations of parameter estimates contained in theta.
+         These are put in structure form, and are used by the routine
+         details.m
+
+
+ Written by Brett Ninness: School of EE &amp; CS
+            Adrian Wills:  University of Newcastle
+                           Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>	KDE: Univariate probability density estimation via kernel method,</li><li><a href="sstotf.html" class="code" title="function g=sstotf(G);">sstotf</a>	SSTOTF: Function to add the polynomial form descriptions to a model</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>	Function to calculate quadratic cost</li><li><a href="VNss.html" class="code" title="function [cost,pe,grad,phi,map] = VNss(Z,theta,OPT,M,div)">VNss</a>	VNss: Function to calculate quadratic cost</li><li><a href="VNssf.html" class="code" title="function [cost,pe,grad,phi,map]=VNssf(Z,theta,OPT,M,div)">VNssf</a>	Function to calculate quadratic cost</li><li><a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>	This routine takes a record of input-output data [y,u] and fits</li><li><a href="ddlc.html" class="code" title="function [m]=ddlc(th,M);">ddlc</a>	Function used as part of DDLC method for estimation of state-space</li><li><a href="details.html" class="code" title="function handle = details(varargin)">details</a>	DETAILS: This function summarises details about a model structure.</li><li><a href="gn.html" class="code" title="function G = gn(Z,M,OPT);">gn</a>	This function calls underlying gradient-based search algorithms, based on</li><li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li><li><a href="sample.html" class="code" title="function [f,g,h,d,q,s,r] = sample(M,theta,T,D)">sample</a>	SAMPLEK: This routine takes a continuous time state space description</li><li><a href="showdist.html" class="code" title="function showdist(varargin)">showdist</a>	SHOWDIST: Function to plot marginal distributions of parameters.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% THETA2M - function to convert from stacked parameter vector to model</span>
+0002 <span class="comment">% structure form.  This function is not meant to ever be</span>
+0003 <span class="comment">% called by a user - instead it is just an auxiliary function that is</span>
+0004 <span class="comment">% used internally by other routines; most importantly EST.m</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% To be more exact, this function takes an initial specification M of a</span>
+0007 <span class="comment">% model structure together with further parameters theta.  The two are</span>
+0008 <span class="comment">% blended to form a final model structure G, theta is assumed to</span>
+0009 <span class="comment">% parameterise only those parts of G that cannot be estimated in closed</span>
+0010 <span class="comment">% form.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% Therefore, for a linear OE structure, M only specifies model</span>
+0013 <span class="comment">% orders, and theta is the parameters of all the dynamics.  However, for</span>
+0014 <span class="comment">% an ARX or FIR, all the linear dynamics would already be specified in M,</span>
+0015 <span class="comment">% and theta would only specify any non-linear dynamics</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% This separation might seem artificial, but in fact is important for the</span>
+0018 <span class="comment">% case where we run an iterative procedure for finding estimates of</span>
+0019 <span class="comment">% non-linear parts, but get estimate of linear part at each iteration in</span>
+0020 <span class="comment">% closed form.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% SD is a structure with vector elements containing the standard</span>
+0023 <span class="comment">% deviations of estimated parameters.  These are formed from M.P, the</span>
+0024 <span class="comment">% covariance matrix of *all* estimated parameters, whether found in</span>
+0025 <span class="comment">% closed form or via an iterative procedure.</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">% Usage is:</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% [G,SD] = theta2m(theta,M,fast)</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">% Where</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">% M     = Model structure definition in MATLAB structure.</span>
+0034 <span class="comment">% theta = Parameters in M stacked into vector.</span>
+0035 <span class="comment">% fast  = Flag, which if set to one, does not bother with conversion</span>
+0036 <span class="comment">%         between tf and ss forms. Default is fast=0;</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">% G     = parameters in theta put into model structure of form</span>
+0039 <span class="comment">%         defined by M.</span>
+0040 <span class="comment">% SD    = Standard deviations of parameter estimates contained in theta.</span>
+0041 <span class="comment">%         These are put in structure form, and are used by the routine</span>
+0042 <span class="comment">%         details.m</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%</span>
+0045 <span class="comment">% Written by Brett Ninness: School of EE &amp; CS</span>
+0046 <span class="comment">%            Adrian Wills:  University of Newcastle</span>
+0047 <span class="comment">%                           Australia.</span>
+0048 
+0049 <span class="comment">% Copyright (C) Brett Ninness</span>
+0050 
+0051 <a name="_sub0" href="#_subfunctions" class="code">function [G,SD] = theta2m(theta,M,fast)</a>
+0052 
+0053 <span class="keyword">if</span> nargin&lt;3 fast=1; <span class="keyword">end</span>;  <span class="comment">% If user doesn't specifically ask for fast version, assume not wanted.</span>
+0054 <span class="keyword">if</span> ~isfield(M,<span class="string">'par'</span>), M.par=<span class="string">'unknown'</span>; <span class="keyword">end</span>
+0055 
+0056 G = M;  <span class="comment">% Put all fixed bits in, then overwrite those that are specified by theta</span>
+0057 
+0058 <span class="comment">% If theta is a matrix it means our purpose here is to add probablity</span>
+0059 <span class="comment">% density estimates (bad code AW)</span>
+0060 addp = size(theta,2)&gt;1;  TH=theta; theta = TH(:,1);
+0061 
+0062 <span class="comment">% If standard dev's are being requested, then get variances of parameters</span>
+0063 <span class="keyword">if</span> nargout&gt;1
+0064  <span class="keyword">try</span>,
+0065   <span class="keyword">if</span> ~strcmpi(M.type,<span class="string">'ss'</span>),  <span class="comment">% At present, error estimates of pars of ss model not supported</span>
+0066    P = real(sqrt(abs(diag(M.P)))); P=P(:)';
+0067   <span class="keyword">else</span>
+0068    P = inf*ones(size(theta));
+0069   <span class="keyword">end</span>
+0070  <span class="keyword">catch</span>
+0071   P = inf*ones(size(theta));
+0072  <span class="keyword">end</span>
+0073 <span class="keyword">end</span>
+0074 
+0075 <span class="comment">% Get number of inputs and outputs and states if NOT a greybox model</span>
+0076 
+0077 <span class="keyword">if</span> ~strcmp(M.par,<span class="string">'grey'</span>),
+0078  <span class="keyword">if</span> any(strcmp(M.type,{<span class="string">'ss'</span>,<span class="string">'bilin'</span>,<span class="string">'bilinear'</span>})),
+0079   nu = size(M.ss.B,2);  ny = size(M.ss.C,1);  nx = size(M.ss.A,1);
+0080  <span class="keyword">else</span>
+0081   <span class="comment">% How may poles/zeros in biggest denominator/numerator? (if not ss form)</span>
+0082   nu = M.nu; 
+0083   ny = M.ny;
+0084   np = max(M.nA); 
+0085   nz = max(M.nB);
+0086  <span class="keyword">end</span>
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">% OK, now recover description of linear dynamics from estimated parameter vector</span>
+0090 <span class="keyword">if</span> strcmpi(M.type,<span class="string">'ss'</span>)  <span class="comment">% State space structure is easy.</span>
+0091  
+0092  <span class="keyword">switch</span> M.par,<span class="comment">% switch according to parametrization</span>
+0093   <span class="keyword">case</span> {<span class="string">'grey'</span>}
+0094    G  = feval(M.t2m,M,theta);
+0095    G.theta = theta;
+0096    nu = size(G.ss.B,2);  
+0097    ny = size(G.ss.C,1);  
+0098    nx = size(G.ss.A,1);
+0099    
+0100   <span class="keyword">case</span> {<span class="string">'unknown'</span>,<span class="string">'full'</span>,<span class="string">'ddlc'</span>,<span class="string">'struct'</span>}
+0101    <span class="keyword">if</span> M.T==0,
+0102     G.ss.A = reshape(theta(1:nx*nx),nx,nx); idx = nx*nx;
+0103     G.ss.B = reshape(theta(idx+1:idx+nx*nu),nx,nu); idx = idx+nx*nu;
+0104     G.ss.C = reshape(theta(idx+1:idx+nx*ny),ny,nx); idx = idx+nx*ny;
+0105     <span class="keyword">if</span> ~isempty(M.ss.D) G.ss.D = reshape(theta(idx+1:idx+ny*nu),ny,nu); idx = idx+ny*nu; <span class="keyword">end</span>;
+0106     G.ss.Q = tril(ones(nx));
+0107     G.ss.Q(find(G.ss.Q)) = theta(idx+1:idx+nx*(nx+1)/2);
+0108     idx    = idx + nx*(nx+1)/2;
+0109     G.ss.S = reshape(theta(idx+1:idx+nx*ny),nx,ny); idx = idx+nx*ny;
+0110     G.ss.R = tril(ones(ny));
+0111     G.ss.R(find(G.ss.R)) = theta(idx+1:idx+ny*(ny+1)/2);
+0112     idx    = idx + ny*(ny+1)/2;
+0113     
+0114     Pi = [G.ss.Q zeros(nx,ny);G.ss.S' G.ss.R]*[G.ss.Q zeros(nx,ny);G.ss.S' G.ss.R]';
+0115     G.ss.Q  = Pi(1:nx,1:nx);
+0116     G.ss.S  = Pi(1:nx,nx+1:nx+ny);
+0117     G.ss.R  = Pi(nx+1:nx+ny,nx+1:nx+ny);
+0118     
+0119    <span class="keyword">else</span>
+0120     G.ss.A = reshape(theta(1:nx*nx),nx,nx); idx = nx*nx;
+0121     G.ss.B = reshape(theta(idx+1:idx+nx*nu),nx,nu); idx = idx+nx*nu;
+0122     G.ss.C = reshape(theta(idx+1:idx+nx*ny),ny,nx); idx = idx+nx*ny;
+0123     <span class="keyword">if</span> ~isempty(M.ss.D) G.ss.D = reshape(theta(idx+1:idx+ny*nu),ny,nu); idx = idx+ny*nu; <span class="keyword">end</span>;
+0124     <span class="keyword">if</span> ~isempty(M.ss.K) G.ss.K = reshape(theta(idx+1:idx+nx*ny),nx,ny); idx = idx+nx*ny; <span class="keyword">end</span>;
+0125     <span class="keyword">if</span> ~isempty(M.ss.X1) G.ss.X1 = reshape(theta(idx+1:idx+nx),nx,1); <span class="keyword">end</span>;
+0126    <span class="keyword">end</span>
+0127       
+0128   <span class="keyword">case</span> <span class="string">'blkdiag'</span>
+0129    G.ss.A=zeros(nx,nx);
+0130    <span class="keyword">for</span> i=1:length(theta),
+0131     <span class="keyword">if</span> i&lt;=nx,
+0132      <span class="keyword">if</span> mod(i,2),
+0133       G.ss.A(i,i)=theta(i);
+0134       G.ss.A(i+1,i+1)=theta(i);
+0135      <span class="keyword">else</span>
+0136       G.ss.A(i-1,i)=theta(i);
+0137       G.ss.A(i,i-1)=-theta(i);
+0138      <span class="keyword">end</span>
+0139     <span class="keyword">elseif</span> i&gt;nx &amp; i&lt;=2*nx,
+0140      G.ss.B(i-nx,1)=theta(i);
+0141     <span class="keyword">elseif</span> i&gt;2*nx &amp; i&lt;=3*nx,
+0142      G.ss.C(1,i-2*nx)=theta(i);
+0143     <span class="keyword">else</span>
+0144      G.ss.D=theta(i);
+0145     <span class="keyword">end</span>
+0146    <span class="keyword">end</span>
+0147  <span class="keyword">end</span>
+0148  
+0149  <span class="comment">% Convert from state space to transfer function form if not doing fast version</span>
+0150  <span class="keyword">if</span> ~fast G = <a href="sstotf.html" class="code" title="function g=sstotf(G);">sstotf</a>(G); <span class="keyword">end</span>;
+0151  
+0152 <span class="keyword">elseif</span> strcmpi(M.type,<span class="string">'bilin'</span>) || strcmpi(M.type,<span class="string">'bilinear'</span>)   <span class="comment">% Bilinear model structure case</span>
+0153  <span class="keyword">switch</span> M.par,<span class="comment">%switch according to parametrization</span>
+0154   <span class="keyword">case</span> {<span class="string">'unknown'</span>,<span class="string">'full'</span>,<span class="string">'ddlc'</span>}
+0155    G.ss.A=reshape(theta(1:nx*nx),nx,nx); idx = nx*nx;
+0156    G.ss.B=reshape(theta(idx+1:idx+nx*nu),nx,nu); idx = idx+nx*nu;
+0157    G.ss.C=reshape(theta(idx+1:idx+nx*ny),ny,nx); idx = idx+nx*ny;
+0158    <span class="keyword">if</span> ~isempty(M.ss.D) G.ss.D=reshape(theta(idx+1:idx+ny*nu),ny,nu); idx = idx+ny*nu; <span class="keyword">end</span>;
+0159    <span class="keyword">if</span> ~isempty(M.ss.K) G.ss.K=reshape(theta(idx+1:idx+nx*ny),nx,ny); idx = idx+nx*ny; <span class="keyword">end</span>;
+0160    <span class="keyword">if</span> ~isempty(M.ss.F), G.ss.F=reshape(theta(idx+1:idx+nx*nx*nu),nx,nx*nu); idx=idx+nx*nx*nu; <span class="keyword">end</span>
+0161    <span class="keyword">if</span> ~isempty(M.ss.G), G.ss.G=reshape(theta(idx+1:idx+ny*nx*nu),ny,nx*nu); idx=idx+ny*nx*nu; <span class="keyword">end</span>
+0162    <span class="keyword">if</span> ~isempty(M.ss.X1), G.ss.X1=reshape(theta(idx+1:idx+nx),nx,1); idx=idx+nx; <span class="keyword">end</span>
+0163    
+0164   <span class="keyword">case</span> <span class="string">'struct'</span>
+0165    idx = 0;
+0166    nAi = nnz(G.ss.Ai);
+0167    <span class="keyword">if</span> nAi&gt;0,
+0168     G.ss.A(logical(G.ss.Ai))=theta(idx+1:idx+nAi);
+0169    <span class="keyword">end</span>
+0170    idx = nAi;
+0171    
+0172    nBi = nnz(G.ss.Bi);
+0173    <span class="keyword">if</span> nBi&gt;0,
+0174     G.ss.B(logical(G.ss.Bi))=theta(idx+1:idx+nBi);
+0175    <span class="keyword">end</span>
+0176    idx = idx+nBi;
+0177    
+0178    nCi = nnz(G.ss.Ci);
+0179    <span class="keyword">if</span> nCi&gt;0,
+0180     G.ss.C(logical(G.ss.Ci))=theta(idx+1:idx+nCi);
+0181    <span class="keyword">end</span>
+0182    idx = idx+nCi;
+0183    
+0184    nDi = nnz(G.ss.Di);
+0185    <span class="keyword">if</span> nDi&gt;0,
+0186     G.ss.D(logical(G.ss.Di))=theta(idx+1:idx+nDi);
+0187    <span class="keyword">end</span>
+0188    idx = idx+nDi;
+0189    
+0190    nKi = nnz(G.ss.Ki);
+0191    <span class="keyword">if</span> nKi&gt;0,
+0192     G.ss.K(logical(G.ss.Ki))=theta(idx+1:idx+nKi);
+0193    <span class="keyword">end</span>
+0194    idx = idx+nKi;
+0195    
+0196    nFi = nnz(G.ss.Fi);
+0197    <span class="keyword">if</span> nFi&gt;0,
+0198     G.ss.F(logical(G.ss.Fi))=theta(idx+1:idx+nFi);
+0199    <span class="keyword">end</span>
+0200    idx = idx+nFi;
+0201    
+0202    nGi = nnz(G.ss.Gi);
+0203    <span class="keyword">if</span> nGi&gt;0,
+0204     G.ss.G(logical(G.ss.Gi))=theta(idx+1:idx+nGi);
+0205    <span class="keyword">end</span>
+0206    idx = idx+nGi;
+0207    
+0208    nX1i = nnz(G.ss.X1i);
+0209    <span class="keyword">if</span> nX1i&gt;0,
+0210     G.ss.X1(logical(G.ss.X1i))=theta(idx+1:idx+nX1i);
+0211    <span class="keyword">end</span>
+0212    idx = idx+nX1i;
+0213  <span class="keyword">end</span>
+0214  
+0215  
+0216 <span class="keyword">else</span>  <span class="comment">% Not ss form, must be some sort of poly form</span>
+0217  <span class="keyword">if</span> strcmpi(M.type,<span class="string">'arx'</span>) <span class="comment">% ARX form is different to other poly forms</span>
+0218   <span class="comment">%  Extract numerator and denominator polys (A &amp; B) from parameter vector G.th</span>
+0219   <span class="keyword">if</span> (nu&gt;0)   <span class="comment">% Are we only looking at an AR model?</span>
+0220    index = 1; G.nB = M.nB;
+0221    <span class="keyword">for</span> r=1:nu  <span class="comment">% One T/F per i/o model</span>
+0222     G.B(r,1:max(M.nB)+1)=[theta(index:index+M.nB(r))',zeros(1,max(M.nB)-M.nB(r))]; index = index+M.nB(r)+1;
+0223    <span class="keyword">end</span>;
+0224   <span class="keyword">else</span>
+0225    G.B = []; G.nB = 0;
+0226   <span class="keyword">end</span>;
+0227   <span class="keyword">if</span> (M.op==<span class="string">'d'</span>)
+0228    G.nA = M.nA;
+0229    <span class="keyword">if</span> (np&gt;0)
+0230     G.A = M.J(2:np+1)+theta(length(theta)-np+1:length(theta))'; G.A = [1,G.A];
+0231    <span class="keyword">else</span>
+0232     G.A = 1;
+0233    <span class="keyword">end</span>;
+0234   <span class="keyword">else</span>
+0235    G.A = theta(length(theta)-np+1:length(theta))'; G.A = [1,G.A]; G.nA = M.nA;   
+0236   <span class="keyword">end</span>
+0237   
+0238  <span class="keyword">elseif</span> ~strcmpi(M.type,<span class="string">'fir'</span>)  <span class="comment">%OE, BJ, ARMA, ARMAX cases</span>
+0239   <span class="comment">%if [~strcmpi(M.type,'fir'), ~strcmpi(M.type,'arx')]</span>
+0240   index = 1;  <span class="comment">% Where we are up to in stepping through theta parameter vector.</span>
+0241   
+0242   <span class="comment">% Extract parameterisation of numerator</span>
+0243   <span class="keyword">for</span> r=1:nu
+0244    <span class="comment">% If only estimating a non-linearity, then scalar gain B(1) normalised</span>
+0245    <span class="comment">% to B(1)=1 =&gt; no need to include in parameter vector, otherwise do so.</span>
+0246    <span class="keyword">if</span> [~strcmp(M.in(r).type,<span class="string">'linear'</span>)  nz &lt; 1]
+0247     G.B=1; <span class="keyword">if</span> nargout&gt;1 SD.B = 0; <span class="keyword">end</span>;
+0248    <span class="keyword">else</span>
+0249     indices = index:index+M.nB(r); padding = zeros(1,max(M.nB)-M.nB(r));
+0250     <span class="keyword">if</span> strcmpi(M.op,<span class="string">'s'</span>)
+0251      dB = length(G.B(r,:))-length(indices);
+0252      G.B(r,dB+1:end)=[theta(indices)',padding];
+0253     <span class="keyword">else</span>  <span class="comment">% M.op = 'q' or 'd' cases</span>
+0254      G.B(r,:)=[theta(indices)',padding];
+0255     <span class="keyword">end</span>; 
+0256     <span class="comment">% Check to see if standard deviation estimates on parameters are being requested</span>
+0257     <span class="keyword">if</span> nargout&gt;1 SD.B(r,:)= [P(index:index+M.nB(r)),zeros(1,max(M.nB)-M.nB(r))]; <span class="keyword">end</span>;
+0258     <span class="keyword">if</span> addp  <span class="comment">% Our purpose here in theta2m is really to add probability density estimates</span>
+0259      ix=1;
+0260      <span class="keyword">for</span> t=index:index+M.nB(r)
+0261       [h.p,h.x] = hist(TH(t,:),50);           <span class="comment">% Get initial pdf estimate as sample histogram</span>
+0262       hs=<a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                              <span class="comment">% Refine via kernel density smoothed pdf estimate</span>
+0263       G.pb(r,ix).x=hs.x; G.pb(r,ix).p=hs.p;   <span class="comment">% Load result into output model structure</span>
+0264       ix = ix+1;                              <span class="comment">% Increment count on which element of B we are up to</span>
+0265      <span class="keyword">end</span>;
+0266     <span class="keyword">end</span>;
+0267     index=index+M.nB(r)+1;
+0268    <span class="keyword">end</span>;
+0269   <span class="keyword">end</span>;
+0270   
+0271   <span class="comment">% Extract parameterisation of denominator</span>
+0272   <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'arma'</span>,<span class="string">'armax'</span>})),
+0273    r=1;
+0274    G.A(r,:)=[[1,theta(index:index+M.nA(r)-1)'],zeros(1,np-M.nA(r))];
+0275    <span class="comment">% Check to see if standard deviation estimates on parameters are being requested</span>
+0276    <span class="keyword">if</span> nargout &gt;1 SD.A(r,:)=[P(index:index+M.nA(r)-1),zeros(1,np-M.nA(r))]; <span class="keyword">end</span>;
+0277    <span class="keyword">if</span> addp  <span class="comment">% Our purpose here in theta2m is really to add probability density estimates</span>
+0278     ix=1;
+0279     <span class="keyword">for</span> t=index:index+M.nA(r)-1
+0280      [h.p,h.x] = hist(TH(t,:),50);           <span class="comment">% Get initial pdf estimate as sample histogram</span>
+0281      hs=<a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                              <span class="comment">% Refine via kernel density smoothed pdf estimate</span>
+0282      G.pa(r,ix).x=hs.x; G.pa(r,ix).p=hs.p;   <span class="comment">% Load result into output model structure</span>
+0283      ix = ix+1;                              <span class="comment">% Increment count on which element of A we are up to</span>
+0284     <span class="keyword">end</span>;
+0285    <span class="keyword">end</span>;
+0286    index=index+M.nA(r);
+0287    
+0288   <span class="keyword">else</span> <span class="comment">%BJ or OE model, in which case A means something else</span>
+0289    <span class="keyword">for</span> r=1:nu
+0290     G.A(r,:)=[[1,theta(index:index+M.nA(r)-1)'],zeros(1,np-M.nA(r))];
+0291     <span class="comment">% Check to see if standard deviation estimates on parameters are being requested</span>
+0292     <span class="keyword">if</span> nargout &gt;1 SD.A(r,:)=[P(index:index+M.nA(r)-1),zeros(1,np-M.nA(r))]; <span class="keyword">end</span>;
+0293     <span class="keyword">if</span> addp  <span class="comment">% Our purpose here in theta2m is really to add probability density estimates</span>
+0294      ix=1;
+0295      <span class="keyword">for</span> t=index:index+M.nA(r)-1
+0296       [h.p,h.x] = hist(TH(t,:),50);           <span class="comment">% Get initial pdf estimate as sample histogram</span>
+0297       hs=<a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                              <span class="comment">% Refine via kernel density smoothed pdf estimate</span>
+0298       G.pa(r,ix).x=hs.x; G.pa(r,ix).p=hs.p;   <span class="comment">% Load result into output model structure</span>
+0299       ix = ix+1;                              <span class="comment">% Increment count on which element of A we are up to</span>
+0300      <span class="keyword">end</span>;
+0301     <span class="keyword">end</span>;
+0302     index=index+M.nA(r);
+0303     <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'ar'</span>,<span class="string">'arma'</span>,<span class="string">'arx'</span>,<span class="string">'armax'</span>})), <span class="keyword">break</span>; <span class="keyword">end</span>
+0304    <span class="keyword">end</span>;
+0305   <span class="keyword">end</span>
+0306    
+0307   <span class="comment">% Extract Parameterisation of noise model</span>
+0308   G.C = [1,theta(index:index+length(M.C)-2)'];
+0309   <span class="keyword">if</span> nargout&gt;1 SD.C = P(index:index+length(M.C)-2); <span class="keyword">end</span>;
+0310   <span class="keyword">if</span> addp  <span class="comment">% Our purpose here in theta2m is really to add probability density estimates</span>
+0311    ix=1;
+0312    <span class="keyword">for</span> t=index:index+length(M.C)-2
+0313     [h.p,h.x] = hist(TH(t,:),50);           <span class="comment">% Get initial pdf estimate as sample histogram</span>
+0314     hs=<a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                              <span class="comment">% Refine via kernel density smoothed pdf estimate</span>
+0315     G.pc(ix).x=hs.x; G.pc(ix).p=hs.p;       <span class="comment">% Load result into output model structure</span>
+0316     ix = ix+1;                              <span class="comment">% Increment count on which element of C we are up to</span>
+0317    <span class="keyword">end</span>;
+0318   <span class="keyword">end</span>;
+0319   
+0320   index = index+length(M.C)-1+isempty(M.C);
+0321   
+0322   <span class="keyword">if</span> strcmpi(M.type,<span class="string">'bj'</span>)
+0323    G.D = [1,theta(index:index+length(M.D)-2)'];
+0324    <span class="keyword">if</span> nargout&gt;1 SD.D = P(index:index+length(M.D)-2); <span class="keyword">end</span>;
+0325    <span class="keyword">if</span> addp  <span class="comment">% Our purpose here in theta2m is really to add probability density estimates</span>
+0326     ix=1;
+0327     <span class="keyword">for</span> t=index:index+length(M.D)-2
+0328      [h.p,h.x] = hist(TH(t,:),50);           <span class="comment">% Get initial pdf estimate as sample histogram</span>
+0329      hs=<a href="kde.html" class="code" title="function hest = kde(histogram,OPT);">kde</a>(h);                              <span class="comment">% Refine via kernel density smoothed pdf estimate</span>
+0330      G.pd(ix).x=hs.x; G.pd(ix).p=hs.p;       <span class="comment">% Load result into output model structure</span>
+0331      ix = ix+1;                              <span class="comment">% Increment count on which element of D we are up to</span>
+0332     <span class="keyword">end</span>;
+0333    <span class="keyword">end</span>;
+0334    index = index+length(M.D)-1+isempty(M.D);
+0335   <span class="keyword">end</span>;
+0336  <span class="keyword">end</span>; <span class="comment">% End of check on FIR or ARX</span>
+0337 <span class="keyword">end</span>; <span class="comment">% End of check on whether ss model structure or not</span>
+0338 
+0339 <span class="comment">% Recover description of input non-linearity from estimated parameter vector</span>
+0340 <span class="keyword">if</span> isfield(M,<span class="string">'in'</span>),
+0341  <span class="keyword">for</span> k=1:nu
+0342   <span class="keyword">if</span> ~strcmpi(M.in(k).type,<span class="string">'linear'</span>) <span class="comment">%  Check if input non-linearity is to be incoporated</span>
+0343    <span class="keyword">if</span> (strcmpi(M.type,<span class="string">'fir'</span>) || strcmpi(M.type,<span class="string">'arx'</span>))
+0344     index = 1;  <span class="comment">% In FIR and ARX cases the linear part is not found iteratively</span>
+0345    <span class="keyword">end</span>;
+0346    <span class="keyword">if</span> (strcmpi(M.in(k).type,<span class="string">'saturation'</span>) || strcmpi(M.in(k).type,<span class="string">'deadzone'</span>))
+0347     eta = theta(index:index+M.in(k).neta-1);
+0348     <span class="keyword">if</span> nargout&gt;1 SD.in(k).eta = P(index:index+M.in(k).neta-1); <span class="keyword">end</span>;
+0349     index=index+M.in(k).neta;
+0350     <span class="keyword">if</span> M.in(k).neta&gt;1
+0351      G.in(k).upper = max(eta); G.in(k).lower = min(eta);
+0352      <span class="keyword">if</span> nargout&gt;1 SD.in(k).upper = SD.in(k).eta(1); SD.in(k).lower = SD.in(k).eta(2); <span class="keyword">end</span>;
+0353     <span class="keyword">else</span>
+0354      G.in(k).upper = abs(eta); G.in(k).lower = -abs(eta);
+0355      <span class="keyword">if</span> nargout&gt;1 SD.in(k).upper = SD.in(k).eta; SD.in(k).lower = SD.in(k).eta; <span class="keyword">end</span>;
+0356     <span class="keyword">end</span>;
+0357    <span class="keyword">elseif</span> ( strcmpi(M.in(k).type,<span class="string">'hinge'</span>) || strcmpi(M.in(k).type,<span class="string">'poly'</span>) )
+0358     eta = theta(index:index+length(M.in(k).eta)-1);
+0359     G.in(k).eta = eta;
+0360     <span class="keyword">if</span> nargout&gt;1 SD.in(k).eta = P(index:index+length(M.in(k).eta)-1); <span class="keyword">end</span>;
+0361     index = index+length(M.in(k).eta);
+0362    <span class="keyword">end</span>;
+0363   <span class="keyword">end</span>;
+0364   G.in(k).type = M.in(k).type;
+0365  <span class="keyword">end</span>;  <span class="comment">% End of loop over all inputs</span>
+0366 <span class="keyword">end</span>
+0367 
+0368 <span class="comment">% Recover description of output non-linearity from estimated parameter vector</span>
+0369 <span class="keyword">if</span> isfield(M,<span class="string">'out'</span>),
+0370  <span class="keyword">if</span> ~strcmpi(M.out.type,<span class="string">'linear'</span>) <span class="comment">%  Check if output non-linearity is to be incoporated</span>
+0371   <span class="keyword">if</span> (strcmpi(M.out.type,<span class="string">'saturation'</span>) || strcmpi(M.out.type,<span class="string">'deadzone'</span>))
+0372    eta = theta(index:index+M.out.neta-1);
+0373    <span class="keyword">if</span> nargout&gt;1 SD.out.eta = P(index:index+M.out.neta-1); <span class="keyword">end</span>;
+0374    index=index+M.out.neta;
+0375    <span class="keyword">if</span> M.out.neta&gt;1
+0376     G.out.upper = max(eta); G.out.lower = min(eta);
+0377     <span class="keyword">if</span> nargout&gt;1 SD.out.upper = SD.out.eta(1); SD.out.lower = SD.out.eta(2); <span class="keyword">end</span>;
+0378    <span class="keyword">else</span>
+0379     G.out.upper = abs(eta); G.out.lower = -abs(eta);
+0380     <span class="keyword">if</span> nargout&gt;1 SD.out.upper = SD.out.eta; SD.out.lower = SD.out.eta; <span class="keyword">end</span>;
+0381    <span class="keyword">end</span>;
+0382   <span class="keyword">elseif</span> ( strcmpi(M.out.type,<span class="string">'hinge'</span>) || strcmpi(M.out.type,<span class="string">'poly'</span>) )
+0383    eta = theta(index:index+length(M.out.eta)-1);
+0384    G.out.eta = eta;
+0385    <span class="keyword">if</span> nargout&gt;1 SD.out.eta = P(index:index+length(M.out.eta)-1); <span class="keyword">end</span>;
+0386    index = index+length(M.out.eta);
+0387   <span class="keyword">end</span>;
+0388  <span class="keyword">end</span>;
+0389 G.out.type = M.out.type;
+0390 <span class="keyword">end</span>
+0391 
+0392 
+0393 
+0394 <span class="comment">%Finally, save theta into new model</span>
+0395 G.theta = theta;
+0396 
+0397 
+0398 
+0399 
+0400</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

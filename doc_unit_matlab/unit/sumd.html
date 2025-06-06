@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of sumd</title>
+  <meta name="keywords" content="sumd">
+  <meta name="description" content="Used by postdist.m to provide an alternate means to numerically compute">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; sumd.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>sumd
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Used by postdist.m to provide an alternate means to numerically compute</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function p = sumd(arg,idx,count) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Used by postdist.m to provide an alternate means to numerically compute
+ integrals using Simpson's method.  There is no conceivable reason why
+ user would ever call this.
+
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="sumd.html" class="code" title="function p = sumd(arg,idx,count)">sumd</a>	Used by postdist.m to provide an alternate means to numerically compute</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="sumd.html" class="code" title="function p = sumd(arg,idx,count)">sumd</a>	Used by postdist.m to provide an alternate means to numerically compute</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Used by postdist.m to provide an alternate means to numerically compute</span>
+0002 <span class="comment">% integrals using Simpson's method.  There is no conceivable reason why</span>
+0003 <span class="comment">% user would ever call this.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0007 <span class="comment">%                             University of Newcastle</span>
+0008 <span class="comment">%                             Australia.</span>
+0009 <span class="comment">%</span>
+0010 
+0011 <span class="comment">% Copyright (C) Brett Ninness</span>
+0012 
+0013 
+0014 <a name="_sub0" href="#_subfunctions" class="code">function p = sumd(arg,idx,count)</a>
+0015 
+0016 <span class="keyword">global</span> P;  <span class="comment">% Used to keep track of running sum of integral, hence must be global</span>
+0017 
+0018 <span class="keyword">if</span> arg.shuffle(idx) &lt;= length(arg.num)
+0019  x = arg.xb(arg.shuffle(idx)).x;
+0020 <span class="keyword">else</span>
+0021  x = arg.xa(arg.shuffle(idx)-length(arg.num)).x;
+0022 <span class="keyword">end</span>;
+0023 
+0024 <span class="keyword">if</span> idx &lt; length(arg.den)+length(arg.num)-1
+0025  <span class="keyword">for</span> k=1:length(x)
+0026    <span class="keyword">if</span> arg.shuffle(idx)&lt;=length(arg.num)
+0027     arg.num(arg.shuffle(idx)) = x(k); 
+0028    <span class="keyword">else</span>
+0029     arg.den(arg.shuffle(idx)-length(arg.num)+1) = x(k);
+0030    <span class="keyword">end</span>;
+0031    <a href="sumd.html" class="code" title="function p = sumd(arg,idx,count)">sumd</a>(arg,idx+1,count);  <span class="comment">% Descend another level in recursive for loops</span>
+0032  <span class="keyword">end</span>;
+0033 <span class="keyword">else</span>
+0034  yp = filter(arg.num,arg.den,arg.u);   <span class="comment">% Get predictor</span>
+0035     pe = arg.y(:)-yp(:); <span class="comment">% Prediction error</span>
+0036     <span class="keyword">if</span> strcmp(lower(arg.dens),<span class="string">'gaussian'</span>) <span class="comment">% Gaussian density comparison</span>
+0037   logp = -(0.5*length(pe)*log(2*pi*arg.v)) -(0.5/arg.v)*pe(:)'*pe(:); 
+0038   p=exp(logp); <span class="keyword">if</span> isinf(p) p = 1e5; <span class="keyword">end</span>;
+0039 <span class="comment">%  if [arg.den(2) &gt; -0.799, arg.den(2) &lt; -0.797, arg.num(1)&gt; 0.201 , arg.num(1) &lt; 0.203] keyboard; end;</span>
+0040 <span class="comment">%     p = ( (1/sqrt(2*pi*arg.v))^length(pe) )*exp(-(0.5/arg.v)*pe(:)'*pe(:));</span>
+0041     <span class="keyword">elseif</span> strcmp(lower(arg.dens),<span class="string">'uniform'</span>)
+0042      p= 1-max( abs(pe)&gt;sqrt(3*arg.v) );  
+0043     <span class="keyword">end</span>;
+0044  <span class="keyword">if</span> isnan(p) p=0; warning(<span class="string">'Warning - pint compututed NAN for an x-axis range value'</span>); <span class="keyword">end</span>;
+0045  
+0046  <span class="keyword">if</span> arg.shuffle(idx) &lt;= length(arg.num)
+0047   P.pb(arg.shuffle(idx)).p(count) = P.pb(arg.shuffle(idx)).p(count) + p;
+0048  <span class="keyword">else</span>
+0049   P.pa(arg.shuffle(idx)-length(arg.num)).p(count) = P.pa(arg.shuffle(idx)-length(arg.num)).p(count) + p;  
+0050  <span class="keyword">end</span>;
+0051 <span class="keyword">end</span>;
+0052 
+0053</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

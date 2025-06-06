@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of m2f</title>
+  <meta name="keywords" content="m2f">
+  <meta name="description" content="M2F - function to compute the frequency response of a linear time">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; m2f.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>m2f
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>M2F - function to compute the frequency response of a linear time</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = m2f(M); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> M2F - function to compute the frequency response of a linear time
+ invariant model.  This function is not ever meant to be
+ called by a user - instead it is just an auxiliary function that is
+ used internally by other routines; most importantly EST.m
+
+ To be more explicit, this function takes a specification M of a
+ model structure and computes the input-output frequency response of the
+ linear part of the model, and then adds that information to the
+ structure defining the model.
+
+ Usage is:
+
+ G = m2f(M)
+
+ Where
+
+ M     = Model structure definition
+
+ G     = Model structure M as above, but augmented to also include an
+         element G.G which specified the frequency response of the
+         linear part of M
+
+ written by Brett Ninness, School of EE &amp; CS
+                           University of Newcastle
+                                 Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>	Function to compute frequency response of LTI system in state space form</li><li><a href="nonpar.html" class="code" title="function G = nonpar(Z,M,OPT);">nonpar</a>	NONPAR This routine takes a record of input-output data [y,u] and</li><li><a href="startM.html" class="code" title="function M = startM(varargin)">startM</a>	STARTM - function to initialise a model structure in case user has been</li><li><a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>	This function accepts a data structure and tries to interpret what type</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_mimo_rand.html" class="code" title="">demo_mimo_rand</a>	Running this demos EM estimation of a randomly chosen multivariable</li><li><a href="demo_struct.html" class="code" title="">demo_struct</a>	Running this demo's ML estimation of grey-box parametrized MIMO model</li><li><a href="finishM.html" class="code" title="function G = finishM(Z,M,OPT);">finishM</a>	</li><li><a href="finishMctstf.html" class="code" title="function G = finishMctstf(Z,M,OPT);">finishMctstf</a>	</li><li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li><li><a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>	SHOWBODE: This routine takes the results of an identification experiment</li><li><a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>	SHOWNYQ: This routine takes the results of an identification experiment and</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% M2F - function to compute the frequency response of a linear time</span>
+0002 <span class="comment">% invariant model.  This function is not ever meant to be</span>
+0003 <span class="comment">% called by a user - instead it is just an auxiliary function that is</span>
+0004 <span class="comment">% used internally by other routines; most importantly EST.m</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% To be more explicit, this function takes a specification M of a</span>
+0007 <span class="comment">% model structure and computes the input-output frequency response of the</span>
+0008 <span class="comment">% linear part of the model, and then adds that information to the</span>
+0009 <span class="comment">% structure defining the model.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Usage is:</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% G = m2f(M)</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Where</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% M     = Model structure definition</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% G     = Model structure M as above, but augmented to also include an</span>
+0020 <span class="comment">%         element G.G which specified the frequency response of the</span>
+0021 <span class="comment">%         linear part of M</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% written by Brett Ninness, School of EE &amp; CS</span>
+0024 <span class="comment">%                           University of Newcastle</span>
+0025 <span class="comment">%                                 Australia.</span>
+0026 
+0027 
+0028 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0029 
+0030 <a name="_sub0" href="#_subfunctions" class="code">function G = m2f(M);</a>
+0031 
+0032 <span class="comment">% Check if frequency domain data was passed in - allows a quick return</span>
+0033 freqdata = 0;
+0034 <span class="keyword">if</span> isa(M,<span class="string">'numeric'</span>)
+0035  M = <a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>(M);
+0036 <span class="keyword">end</span>
+0037 <span class="keyword">if</span> isfield(M,<span class="string">'type'</span>),
+0038  <span class="keyword">if</span> strcmpi(M.type,<span class="string">'frequency'</span>),
+0039   freqdata = 1;
+0040  <span class="keyword">end</span>
+0041 <span class="keyword">elseif</span> isfield(M,<span class="string">'y'</span>),
+0042  <span class="keyword">if</span> ~isreal(M.y),
+0043   freqdata = 1;
+0044  <span class="keyword">end</span>
+0045 <span class="keyword">end</span>
+0046 <span class="keyword">if</span> freqdata,
+0047  G   = M;
+0048  G.G = G.y;
+0049  <span class="keyword">return</span>;
+0050 <span class="keyword">end</span>
+0051 
+0052 <span class="comment">% Check if time domain data was passed in</span>
+0053 timedata = 0;
+0054 <span class="keyword">if</span> isfield(M,<span class="string">'type'</span>),
+0055  <span class="keyword">if</span> strcmpi(M.type,<span class="string">'time'</span>),
+0056   timedata = 1;
+0057  <span class="keyword">end</span>
+0058 <span class="keyword">elseif</span> isfield(M,<span class="string">'y'</span>),
+0059  <span class="keyword">if</span> isreal(M.y),
+0060   timedata = 1;
+0061  <span class="keyword">end</span>
+0062 <span class="keyword">elseif</span> isreal(M)
+0063  timedata=1;
+0064 <span class="keyword">end</span>
+0065 <span class="keyword">if</span> timedata,
+0066  G   = <a href="nonpar.html" class="code" title="function G = nonpar(Z,M,OPT);">nonpar</a>(M);
+0067  <span class="keyword">return</span>;
+0068 <span class="keyword">end</span>
+0069 
+0070 <span class="comment">% Model has not come from estimation routine =&gt; populate fields</span>
+0071 <span class="keyword">if</span> ~isfield(M,<span class="string">'finishM'</span>) M = <a href="startM.html" class="code" title="function M = startM(varargin)">startM</a>(M); <span class="keyword">end</span>;
+0072 
+0073 <span class="comment">% Pass all input information through to output</span>
+0074 G = M;
+0075 
+0076 <span class="comment">%If there is no type, then check to see if there is a G.G</span>
+0077 <span class="keyword">if</span> ~isfield(G,<span class="string">'type'</span>),
+0078  <span class="keyword">return</span>;
+0079 <span class="keyword">end</span>
+0080 
+0081 <span class="comment">% Figure out how many inputs and outputs there are</span>
+0082 <span class="keyword">if</span> strcmpi(M.type,<span class="string">'nonpar'</span>)
+0083     <span class="keyword">return</span>;
+0084 <span class="keyword">else</span>
+0085  <span class="keyword">if</span> isfield(M,<span class="string">'nu'</span>),
+0086   nu = M.nu;
+0087  <span class="keyword">elseif</span> isfield(M,<span class="string">'B'</span>),
+0088   nu = size(M.B,1);
+0089  <span class="keyword">elseif</span> isfield(M,<span class="string">'ss'</span>),
+0090   <span class="keyword">if</span> isfield(M.ss,<span class="string">'B'</span>),
+0091    nu = size(M.ss.B,2);
+0092   <span class="keyword">end</span>
+0093  <span class="keyword">else</span>
+0094   nu = 1;
+0095  <span class="keyword">end</span>
+0096  <span class="keyword">if</span> isfield(M,<span class="string">'ny'</span>),
+0097   ny = M.ny;
+0098  <span class="keyword">elseif</span> isfield(M,<span class="string">'ss'</span>),
+0099   <span class="keyword">if</span> isfield(M.ss,<span class="string">'C'</span>),
+0100    ny = size(M.ss.C,1);
+0101   <span class="keyword">end</span>
+0102  <span class="keyword">else</span>
+0103   ny = 1;
+0104  <span class="keyword">end</span>
+0105 <span class="keyword">end</span>
+0106 
+0107 <span class="comment">% Check for lack of input, and set to defaults</span>
+0108 <span class="keyword">if</span> ~isfield(G,<span class="string">'delay'</span>)
+0109  G.delay = zeros(nu,1);
+0110 <span class="keyword">elseif</span> isempty(G.delay)
+0111  G.delay = zeros(nu,1);
+0112 <span class="keyword">end</span>
+0113 
+0114 <span class="comment">% Set M.w and M.T to default values if not present</span>
+0115 <span class="keyword">if</span> ~isfield(M,<span class="string">'T'</span>),
+0116  M.T = 1;
+0117  G.T = M.T;
+0118 <span class="keyword">end</span>
+0119 <span class="keyword">if</span> ~isfield(M,<span class="string">'w'</span>),
+0120  M.w = logspace(-3,log10(pi/M.T),50);
+0121  G.w = M.w;
+0122 <span class="keyword">end</span>
+0123 
+0124 <span class="comment">% Get appropriate discrete time frequency domain argument</span>
+0125 <span class="keyword">if</span> (M.op==<span class="string">'q'</span>),
+0126  ww = exp(j*M.w*M.T);
+0127  <span class="comment">% Compute extra phase lag implied by delays on inputs</span>
+0128  pdel = exp((-j*M.w(:)*M.T)*G.delay');
+0129 <span class="keyword">elseif</span> (M.op==<span class="string">'d'</span>),
+0130  ww = (exp(j*M.w*M.T)-ones(size(M.w)))./(M.T);
+0131  <span class="comment">% Compute extra phase lag implied by delays on inputs</span>
+0132  pdel = exp((-j*M.w(:)*M.T)*G.delay');
+0133 <span class="keyword">elseif</span> (M.op==<span class="string">'s'</span>),
+0134  ww = j*M.w;
+0135  <span class="comment">% Compute extra phase lag implied by delays on inputs</span>
+0136  pdel = exp(-j*M.w(:)*G.delay');
+0137 <span class="keyword">else</span>
+0138  error(<span class="string">'M.op is not known.'</span>);
+0139 <span class="keyword">end</span>
+0140 ww = ww(:);
+0141 
+0142 G.G = zeros(ny,nu,length(M.w));
+0143 G.H = zeros(ny,nu,length(M.w));
+0144 
+0145 <span class="comment">% Set G.type to unknown if it is</span>
+0146 <span class="keyword">if</span> ~isfield(G,<span class="string">'type'</span>)
+0147  G.type = <span class="string">'unknown'</span>;
+0148 <span class="keyword">end</span>
+0149 
+0150 <span class="comment">% Handle the case of ar, arma, arx, and armax models by setting D = A</span>
+0151 <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'ar'</span>,<span class="string">'arma'</span>,<span class="string">'arx'</span>,<span class="string">'armax'</span>})), G.D = G.A; <span class="keyword">end</span>
+0152 
+0153 <span class="comment">% Now handle different model types properly</span>
+0154 <span class="keyword">switch</span> G.type, 
+0155  <span class="keyword">case</span> <span class="string">'ss'</span>,
+0156   <span class="keyword">if</span> isfield(G.ss,<span class="string">'K'</span>),
+0157    <span class="keyword">if</span> ~isempty(G.ss.K)  <span class="comment">% Check we have a noise model</span>
+0158     <span class="keyword">if</span> G.nu&gt;0,
+0159      G.G=<a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(G.ss.A,G.ss.B,G.ss.C,ww);
+0160      <span class="keyword">if</span> numel(G.ss.D)&gt;0,
+0161       G.G = G.G + G.ss.D(:,:,ones(1,length(ww)));
+0162      <span class="keyword">end</span>
+0163     <span class="keyword">else</span>
+0164      G.G=[];
+0165     <span class="keyword">end</span>
+0166     DK=eye(ny); G.H=<a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(G.ss.A,G.ss.K,G.ss.C,ww) + DK(:,:,ones(1,length(ww)));
+0167    <span class="keyword">else</span>
+0168     G.G=<a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(G.ss.A,G.ss.B,G.ss.C,ww);
+0169     <span class="keyword">if</span> numel(G.ss.D)&gt;0,
+0170      G.G = G.G + G.ss.D(:,:,ones(1,length(ww)));
+0171     <span class="keyword">end</span>
+0172    <span class="keyword">end</span>
+0173   <span class="keyword">else</span>   
+0174    G.G=<a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(G.ss.A,G.ss.B,G.ss.C,ww);
+0175    <span class="keyword">if</span> numel(G.ss.D)&gt;0,
+0176     G.G = G.G + G.ss.D(:,:,ones(1,length(ww)));
+0177    <span class="keyword">end</span>
+0178   <span class="keyword">end</span>
+0179 
+0180   <span class="keyword">for</span> k=1:nu,
+0181    <span class="keyword">for</span> m=1:ny,
+0182     pp(1,1,:)  = pdel(:,k);
+0183     G.G(m,k,:) = G.G(m,k,:).*pp;
+0184    <span class="keyword">end</span>
+0185   <span class="keyword">end</span>
+0186   
+0187   
+0188  <span class="keyword">otherwise</span> <span class="comment">% Not an ss model, must be poly</span>
+0189   
+0190   <span class="keyword">for</span> k=1:nu
+0191    <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'bj'</span>,<span class="string">'oe'</span>})), nua = k; <span class="keyword">else</span> nua = 1; <span class="keyword">end</span>
+0192    <span class="keyword">for</span> m=1:ny
+0193     <span class="comment">% Get transfer function from k'th input to m'th output</span>
+0194     A=G.A(nua,:,m); B=G.B(k,:,m);
+0195     <span class="keyword">switch</span> G.op,
+0196      <span class="keyword">case</span> {<span class="string">'q'</span>,<span class="string">'d'</span>}
+0197       B = fliplr(B);
+0198       A = fliplr(A);
+0199       G.G(m,k,:) = polyval(B,1./ww)./polyval(A,1./ww);
+0200       pp(1,1,:)  = pdel(:,k);
+0201       G.G(m,k,:) = G.G(m,k,:).*pp; <span class="comment">% Take time delay on k'th input into account</span>
+0202      <span class="keyword">case</span> <span class="string">'s'</span>
+0203       G.G(m,k,:) = polyval(B,ww)./polyval(A,ww);
+0204       pp(1,1,:)  = pdel(:,k);
+0205       G.G(m,k,:) = G.G(m,k,:).*pp; <span class="comment">% Take time delay on k'th input into account</span>
+0206     <span class="keyword">end</span>
+0207    <span class="keyword">end</span>
+0208   <span class="keyword">end</span>
+0209   <span class="keyword">if</span> isfield(G,<span class="string">'C'</span>) &amp; isfield(G,<span class="string">'D'</span>),
+0210    <span class="keyword">if</span> [~isempty(G.C) ~isempty(G.D)]  <span class="comment">% Check we have a noise model</span>
+0211     <span class="keyword">for</span> k=1:ny
+0212      <span class="keyword">for</span> m=1:ny
+0213       <span class="keyword">switch</span> G.op,
+0214        <span class="keyword">case</span> {<span class="string">'q'</span>,<span class="string">'d'</span>},
+0215         <span class="comment">% Get transfer function from k'th input to m'th output</span>
+0216         D=G.D(k,:,m); C=G.C(k,:,m); C=[zeros(1,length(D)-length(C)) C]; C=fliplr(C); D=fliplr(D);
+0217         G.H(m,k,:) = polyval(C,1./ww)./polyval(D,1./ww);
+0218         
+0219        <span class="keyword">case</span> <span class="string">'s'</span>
+0220         G.H(m,k,:) = polyval(G.C(k,:,m),1./ww)./polyval(G.D(k,:,m),1./ww);
+0221       <span class="keyword">end</span>
+0222      <span class="keyword">end</span>
+0223     <span class="keyword">end</span>
+0224    <span class="keyword">end</span>
+0225   <span class="keyword">end</span>
+0226 <span class="keyword">end</span>
+0227 
+0228 <span class="comment">% For time series case, noise spectral factor masquerades as dynamic freq resp.</span>
+0229 <span class="keyword">if</span> nu&lt;1 G.G = G.H; <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_mimo_ct</title>
+  <meta name="keywords" content="demo_mimo_ct">
+  <meta name="description" content="Running this demo's PEM estimation of continuous time state space">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_mimo_ct.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_mimo_ct
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demo's PEM estimation of continuous time state space</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demo's PEM estimation of continuous time state space
+  model via gradient-based search.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="samplek.html" class="code" title="function M = samplek(mm)">samplek</a>	SAMPLEK: This routine takes a continuous time stochastic state</li><li><a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>	SHOWBODE: This routine takes the results of an identification experiment</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demo's PEM estimation of continuous time state space</span>
+0002 <span class="comment">%  model via gradient-based search.</span>
+0003 
+0004 clear; close all;  
+0005 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> trans;
+0008 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0009 
+0010 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Specify Experiment Conditions</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0015  
+0016 T  = 1e-3;                <span class="comment">% Sampling period for simulation</span>
+0017                           <span class="comment">% of true system (sec)</span>
+0018 Tf = 256;                 <span class="comment">% Duration of data record (sec)</span>
+0019 Ns = round(Tf/T);         <span class="comment">% Implied number of samples</span>
+0020 ts = linspace(0,Tf-T,Ns); <span class="comment">% Sampel time points</span>
+0021 
+0022 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  Specify a true linear system</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0027 
+0028 Mt.ss.A  = [-0.5 1; -0.6 0];
+0029 Mt.ss.B  = [1;1];
+0030 Mt.ss.C  = [1 0];
+0031 Mt.ss.D  = [];
+0032 K = 1e-3*[1;1];
+0033 Mt.ss.K  = K;
+0034 Mt.ss.Q  = K*K';
+0035 Mt.ss.S  = K;
+0036 Mt.ss.R  = 1;
+0037 Mt.ss.X1 = zeros(size(Mt.ss.A,1),1);
+0038 Mt.T = T;
+0039 Mt.op = <span class="string">'s'</span>;
+0040 
+0041 <span class="comment">% Obtain its sampled data equivalent assuming zero order hold on input</span>
+0042 <span class="comment">% and integrated sampling on the output</span>
+0043 
+0044 Ms = <a href="samplek.html" class="code" title="function M = samplek(mm)">samplek</a>(Mt);
+0045 A=Ms.ss.A; B=Ms.ss.B; C=Ms.ss.C; D=Ms.ss.D;
+0046 Q=Ms.ss.Q; S=Ms.ss.S; R=Ms.ss.R;
+0047 
+0048 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%  Simulate a data record</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0053 
+0054 regular = 1;   <span class="comment">% True system simulated at T second time scale</span>
+0055                <span class="comment">% can be either regularly or irregularly sampled.</span>
+0056 
+0057 <span class="comment">% First, generate the input and sampling indices</span>
+0058 
+0059 <span class="keyword">if</span> regular,    <span class="comment">% Regular sampling requested</span>
+0060 
+0061  Ts  = 0.2;          <span class="comment">% Regular sampling interval (sec)</span>
+0062  s   = round(Ts/T);  <span class="comment">% Factor by which simulation sampling is faster</span>
+0063  N   = floor(Tf/Ts); <span class="comment">% Number of samples available for estimation</span>
+0064  idx = 1:s:Ns;       <span class="comment">% Indexes for regular sampling of true system</span>
+0065  
+0066  <span class="comment">% Generate the input (regulararly spaced samples)</span>
+0067  u  = randn(1,N); 
+0068  tt = 0:1:N-1; u = sign(sin(4*pi*tt/N));
+0069  
+0070  uc = u(kron([1:N],ones(1,s)));  <span class="comment">% Upsample the input to correct the time base</span>
+0071 
+0072 <span class="keyword">else</span>   <span class="comment">% Irregular sampling requested</span>
+0073 
+0074  Ts  = 2;
+0075  s   = round(Ts/T);  <span class="comment">% Number of times greater to sample discrete data</span>
+0076  N   = floor(Tf/Ts); <span class="comment">% Number of samples for estimation</span>
+0077  
+0078  <span class="comment">% Generate sampling index points randomly</span>
+0079  idx = cumsum(1+rand(1,N));
+0080  idx = [1 round(Ns*idx/max(idx))];
+0081  
+0082  <span class="comment">%Generate the input (irregular sampling)</span>
+0083  u  = randn(1,N); 
+0084  uc = zeros(1,Ns);
+0085  <span class="keyword">for</span> i=1:N,
+0086   uc(idx(i):idx(i+1)-1) = u(i);  <span class="comment">% Upsample the input to correct the time base</span>
+0087  <span class="keyword">end</span>
+0088  uc(end) = u(end);
+0089 <span class="keyword">end</span>
+0090 
+0091 x  = zeros(2,1);      <span class="comment">% Initial state set to zero</span>
+0092 yc = zeros(1,Ns);     
+0093 Qs = sqrtm(Q);
+0094 
+0095 <span class="comment">% Simulate</span>
+0096 <span class="keyword">for</span> k=1:Ns,
+0097  yc(k) = C*x + 1e-2*sqrt(K(1))*randn(1)/T;
+0098  x     = A*x + B*uc(k) + Qs*randn(2,1);
+0099 <span class="keyword">end</span>
+0100 
+0101 <span class="comment">% Sample the data using integration (average) the data</span>
+0102 <span class="comment">% IMPORTANT - make sure Z.t is set so that continuous data can be recognized</span>
+0103 
+0104 yavg = zeros(1,N);
+0105 <span class="comment">% Assume integration as sampling step</span>
+0106 del = min(diff(idx))-1;
+0107 <span class="keyword">for</span> i=1:N,
+0108  yavg(:,i) = mean(yc(idx(i):idx(i)+del),2);
+0109 <span class="keyword">end</span>
+0110 
+0111 <span class="comment">% Build up data structure from simulation results</span>
+0112 Z.y = yavg;
+0113 Z.u = u(:)';
+0114 Z.t = ts(idx);
+0115 
+0116 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0117 <span class="comment">%</span>
+0118 <span class="comment">%  Specify model structure</span>
+0119 <span class="comment">%</span>
+0120 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0121 
+0122 M.A    = 2;
+0123 M.type = <span class="string">'ss'</span>;
+0124 M.op   = <span class="string">'s'</span>;
+0125 
+0126 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0127 <span class="comment">%</span>
+0128 <span class="comment">%  Specify Optional parts about how the estimation procedure runs</span>
+0129 <span class="comment">%</span>
+0130 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0131 
+0132 OPT.dsp    = dsp;
+0133 OPT.miter  = 200;
+0134 OPT.alg    = <span class="string">'gn'</span>;
+0135 
+0136 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0137 <span class="comment">%</span>
+0138 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0139 <span class="comment">%</span>
+0140 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0141 
+0142 G = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,OPT);
+0143 
+0144 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0145 <span class="comment">%</span>
+0146 <span class="comment">%  Display results</span>
+0147 <span class="comment">%</span>
+0148 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0149 
+0150 <span class="keyword">if</span> dsp,
+0151  Mt.disp.colour=<span class="string">'b'</span>;
+0152  Mt.disp.legend = <span class="string">'True Response'</span>;
+0153  Mt.w = G.w; 
+0154  <a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>(Mt,G);
+0155 <span class="keyword">end</span>
+0156 
+0157 echo off;
+0158 
+0159 <span class="keyword">if</span> dm
+0160  disp(<span class="string">'  '</span>)
+0161  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0162  disp(<span class="string">'  '</span>)
+0163  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0164  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0165  disp(<span class="string">' '</span>)
+0166  keyboard;
+0167 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

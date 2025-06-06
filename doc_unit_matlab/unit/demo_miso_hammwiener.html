@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_miso_hammwiener</title>
+  <meta name="keywords" content="demo_miso_hammwiener">
+  <meta name="description" content="Running this demos estimation of MISO Hammerstein-Wiener">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_miso_hammwiener.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_miso_hammwiener
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demos estimation of MISO Hammerstein-Wiener</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demos estimation of MISO Hammerstein-Wiener 
+  model structure using prediction error method.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>	Function to deadzone a signal u between a</li><li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>	Function to saturate a signal u in the</li><li><a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>	SHOWBODE: This routine takes the results of an identification experiment</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demos estimation of MISO Hammerstein-Wiener</span>
+0002 <span class="comment">%  model structure using prediction error method.</span>
+0003 
+0004 clear; close all;
+0005 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> trans;
+0008 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0009 OPT.dsp = dsp;
+0010 
+0011 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%  Specify Experiment Conditions</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0016 
+0017 T   = 1;       <span class="comment">% Sampling Period (sec)</span>
+0018 N   = 1000;    <span class="comment">% Number of Samples</span>
+0019 var = 1e-4;    <span class="comment">% White Measurement Noise variance</span>
+0020 
+0021 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">%  Specify True Linear System Components</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0026 
+0027 den1      = real(poly([-0.1,-1,-0.3,-0.4]));  <span class="comment">% First system</span>
+0028 num1      = den1(length(den1));
+0029 den2      = real(poly([-0.2,-0.1,-0.5]));     <span class="comment">% Second System</span>
+0030 num2      = 1.1*den2(length(den2));
+0031 
+0032 [bq1,aq1] = c2dm(num1,den1,T,<span class="string">'zoh'</span>);     <span class="comment">% Discrete time versions</span>
+0033 [bq2,aq2] = c2dm(num2,den2,T,<span class="string">'zoh'</span>);
+0034 
+0035 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">%  Specify True Nonlinear System Components</span>
+0038 <span class="comment">%</span>
+0039 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0040 
+0041 in1_type = <span class="string">'saturation'</span>;
+0042 in1_low = -0.8;  in1_up  = 0.9;
+0043 
+0044 in2_type = <span class="string">'deadzone'</span>;
+0045 in2_low = -0.5;  in2_up  = 0.6;
+0046 
+0047 out_type = <span class="string">'deadzone'</span>; 
+0048 out_low = -0.05; out_up = 0.05; 
+0049 
+0050 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%  Simulate a data record</span>
+0053 <span class="comment">%</span>
+0054 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0055 
+0056 u      = randn(N,2);  <span class="comment">% Get 2 white noise input</span>
+0057 x(:,1) = <a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(u(:,1),in1_low,in1_up,1);
+0058 x(:,2) = <a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(u(:,2),in2_low,in2_up);
+0059 noise  = sqrt(var)*randn(N,1);   <span class="comment">% Measurement Noise</span>
+0060 z      = filter(bq1,aq1,x(:,1))+filter(bq2,aq2,x(:,2)) + noise(:);
+0061 y      = <a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(z,out_low,out_up);
+0062 Z.y = y; Z.u = u;
+0063 
+0064 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0065 <span class="comment">%</span>
+0066 <span class="comment">%  Specify Model Structure</span>
+0067 <span class="comment">%</span>
+0068 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0069 
+0070 M.A    = [length(aq1)-1;length(aq2)-1];
+0071 M.B    = [length(bq1)-2;length(bq2)-2];
+0072 M.delay = [1;1];
+0073 M.T     = T;
+0074 M.type  = <span class="string">'oe'</span>;
+0075 
+0076 M.in(1).type  = in1_type;
+0077 M.in(2).type  = in2_type;
+0078 
+0079 M.out.type    = out_type;
+0080 
+0081 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0082 <span class="comment">%</span>
+0083 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0084 <span class="comment">%</span>
+0085 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0086 
+0087 G = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,OPT);
+0088 
+0089 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0090 <span class="comment">%</span>
+0091 <span class="comment">%  Plot the results</span>
+0092 <span class="comment">%</span>
+0093 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0094 
+0095 <span class="keyword">if</span> dsp, 
+0096     Gt.A = [aq1;[aq2 0]];
+0097     Gt.B = [bq1;[bq2 0]];
+0098     Gt.T = T;
+0099     Gt.type = <span class="string">'oe'</span>;
+0100     Gt.in(1).type = in1_type;
+0101     Gt.in(1).lower = in1_low;
+0102     Gt.in(1).upper = in1_up;
+0103     Gt.in(2).type = in2_type;
+0104     Gt.in(2).lower = in2_low;
+0105     Gt.in(2).upper = in2_up;
+0106     Gt.out.type = out_type;
+0107     Gt.out.lower = out_low;
+0108     Gt.out.upper = out_up; 
+0109     Gt.disp.colour=<span class="string">'b'</span>;
+0110     Gt.disp.legend = <span class="string">'True Response'</span>;
+0111     
+0112     <a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>(Gt,G);
+0113     
+0114     figure;
+0115     utest = linspace(-1,1,1000);
+0116     plot(utest(:),<a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(utest(:),G.in(1).lower,G.in(1).upper,1),<span class="string">'xr'</span>); hold on;
+0117     plot(utest(:),<a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(utest(:),Gt.in(1).lower,Gt.in(1).upper,1),<span class="string">'-'</span>,<span class="string">'linewidth'</span>,2);
+0118     legend({<span class="string">'Estimated'</span>,<span class="string">'True'</span>},<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+0119     title(<span class="string">'Input #1 nonlinearity'</span>)
+0120     grid on;
+0121     hold off;
+0122     
+0123     figure;
+0124     utest = linspace(-1,1,1000);
+0125     plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),G.in(2).lower,G.in(2).upper),<span class="string">'xr'</span>); hold on;
+0126     plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),Gt.in(2).lower,Gt.in(2).upper),<span class="string">'-'</span>,<span class="string">'linewidth'</span>,2);
+0127     legend({<span class="string">'Estimated'</span>,<span class="string">'True'</span>},<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+0128     title(<span class="string">'Input #2 nonlinearity'</span>)
+0129     grid on;
+0130     hold off;
+0131  
+0132     figure;
+0133     utest = linspace(-1,1,1000);
+0134     plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),G.out.lower,G.out.upper),<span class="string">'xr'</span>); hold on;
+0135     plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),Gt.out.lower,Gt.out.upper),<span class="string">'-'</span>,<span class="string">'linewidth'</span>,2);
+0136     legend({<span class="string">'Estimated'</span>,<span class="string">'True'</span>},<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+0137     title(<span class="string">'Output nonlinearity'</span>)
+0138     grid on;
+0139     hold off;
+0140   
+0141 <span class="keyword">end</span>
+0142 
+0143 echo off;
+0144 
+0145 <span class="keyword">if</span> dm
+0146     disp(<span class="string">'  '</span>)
+0147     disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0148     disp(<span class="string">'  '</span>)
+0149     disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0150     disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0151     disp(<span class="string">' '</span>)
+0152     keyboard;
+0153 <span class="keyword">end</span>;
+0154 
+0155 
+0156 
+0157 
+0158 
+0159 
+0160 
+0161 
+0162 
+0163 
+0164 
+0165 
+0166 
+0167</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

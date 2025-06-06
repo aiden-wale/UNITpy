@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of subspace</title>
+  <meta name="keywords" content="subspace">
+  <meta name="description" content="Function that calls underlying subspace algorithms depending on data">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; subspace.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>subspace
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function that calls underlying subspace algorithms depending on data</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = subspace(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Function that calls underlying subspace algorithms depending on data
+  type. E.g. equidistant discrete time data corresponds to the standard
+  and well known N4SID or CCA algorithms. Likewise, frequency domain data
+  will correspond to the frequency domain subspace algorithm.
+
+   written by Brett Ninness, School of EE &amp; CS
+              Adrian Wills   University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fsid.html" class="code" title="function [g] = fsid(z,mm,OPT)">fsid</a>	FSID computes a state space model [A,B,C,D] that fits an observed (possibly</li><li><a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>	This function estimates a state-space model for a possibly</li><li><a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>	This function accepts a data structure and tries to interpret what type</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="startG.html" class="code" title="function M = startG(Z,M,OPT)">startG</a>	STARTG - function to initialise estimate of dynamics model in case user</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Function that calls underlying subspace algorithms depending on data</span>
+0002 <span class="comment">%  type. E.g. equidistant discrete time data corresponds to the standard</span>
+0003 <span class="comment">%  and well known N4SID or CCA algorithms. Likewise, frequency domain data</span>
+0004 <span class="comment">%  will correspond to the frequency domain subspace algorithm.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0007 <span class="comment">%              Adrian Wills   University of Newcastle</span>
+0008 <span class="comment">%                             Australia.</span>
+0009 <span class="comment">%</span>
+0010 
+0011 <span class="comment">% Copyright (C) Brett Ninness</span>
+0012 
+0013 <a name="_sub0" href="#_subfunctions" class="code">function G = subspace(Z,M,OPT)</a>
+0014 
+0015 <span class="comment">% Make sure Z has been parsed</span>
+0016 Z=<a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>(Z);
+0017 
+0018 <span class="keyword">if</span> nargin&lt;2,
+0019  M   = [];
+0020  OPT = [];
+0021 <span class="keyword">elseif</span> nargin&lt;3,
+0022  OPT = [];
+0023 <span class="keyword">end</span>
+0024 
+0025 <span class="comment">% Now switch according to data type</span>
+0026 <span class="keyword">switch</span> Z.type
+0027  
+0028  <span class="keyword">case</span> <span class="string">'time'</span>
+0029   G = <a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>(Z,M,OPT);
+0030   
+0031  <span class="keyword">case</span> <span class="string">'frequency'</span>
+0032   G = <a href="fsid.html" class="code" title="function [g] = fsid(z,mm,OPT)">fsid</a>(Z,M,OPT);
+0033   
+0034  <span class="keyword">otherwise</span>
+0035   error(<span class="string">'Data type (Z.type) not known'</span>);
+0036         
+0037 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

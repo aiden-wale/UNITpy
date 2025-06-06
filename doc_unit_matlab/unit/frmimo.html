@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of frmimo</title>
+  <meta name="keywords" content="frmimo">
+  <meta name="description" content="Function to compute frequency response of LTI system in state space form">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; frmimo.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>frmimo
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to compute frequency response of LTI system in state space form</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = frmimo(A,B,C,s); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Function to compute frequency response of LTI system in state space form
+
+  Usage G = mimofr(A,B,C,s)
+
+  In which case
+
+   G = C*[sI-A)^-1]*B
+
+  for each of the M entries in s.  If B and C imply ny outputs and nu
+  inputs (ie, a multivariable (MIMO) model) then G will be a three
+  dimensional array of dimensions ny x nu x M. 
+
+      
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VNssf.html" class="code" title="function [cost,pe,grad,phi,map]=VNssf(Z,theta,OPT,M,div)">VNssf</a>	Function to calculate quadratic cost</li><li><a href="fsid.html" class="code" title="function [g] = fsid(z,mm,OPT)">fsid</a>	FSID computes a state space model [A,B,C,D] that fits an observed (possibly</li><li><a href="m2f.html" class="code" title="function G = m2f(M);">m2f</a>	M2F - function to compute the frequency response of a linear time</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Function to compute frequency response of LTI system in state space form</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  Usage G = mimofr(A,B,C,s)</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  In which case</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%   G = C*[sI-A)^-1]*B</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  for each of the M entries in s.  If B and C imply ny outputs and nu</span>
+0010 <span class="comment">%  inputs (ie, a multivariable (MIMO) model) then G will be a three</span>
+0011 <span class="comment">%  dimensional array of dimensions ny x nu x M.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0015 <span class="comment">%                             University of Newcastle</span>
+0016 <span class="comment">%                             Australia.</span>
+0017 
+0018 <span class="comment">% Copyright (C) Brett Ninness,</span>
+0019 
+0020 <a name="_sub0" href="#_subfunctions" class="code">function G = frmimo(A,B,C,s);</a>
+0021 
+0022 I = eye(size(A)); M = length(s);
+0023 ny = size(C,1); nu = size(B,2);
+0024 G = zeros(ny,nu,M);
+0025 
+0026 <span class="keyword">for</span> k=1:M
+0027  G(:,:,k) = C*((s(k)*I-A)\B);
+0028 <span class="keyword">end</span>;
+0029 
+0030</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

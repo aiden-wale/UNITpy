@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_mimo</title>
+  <meta name="keywords" content="demo_mimo">
+  <meta name="description" content="Running this demo's ML estimation of MIMO system via GN-based">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_mimo.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_mimo
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demo's ML estimation of MIMO system via GN-based</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demo's ML estimation of MIMO system via GN-based
+  algorithm and ML estimation of same MIMO system via EM algorithm.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>	SHOWNYQ: This routine takes the results of an identification experiment and</li><li><a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>	This function estimates a state-space model for a possibly</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demo's ML estimation of MIMO system via GN-based</span>
+0002 <span class="comment">%  algorithm and ML estimation of same MIMO system via EM algorithm.</span>
+0003 
+0004 clear; close all;  
+0005 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> trans;
+0008 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0009 
+0010 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Specify Experiment Conditions</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0015 
+0016 T    = 1;           <span class="comment">% Sampling period in seconds</span>
+0017 N    = 1000;        <span class="comment">% Number of data samples</span>
+0018 Rvar = 1e-1*eye(2); <span class="comment">% Measurement noise</span>
+0019 
+0020 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  Specify a true linear system</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0025 
+0026 den11     = [1 1.1 0.1];
+0027 den12     = [1 2.5 1];
+0028 den21     = [1 1 0.21];
+0029 den22     = [1 1.2 0.32];
+0030 sysc      = tf({1,3; 1 1}, {den11, den12; den21, den22});
+0031 sysd      = c2d(sysc,T,<span class="string">'zoh'</span>);
+0032 [A,B,C,D] = ssdata(sysd); 
+0033 nx        = size(A,1);
+0034 ny        = size(C,1);
+0035 nu        = size(B,2);
+0036 delay     = [1;3];
+0037 
+0038 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">%  Simulate a data record</span>
+0041 <span class="comment">%</span>
+0042 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0043 
+0044 u = randn(size(B,2),N);  <span class="comment">% The exogenous input</span>
+0045 <span class="comment">% Include delays specified in model structure on inputs</span>
+0046 <span class="keyword">for</span> r=1:2, udel(r,:) = [zeros(1,delay(r)) u(r,1:N-delay(r))]; <span class="keyword">end</span>;
+0047 e = (sqrtm(Rvar)*randn(size(C,1),N)); <span class="comment">% The measurement noise sequence</span>
+0048 K = dlqe(A,eye(nx),C,eye(nx),0.1*eye(ny));
+0049 x = zeros(nx,N+1); 
+0050 y = zeros(ny,N);
+0051 <span class="keyword">for</span> t=1:N,
+0052     y(:,t)   = C*x(:,t) + D*udel(:,t) +   e(:,t);  <span class="comment">%Simulate output</span>
+0053     x(:,t+1) = A*x(:,t) + B*udel(:,t) + K*e(:,t);  <span class="comment">%Simulate state with innovations structure</span>
+0054 <span class="keyword">end</span>
+0055 Z.y = y; 
+0056 Z.u = u;
+0057 
+0058 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0059 <span class="comment">%</span>
+0060 <span class="comment">%  Specify model structure</span>
+0061 <span class="comment">%</span>
+0062 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0063 
+0064 M.nx    = nx; 
+0065 M.delay = delay; 
+0066 M.estX1 = 0;
+0067 M.T     = T;
+0068 
+0069 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0070 <span class="comment">%</span>
+0071 <span class="comment">%  Specify Optional parts about how the estimation procedure runs</span>
+0072 <span class="comment">%</span>
+0073 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0074 
+0075 OPT.dsp   = dsp; 
+0076 OPT.alg   = <span class="string">'em'</span>;
+0077 OPT.miter = 100; 
+0078 opt       = OPT; 
+0079 opt.alg   = <span class="string">'gn'</span>; 
+0080 opt.cost  = <span class="string">'det'</span>;   <span class="comment">% Maximum likelihood criterion for GN search.</span>
+0081 
+0082 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0085 <span class="comment">%</span>
+0086 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0087 
+0088 <span class="keyword">if</span> dsp, disp(<span class="string">'Finding subspace based estimate....'</span>); <span class="keyword">end</span>
+0089 Gsid=<a href="sid.html" class="code" title="function G = sid(Z,M,OPT);">sid</a>(Z,M,OPT);
+0090 <span class="keyword">if</span> dsp, disp(<span class="string">'Finding ML estimate via EM....'</span>); <span class="keyword">end</span>
+0091 G=<a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,OPT);
+0092 <span class="keyword">if</span> dsp, disp(<span class="string">'Finding ML estimate via gn search....'</span>); <span class="keyword">end</span>
+0093 Ggn=<a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,opt);
+0094 
+0095 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0096 <span class="comment">%</span>
+0097 <span class="comment">%  Display the results</span>
+0098 <span class="comment">%</span>
+0099 <span class="comment">% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0100 
+0101 <span class="keyword">if</span> dsp,
+0102  Gt.ss.A  = A;
+0103  Gt.ss.B  = B;
+0104  Gt.ss.C  = C;
+0105  Gt.ss.D  = D;
+0106  Gt.ss.K  = K;
+0107  Gt.T     = T;
+0108  Gt.w     = G.w;
+0109  Gt.delay = delay;
+0110  Gt.disp.colour=<span class="string">'b'</span>;
+0111  Gt.disp.legend = <span class="string">'True Response'</span>;
+0112  
+0113  <a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>(Gt,G,Gsid,Ggn);    
+0114 <span class="keyword">end</span>
+0115 
+0116 echo off;
+0117 
+0118 <span class="keyword">if</span> dm
+0119  disp(<span class="string">'  '</span>)
+0120  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0121  disp(<span class="string">'  '</span>)
+0122  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0123  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0124  disp(<span class="string">' '</span>)
+0125  keyboard;
+0126 <span class="keyword">end</span>;
+0127</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

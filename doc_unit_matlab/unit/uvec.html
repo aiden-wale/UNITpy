@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of uvec</title>
+  <meta name="keywords" content="uvec">
+  <meta name="description" content="This is a function that returns a unit column vector of length n with">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; uvec.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>uvec
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a function that returns a unit column vector of length n with</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function v = uvec(k,n) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> This is a function that returns a unit column vector of length n with
+ entry 1&lt;=k&lt;=n equal to 1.0 and all other entries equal to 0.
+
+ Usage:
+
+   v = uvec(k,n);
+
+ Written by Adrian Wills: School of EE &amp; CS
+                          University of Newcastle
+                            Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>	This routine takes a record of input-output data [y,u] and fits</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% This is a function that returns a unit column vector of length n with</span>
+0002 <span class="comment">% entry 1&lt;=k&lt;=n equal to 1.0 and all other entries equal to 0.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   v = uvec(k,n);</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Written by Adrian Wills: School of EE &amp; CS</span>
+0009 <span class="comment">%                          University of Newcastle</span>
+0010 <span class="comment">%                            Australia.</span>
+0011 
+0012 <span class="comment">% Copyright (C) Adrian Wills</span>
+0013 
+0014 <a name="_sub0" href="#_subfunctions" class="code">function v = uvec(k,n)</a>
+0015 
+0016 v = zeros(n,1); v(k) = 1;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

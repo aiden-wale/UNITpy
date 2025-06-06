@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of polynom</title>
+  <meta name="keywords" content="polynom">
+  <meta name="description" content="POLYNOM - function to pass a signal vector u through a nonlinearity X to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; polynom.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>polynom
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>POLYNOM - function to pass a signal vector u through a nonlinearity X to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [x,phi,w] = polynom(u,alpha) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> POLYNOM - function to pass a signal vector u through a nonlinearity X to
+ produce an output x = X(u) where X is defined as a polynomial.  That
+ is, a vector alpha = [a1,a2,...,an] is specified and then
+
+ X = a1*u + a2*u^2 + a3*u^3 + ... + an*u^n
+
+
+ Usage is: 
+
+ [x,phi] = polynom(u,alpha)
+
+ Where
+
+ u     = input vector
+ alpha = parameters vector specifying X.
+ x     = vector representing output of nonlinearity
+ phi   = matrix of `regressors' in the sense that x = phi*alpha(:)
+ w     = derivative dX(u)/du
+
+  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.
+                            University of Newcastle
+                            Australia</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_memoryless.html" class="code" title="">demo_memoryless</a>	Running this demos estimation of a static (memoryless)</li><li><a href="details.html" class="code" title="function handle = details(varargin)">details</a>	DETAILS: This function summarises details about a model structure.</li><li><a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>	U2X - function to pass an input u through a specified non-linearity X so</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% POLYNOM - function to pass a signal vector u through a nonlinearity X to</span>
+0002 <span class="comment">% produce an output x = X(u) where X is defined as a polynomial.  That</span>
+0003 <span class="comment">% is, a vector alpha = [a1,a2,...,an] is specified and then</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% X = a1*u + a2*u^2 + a3*u^3 + ... + an*u^n</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Usage is:</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% [x,phi] = polynom(u,alpha)</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% Where</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% u     = input vector</span>
+0015 <span class="comment">% alpha = parameters vector specifying X.</span>
+0016 <span class="comment">% x     = vector representing output of nonlinearity</span>
+0017 <span class="comment">% phi   = matrix of `regressors' in the sense that x = phi*alpha(:)</span>
+0018 <span class="comment">% w     = derivative dX(u)/du</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.</span>
+0021 <span class="comment">%                            University of Newcastle</span>
+0022 <span class="comment">%                            Australia</span>
+0023 
+0024 <span class="comment">% Copyright (C) Brett Ninness</span>
+0025 
+0026 <a name="_sub0" href="#_subfunctions" class="code">function [x,phi,w] = polynom(u,alpha)</a>
+0027 
+0028 u = u(:); 
+0029 wun = ones(1,length(alpha)); 
+0030 index = 0:1:length(alpha)-1;
+0031 phi = (u*wun).^kron(index,ones(length(u),1));
+0032 x = phi*alpha(:);
+0033 beta = alpha(:); 
+0034 beta = alpha(2:length(alpha)); 
+0035 beta = beta(:); kk = 2:1:length(alpha); 
+0036 beta = beta.*kk(:);
+0037 w = alpha(1)*ones(size(u))+phi(:,1:length(alpha)-1)*beta;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

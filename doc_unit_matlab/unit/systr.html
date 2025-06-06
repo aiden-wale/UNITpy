@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of systr</title>
+  <meta name="keywords" content="systr">
+  <meta name="description" content="SYSTR - function to simulate a bilinear system.  Never meant to be">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; systr.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>systr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SYSTR - function to simulate a bilinear system.  Never meant to be</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [xh,yh,pe,ukx] = systr(y,u,A,B,C,D,K,F,G,X1,isD,isK,isF,isG,isX1,mukx) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> SYSTR - function to simulate a bilinear system.  Never meant to be
+ called by the user - strictly for internal use
+
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="kronaw.html" class="code" title="function c = kronaw(a,b)">kronaw</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VNss.html" class="code" title="function [cost,pe,grad,phi,map] = VNss(Z,theta,OPT,M,div)">VNss</a>	VNss: Function to calculate quadratic cost</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% SYSTR - function to simulate a bilinear system.  Never meant to be</span>
+0002 <span class="comment">% called by the user - strictly for internal use</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0006 <span class="comment">%                             University of Newcastle</span>
+0007 <span class="comment">%                             Australia.</span>
+0008 <span class="comment">%</span>
+0009 
+0010 <span class="comment">% Copyright (C) Brett Ninness</span>
+0011 
+0012 <a name="_sub0" href="#_subfunctions" class="code">function [xh,yh,pe,ukx] = systr(y,u,A,B,C,D,K,F,G,X1,isD,isK,isF,isG,isX1,mukx)</a>
+0013 
+0014 N = max(length(y),length(u));
+0015 n = size(A,1);
+0016 m = size(B,2);
+0017 p = size(C,1);
+0018 
+0019 x   = zeros(1,n);
+0020 xh  = zeros(N,n);
+0021 yh  = zeros(N,p);
+0022 pe  = zeros(N,p);
+0023 ukx = zeros(N,mukx*n);
+0024 At  = A.';
+0025 Bt  = B.';
+0026 Ct  = C.';
+0027 Dt  = D.';
+0028 Kt  = K.';
+0029 Ft  = F.';
+0030 Gt  = G.';
+0031 <span class="keyword">if</span> isX1,
+0032     x(1,:) = X1(:)';
+0033 <span class="keyword">end</span>
+0034 <span class="keyword">for</span> t=1:N,
+0035  <span class="comment">%Save state into xh</span>
+0036  xh(t,:) = x;
+0037  
+0038  <span class="comment">%Compute u kron x</span>
+0039  ukx(t,:) = <a href="kronaw.html" class="code" title="function c = kronaw(a,b)">kronaw</a>(u(t,1:mukx),xh(t,:));
+0040  
+0041  <span class="comment">%Update output</span>
+0042  yh(t,:) = xh(t,:)*Ct + u(t,:)*Dt + ukx(t,:)*Gt;
+0043  pe(t,:) = y(t,:) - yh(t,:);
+0044  
+0045  <span class="comment">%Update state</span>
+0046  x = xh(t,:)*At + u(t,:)*Bt + ukx(t,:)*Ft + pe(t,:)*Kt;
+0047 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

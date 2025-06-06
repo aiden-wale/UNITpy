@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of delsimeng</title>
+  <meta name="keywords" content="delsimeng">
+  <meta name="description" content="Function to perform filtering according to delta operator state space">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; delsimeng.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>delsimeng
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to perform filtering according to delta operator state space</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y=delsimeng(u,a,b,c,d,x,delta) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Function to perform filtering according to delta operator state space 
+ description of filter.  
+
+    Written by Brett Ninness, School of Electrical Engineering
+                              and Computer Science
+                              University of Newcastle
+                              Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="delsimf.html" class="code" title="function y = delsimf(num,den,u,delta,y0)">delsimf</a>	Delta operator version of dlsim.  That is, given a vector of inputs u() to</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Function to perform filtering according to delta operator state space</span>
+0002 <span class="comment">% description of filter.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%    Written by Brett Ninness, School of Electrical Engineering</span>
+0005 <span class="comment">%                              and Computer Science</span>
+0006 <span class="comment">%                              University of Newcastle</span>
+0007 <span class="comment">%                              Australia.</span>
+0008 
+0009 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0010 
+0011 
+0012 <a name="_sub0" href="#_subfunctions" class="code">function y=delsimeng(u,a,b,c,d,x,delta)</a>
+0013 
+0014 <span class="comment">%Simulate a state-space system given in delta operator form...</span>
+0015 
+0016 <span class="comment">%Number of data points, inputs, outputs and states</span>
+0017 
+0018 N  = max(size(u));
+0019 
+0020 <span class="keyword">if</span> isempty(a), a = zeros(length(x)); <span class="keyword">end</span>
+0021 <span class="keyword">if</span> isempty(b), b = zeros(length(x),min(size(u))); <span class="keyword">end</span>
+0022 <span class="keyword">if</span> isempty(c), c = zeros(1,length(x)); <span class="keyword">end</span>
+0023 <span class="keyword">if</span> isempty(d), d = zeros(1,min(size(u))); <span class="keyword">end</span>
+0024 
+0025 nu = min(size(u));
+0026 ny = size(c,1);
+0027 nx = size(a,1);
+0028 
+0029 a = delta*a; 
+0030 b = delta*b;
+0031 
+0032 u = u.';
+0033 y = zeros(ny,N);
+0034 <span class="keyword">for</span> i = 1:N;
+0035  y(:,i) = y(:,i) + d*u(:,i);
+0036  <span class="keyword">if</span> nx&gt;0,
+0037   y(:,i) = y(:,i) + c*x;
+0038   x_increment = a*x + b*u(:,i);
+0039   x = x + x_increment;
+0040  <span class="keyword">end</span>
+0041 <span class="keyword">end</span>
+0042 
+0043 y = y.';</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

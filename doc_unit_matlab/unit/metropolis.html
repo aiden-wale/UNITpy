@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of metropolis</title>
+  <meta name="keywords" content="metropolis">
+  <meta name="description" content="METROPOLIS:  Metropolis algorithm implementation for generating a">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; metropolis.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>metropolis
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>METROPOLIS:  Metropolis algorithm implementation for generating a</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = metropolis(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  METROPOLIS:  Metropolis algorithm implementation for generating a
+  Markov Chain theta_1, theta_2,..... whose distribution converges to 
+  an arbitrary density p(theta|Z) which may be specified by the user.
+
+  Usage is 
+
+  G = metropolis(Z,M,OPT)
+  
+  where:
+
+   Z:          A matlab structure which contains the data which is 
+               used in the conditioning in the density p(theta|Z) that 
+               this routine is seeking to compute. The format is
+               arbitrary, but must be consistent with what the user
+               expects in the user defined function M.pratio
+   M:          A matlab structure which</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="rchol.html" class="code" title="function [A] = rchol(A);">rchol</a>	A function for computing the Cholesky factorisation,</li><li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  METROPOLIS:  Metropolis algorithm implementation for generating a</span>
+0002 <span class="comment">%  Markov Chain theta_1, theta_2,..... whose distribution converges to</span>
+0003 <span class="comment">%  an arbitrary density p(theta|Z) which may be specified by the user.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  Usage is</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  G = metropolis(Z,M,OPT)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  where:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Z:          A matlab structure which contains the data which is</span>
+0012 <span class="comment">%               used in the conditioning in the density p(theta|Z) that</span>
+0013 <span class="comment">%               this routine is seeking to compute. The format is</span>
+0014 <span class="comment">%               arbitrary, but must be consistent with what the user</span>
+0015 <span class="comment">%               expects in the user defined function M.pratio</span>
+0016 <span class="comment">%   M:          A matlab structure which</span>
+0017 <span class="comment">%</span>
+0018 
+0019 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0020 <span class="comment">%                             University of Newcastle</span>
+0021 <span class="comment">%                              Australia.</span>
+0022 
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Copyright (C) Brett Ninness</span>
+0025 
+0026 <a name="_sub0" href="#_subfunctions" class="code">function G = metropolis(Z,M,OPT)</a>
+0027 
+0028 mcvar = 1e-6;        <span class="comment">% default variance of random walking driving MC.</span>
+0029 Temp = 1000;         <span class="comment">% Initial temperature for annealing</span>
+0030 dfac = 0.92;         <span class="comment">% Factor to decrease temperature by</span>
+0031 alfwin=100;          <span class="comment">% Width of sliding window used to monitor average acceptance rate</span>
+0032 
+0033 <span class="comment">% Unspecified parts of OPT -&gt; defaults</span>
+0034 <span class="keyword">if</span> ~exist(<span class="string">'OPT'</span>) OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>([]); <span class="keyword">else</span> OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT); <span class="keyword">end</span>;
+0035 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'Mmax'</span>)   OPT.Mmax=1e5;               <span class="keyword">end</span>;
+0036 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'dens'</span>)   OPT.dens=<span class="string">'gaussian'</span>;        <span class="keyword">end</span>;
+0037 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'mcvar'</span>)  OPT.mcvar=mcvar;            <span class="keyword">end</span>;
+0038 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'burn'</span>)   OPT.burn=0.1;               <span class="keyword">end</span>;
+0039 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'rej'</span>)    OPT.rej=0;               <span class="keyword">end</span>;
+0040 OPT.cold=[];  <span class="comment">% Will be used as a way of telling M.pratio not to bother computing old cost</span>
+0041 
+0042 <span class="comment">% Set aside memory to store chain realisation and initialise first column</span>
+0043 <span class="keyword">if</span> isfield(M,<span class="string">'theta'</span>)
+0044  theta = M.theta;
+0045 <span class="keyword">else</span>
+0046  error(<span class="string">'Must specify starting value M.theta!'</span>);
+0047 <span class="keyword">end</span>;
+0048 G.TH = zeros(length(theta),OPT.Mmax); G.TH(:,1)=theta(:); thn = length(theta); 
+0049 G.mcvar = zeros(1,OPT.Mmax); <span class="comment">% Record of (possibly) dynamic changing proposal variability</span>
+0050 
+0051 <span class="comment">% To estimate noise variance, keep metropolis realisations in opt.var</span>
+0052 opt=OPT; G.varlog=zeros(1,OPT.Mmax); G.varlog(1) = OPT.var;
+0053 
+0054 idx =  2;                  <span class="comment">% Where we are up to in recording a MC realisation;</span>
+0055 pcom = 0;                  <span class="comment">% Percentage complete count initialised to zero;</span>
+0056 qvar = OPT.mcvar;          <span class="comment">% Starting proposal density variance;</span>
+0057 accep = 0;                 <span class="comment">% Initialize count of number of acceptances.</span>
+0058 wincount = 0;              <span class="comment">% Acceptance count just over analysis window</span>
+0059 P2=<a href="rchol.html" class="code" title="function [A] = rchol(A);">rchol</a>(M.P);             <span class="comment">% Scaling on parameter updates</span>
+0060 mark = cputime;            <span class="comment">% Used to keep track of elapsed time</span>
+0061 
+0062 <span class="comment">% Now ready to run the chain</span>
+0063 <span class="keyword">if</span> OPT.dsp
+0064  disp(<span class="string">'Running Metropolis Sampler........'</span>)
+0065  disp(<span class="string">''</span>);
+0066 <span class="keyword">end</span>;
+0067 <span class="keyword">for</span> k=2:OPT.Mmax  
+0068  <span class="comment">% If requested, give feedback on our status</span>
+0069  <span class="keyword">if</span> OPT.dsp 
+0070   <span class="keyword">if</span> ( (mod(k,floor(OPT.Mmax/20))==0)|k==2)
+0071    disp(sprintf(<span class="string">'Percentage Complete = %d%%, Time since last update = %f s'</span>,pcom,cputime-mark)); pcom=pcom+5;
+0072    <span class="keyword">if</span> k&gt;2
+0073     remaining = (20 - k/floor(OPT.Mmax/20))*(cputime-mark);
+0074     hrs  = floor(remaining/3600); remaining = rem(remaining,3600);
+0075     mins = floor(remaining/60); 
+0076     secs = floor(rem(remaining,60));
+0077     disp(sprintf(<span class="string">'Predicted completion in %d:%d:%d hrs:mins:secs'</span>,hrs,mins,secs))
+0078    <span class="keyword">end</span>;
+0079    mark=cputime;
+0080   <span class="keyword">end</span>;
+0081  <span class="keyword">end</span>; 
+0082 
+0083  <span class="comment">% Every time a block of width alfwin passes, re-examine proposal variance</span>
+0084  <span class="keyword">if</span> ~mod(k,alfwin)  
+0085   prop = wincount/alfwin;
+0086   <span class="keyword">if</span> prop &lt; 0.25
+0087    qvar = qvar/1.2;
+0088   <span class="keyword">elseif</span> prop &gt; 0.20
+0089    qvar = qvar*1.2;
+0090   <span class="keyword">end</span>;
+0091   <span class="comment">% Gradually increase the width alfwin used for monitoring acceptance rate</span>
+0092   <span class="comment">%if k&gt;floor(0.1*OPT.Mmax)</span>
+0093   <span class="keyword">if</span> k&gt;10000 
+0094    alfwin=2*alfwin;
+0095   <span class="keyword">end</span>;
+0096   wincount=0;  <span class="comment">% Start counting over again on new window;</span>
+0097  <span class="keyword">end</span>; 
+0098  
+0099  G.mcvar(k) = qvar; <span class="comment">% Keep record of the variances for possible later examination</span>
+0100  
+0101  <span class="comment">% Set up mean and variance for proposal</span>
+0102  M.thold = G.TH(:,k-1);  P=(diag(abs(M.thold)));
+0103   
+0104  <span class="comment">% Draw new proposal for parametrization of dynamics</span>
+0105  <span class="comment">%M.thnew = M.thold + qvar*randn(size(M.thold));</span>
+0106  M.thnew = M.thold + qvar*P2'*randn(size(M.thold));   
+0107  
+0108  <span class="comment">% Draw new proposal for measurement noise variance</span>
+0109  varold = opt.var;
+0110  opt.var = (sqrt(opt.var)+sqrt(0.0001)*randn)^2;   
+0111  opt.varold = varold;
+0112  
+0113  [prat,cold]=feval(M.pratio,Z,M,opt); 
+0114  
+0115  <span class="comment">% Now keep the new thnew with the associated Metropolis acceptance probability</span>
+0116  <span class="keyword">if</span> (rand &lt;= prat) 
+0117   G.TH(:,k) = M.thnew;   <span class="comment">% Succesful in testing Uniform against alpha</span>
+0118   accep=accep+1;         <span class="comment">% Global acceptance count</span>
+0119   wincount=wincount+1;   <span class="comment">% Local window acceptance count</span>
+0120   OPT.cold=[];           <span class="comment">% Tell M.pratio it needs to recompute &quot;old&quot; cost next time</span>
+0121   G.varlog(k) = opt.var; <span class="comment">% Record that we accept this new noise variance</span>
+0122  <span class="keyword">else</span> 
+0123   G.TH(:,k) = M.thold;   <span class="comment">% The converse, we made a rejection</span>
+0124   opt.var = varold;      <span class="comment">% New noise variance was not accepted</span>
+0125   G.varlog(k) = varold;
+0126   OPT.cold = cold;       <span class="comment">% No acceptance means denominator of alpha remains unchanged - tell M.pratio no need to recompute it</span>
+0127  <span class="keyword">end</span>;
+0128 
+0129 <span class="keyword">end</span>; <span class="comment">% Loop on k up to OPT.Mmax;</span>
+0130 
+0131 G.prop = accep/OPT.Mmax;  <span class="comment">% Return proportion of accepted proposals</span>
+0132 
+0133</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

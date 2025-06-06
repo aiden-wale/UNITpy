@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of gerror</title>
+  <meta name="keywords" content="gerror">
+  <meta name="description" content="GERROR.M This routine provides a translation from parameter uncertainties in">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; gerror.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>gerror
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GERROR.M This routine provides a translation from parameter uncertainties in</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Ge,Gvar] = gerror(G) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   GERROR.M This routine provides a translation from parameter uncertainties in
+   estimated dynamic models G=B/A to 95% confidence ellipses for the
+   estimated frequency response. Also, 95% confidence regions for estimated
+   magnitude and phase are generated
+
+   This function is not intended to be called directly by a user -
+   rather it is in `internal' routine that is used by estimation
+   functions such as est.m, barx.m and onid.m.
+
+   Usage is:
+
+   [Ge,Gvar] = gerror(G)
+
+   where
+
+   G.A      = Denominator estimate polynomial(s).
+   G.B      = Numerator estimate polynomial(s).
+   G.P      = Covariance Matrix of Estimated Parameters.
+   G.T      = Sampling period in seconds. Default is 1s.
+   G.w      = Vector of frequencies (in rad/s *not* normalised frquency)
+              at which to supply estimated frequency response.
+              You only need to supply this if Ghat is requested.
+   G.op     = set to 'q' for shift and 'd' for delta.
+              Default is 'q' if not specified.
+   Ge       = Matrix defining confidence regions.  In the case of MISO
+              systems, this matrix is three dimensional with each `page'
+              representing the error bounds for one input-output model.
+   Gvar     = vector which is var(G(w)), one element per element in G.w.
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ellipse.html" class="code" title="function z = ellipse(Q,r,Numpoints);">ellipse</a>	This routine, given a square matrix Q, and a value r, will generate a string</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>	SHOWBODE: This routine takes the results of an identification experiment</li><li><a href="shownyq.html" class="code" title="function handle = shownyq(varargin)">shownyq</a>	SHOWNYQ: This routine takes the results of an identification experiment and</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%   GERROR.M This routine provides a translation from parameter uncertainties in</span>
+0002 <span class="comment">%   estimated dynamic models G=B/A to 95% confidence ellipses for the</span>
+0003 <span class="comment">%   estimated frequency response. Also, 95% confidence regions for estimated</span>
+0004 <span class="comment">%   magnitude and phase are generated</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   This function is not intended to be called directly by a user -</span>
+0007 <span class="comment">%   rather it is in `internal' routine that is used by estimation</span>
+0008 <span class="comment">%   functions such as est.m, barx.m and onid.m.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%   Usage is:</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%   [Ge,Gvar] = gerror(G)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%   where</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%   G.A      = Denominator estimate polynomial(s).</span>
+0017 <span class="comment">%   G.B      = Numerator estimate polynomial(s).</span>
+0018 <span class="comment">%   G.P      = Covariance Matrix of Estimated Parameters.</span>
+0019 <span class="comment">%   G.T      = Sampling period in seconds. Default is 1s.</span>
+0020 <span class="comment">%   G.w      = Vector of frequencies (in rad/s *not* normalised frquency)</span>
+0021 <span class="comment">%              at which to supply estimated frequency response.</span>
+0022 <span class="comment">%              You only need to supply this if Ghat is requested.</span>
+0023 <span class="comment">%   G.op     = set to 'q' for shift and 'd' for delta.</span>
+0024 <span class="comment">%              Default is 'q' if not specified.</span>
+0025 <span class="comment">%   Ge       = Matrix defining confidence regions.  In the case of MISO</span>
+0026 <span class="comment">%              systems, this matrix is three dimensional with each `page'</span>
+0027 <span class="comment">%              representing the error bounds for one input-output model.</span>
+0028 <span class="comment">%   Gvar     = vector which is var(G(w)), one element per element in G.w.</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0031 <span class="comment">%                             University of Newcastle</span>
+0032 <span class="comment">%                             Australia.</span>
+0033 
+0034 
+0035 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0036 
+0037 <a name="_sub0" href="#_subfunctions" class="code">function [Ge,Gvar] = gerror(G)</a>
+0038 
+0039 pn    = 20;             <span class="comment">% Number of points on confidence ellipse</span>
+0040 level = 6;              <span class="comment">% 6=&gt;95% Confidence region</span>
+0041 nell  = 50;             <span class="comment">% Maximum number of confidence region ellipses to plot.</span>
+0042 [nu,dummy] = size(G.A); <span class="comment">% nu = number of inputs in model structure.</span>
+0043 
+0044 <span class="comment">% Check to see how denominator was normalised.</span>
+0045 <span class="keyword">if</span> (G.A(1,1) == 1) lnorm = 1; <span class="keyword">else</span> lnorm = 0; <span class="keyword">end</span>;
+0046 
+0047 <span class="comment">% Get appropriate frequency domain variable depending on operator used</span>
+0048 <span class="keyword">if</span> (G.op==<span class="string">'q'</span>) ww = exp(-j*G.w*G.T); <span class="keyword">else</span> ww = (G.T)./(exp(j*G.w*G.T)-ones(size(G.w))); <span class="keyword">end</span>; ww = ww(:);
+0049 
+0050 <span class="keyword">for</span> r=1:nu 
+0051     Aw(:,r)   = polyval(fliplr(G.A(r,:)),ww); 
+0052     aG(1,r,:) = unwrap(angle(G.G(1,r,:))); 
+0053 <span class="keyword">end</span>
+0054 kinc = ceil(length(G.w)/nell);   <span class="comment">% Plot no more than `nell' confidence ellipses.</span>
+0055 
+0056 <span class="comment">% Initialise matrices used to store error bound information</span>
+0057 Ge = zeros(4+pn,floor(length(G.w)/kinc),nu);
+0058 mupper = zeros(1,floor(length(G.w)/kinc));  <span class="comment">% Initialisation of arrays</span>
+0059 mlower = zeros(1,floor(length(G.w)/kinc));  <span class="comment">% for storing results.</span>
+0060 pupper = zeros(1,floor(length(G.w)/kinc));
+0061 plower = zeros(1,floor(length(G.w)/kinc));
+0062 
+0063 Bind = 1; <span class="comment">% Which block in theta pertaining to G.B we are up to</span>
+0064 Aind = 0; <span class="comment">% Which block in theta pertaining to G.A we are up to</span>
+0065 <span class="keyword">for</span> r=1:nu  <span class="comment">%  One set of error bounds for each input-output model</span>
+0066   <span class="keyword">for</span> k=1:length(G.w)
+0067    <span class="comment">% GAMMA is derivative of freq. resp. wrt the parameters</span>
+0068 <span class="comment">%    if strcmp(lower(G.type),'fir')  % In FIR case GAMMA is already computed by onid</span>
+0069 <span class="comment">%      index = r:nu:(length(G.poles)+length(find(imag(G.poles)))-1)*nu+r;</span>
+0070 <span class="comment">%      GAMMA = G.GAMMA(k,:); P = G.P(index,index);</span>
+0071 <span class="comment">%    else  % Otherwise need to figure out what GAMMA is</span>
+0072     <span class="keyword">if</span> 1,
+0073     kk = 1:1:G.nA(r); kkk = 0:1:G.nA(r)-1; ll = 0:1:G.nB(r);
+0074     <span class="keyword">if</span> lnorm dGd = (ww(k).^kk)/Aw(k,r); <span class="keyword">else</span> GAMMA = (ww(k).^kkk)/Aw(k,r); <span class="keyword">end</span>;
+0075     dGn = (ww(k).^ll)/Aw(k,r);
+0076     <span class="keyword">if</span> strcmp(lower(G.type),<span class="string">'arx'</span>)  <span class="comment">% This is special in MISO case since only one den estimationed</span>
+0077      GAMMA = [dGn,-G.G(1,r,k)*dGd];
+0078      index = Bind:Bind+G.nB(r); index = [index,sum(G.nB)+nu+1:sum(G.nB)+nu+G.nA(1)];
+0079      P=G.P(index,index);
+0080     <span class="keyword">else</span>
+0081      GAMMA = [zeros(1,Bind-1),dGn,zeros(1,sum(G.nB)+nu-G.nB(r)-Bind),<span class="keyword">...</span>
+0082      zeros(1,Aind),-G.G(1,r,k)*dGd,zeros(1,sum(G.nA)-G.nA(r)-Aind)];
+0083      P=G.P(1:sum(G.nB)+nu+sum(G.nA),1:sum(G.nB)+nu+sum(G.nA));
+0084     <span class="keyword">end</span>;
+0085    <span class="keyword">end</span>;  <span class="comment">% OK, now that derivative of f/resp wrt params available, get confidence regions</span>
+0086    GAMMA = [real(GAMMA);imag(GAMMA)];
+0087    Q = GAMMA*P*GAMMA';  Gvar(k) = trace(Q);
+0088    <span class="keyword">if</span> (rem(k,kinc)==0)
+0089     <span class="keyword">if</span> det(Q) &gt; 1e-20;  <span class="comment">% Don't bother if error is negligible</span>
+0090      Qi = [0,-1;1,0]*Q*[0,1;-1,0]/det(Q);  <span class="comment">% inv(Q) creates hassles if degenerate</span>
+0091      el = <a href="ellipse.html" class="code" title="function z = ellipse(Q,r,Numpoints);">ellipse</a>(Qi,level,pn); el = el(:);
+0092      Ge(5:pn+4,k/kinc,r) = el + G.G(1,r,k)*ones(size(el));
+0093      <span class="comment">%  Now need to find max and min mag and phase when lying on these ellipses</span>
+0094      [v,l] = eig(Qi); v1 = v(:,1); v2 = v(:,2); l1 = l(1,1); l2 = l(2,2);
+0095     <span class="keyword">else</span>
+0096      l1 = 1e20; l2 = l1;
+0097     <span class="keyword">end</span>;
+0098     <span class="comment">% Find lower and upper bounds on magnitude</span>
+0099     l=min(l1,l2); <span class="keyword">if</span> (l&gt;1e-10) l = sqrt(level/l); <span class="keyword">else</span> l=1e10; <span class="keyword">end</span>;
+0100     minG = min(abs(G.G(1,r,:)));
+0101     mupper(k/kinc) = abs(G.G(1,r,k))+l;
+0102     mlower(k/kinc) = max(abs(G.G(1,r,k))-l,1e-2*minG);
+0103     <span class="comment">% That is bounds on mag done, now let's do bound on phase.</span>
+0104     <span class="keyword">if</span> (l&gt;abs(G.G(1,r,k)))
+0105       per = pi;
+0106     <span class="keyword">else</span>
+0107       per = asin(l/abs(G.G(1,r,k)));
+0108     <span class="keyword">end</span>;
+0109     pupper(k/kinc) = aG(1,r,k)+per;
+0110     plower(k/kinc) = aG(1,r,k)-per;
+0111    <span class="keyword">end</span>;
+0112   <span class="keyword">end</span>;
+0113 
+0114   <span class="comment">% Pack error quantification data into output data structure</span>
+0115   Ge(1:4,1:floor(length(G.w)/kinc),r) = [mupper;mlower;pupper;plower];
+0116 
+0117   <span class="comment">% Update index of block in theta pertaining to the G.B and G.A we are up to</span>
+0118   <span class="keyword">if</span> ~strcmp(lower(G.type),<span class="string">'fir'</span>) Bind = Bind+G.nB(r)+1;  Aind = Aind+G.nA(r); <span class="keyword">end</span>;
+0119 <span class="keyword">end</span>; <span class="comment">% END of loop over each input-output model</span>
+0120 
+0121 
+0122 
+0123 
+0124 
+0125 
+0126 
+0127 
+0128 
+0129</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of udisp</title>
+  <meta name="keywords" content="udisp">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; udisp.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>udisp
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function udisp(str,guiRunning,guiHandle) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="argmin.html" class="code" title="function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)">argmin</a>	Function to find minimum of function that is defined by user supplied</li><li><a href="em_sub.html" class="code" title="function G = em_sub(Z,M,OPT)">em_sub</a>	EM_SUB: Subroutine called by EM.m that computes</li><li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="fem.html" class="code" title="function g = fem(z,mm,opt);">fem</a>	This function tries to compute the maximum likelihood estimate of a</li><li><a href="gn.html" class="code" title="function G = gn(Z,M,OPT);">gn</a>	This function calls underlying gradient-based search algorithms, based on</li><li><a href="startG.html" class="code" title="function M = startG(Z,M,OPT)">startG</a>	STARTG - function to initialise estimate of dynamics model in case user</li><li><a href="startH.html" class="code" title="function M = startH(Z,M,OPT)">startH</a>	STARTH - function to initialise estimate of noise model in case user</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function udisp(str,guiRunning,guiHandle)</a>
+0002 
+0003 <span class="keyword">if</span> guiRunning
+0004  guiHandle.gui.eto.myEstModelPopup.append(str);
+0005 <span class="keyword">else</span>
+0006  disp(str);
+0007 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

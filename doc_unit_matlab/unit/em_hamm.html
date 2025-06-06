@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of em_hamm</title>
+  <meta name="keywords" content="em_hamm">
+  <meta name="description" content="Extract sizes of input and output from data matrix">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; em_hamm.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>em_hamm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Extract sizes of input and output from data matrix</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G=em_hamm(Z,M,OPT); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Extract sizes of input and output from data matrix</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="ks.html" class="code" title="function G = ks(Z,M,OPT)">ks</a>	KS. This function is the square-root implementation of the Kalman</li><li><a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>	U2X - function to pass an input u through a specified non-linearity X so</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="em.html" class="code" title="function G = em(Z,M,OPT);">em</a>	EM: Function to find maximum likelihood estimates of state space mdoel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function G=em_hamm(Z,M,OPT);</a>
+0002 
+0003 <span class="comment">% Extract sizes of input and output from data matrix</span>
+0004 [y,u,ny,nu,N] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0005 
+0006 G=M;            <span class="comment">% Initial estimate becomes candidate for final estimate</span>
+0007 nx=size(G.ss.A,1); <span class="comment">% Get state dimension</span>
+0008 stop_crit = 0;  <span class="comment">% Flag for termination of search</span>
+0009 count     = 0;  <span class="comment">% Count on number of search iterations</span>
+0010 
+0011 <span class="keyword">if</span> OPT.dsp,     <span class="comment">% Let people know the algorithm being used.</span>
+0012     disp(<span class="string">'EM based Hammerstein System Estimation'</span>);
+0013     disp(<span class="string">'--------------------------------------'</span>);
+0014 <span class="keyword">end</span>;
+0015 
+0016 <span class="comment">% Initialize uncertainty in Hammerstein system components</span>
+0017 mz.ss.Q  = 10*eye(nu,nu);
+0018 mz.ss.P1 = eye(nu,nu);
+0019 mz.ss.X1 = zeros(nu,1);
+0020 
+0021 G.ss.X1=zeros(nx,1);
+0022 G.ss.P1=eye(nx);
+0023 G.ss.Q=100*eye(nx);
+0024 G.ss.R=0.01*eye(ny);
+0025 G.ss.S=zeros(nx,ny);
+0026 
+0027 <span class="comment">% Now loop over E and M steps</span>
+0028 <span class="keyword">while</span> stop_crit==0,
+0029     count = count + 1;
+0030 
+0031     <span class="comment">% Perform the E-step using a Kalman smoother</span>
+0032     m=G; 
+0033     opt.allP=1; 
+0034     m.in=G.in;
+0035     z=<a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(u,m);  <span class="comment">% Pass input through existing estimate of input non-linearity</span>
+0036 
+0037     <span class="comment">% Form Augmented state space model that includes Hamm output as a state</span>
+0038     mm.ss.A=[m.ss.A,m.ss.B;zeros(nu,nx),zeros(nu,nu)]; mm.ss.B=[zeros(nx,nu);eye(nu,nu)];
+0039     mm.ss.C=[m.ss.C,m.ss.D]; mm.ss.D=zeros(ny,nu);
+0040     mm.ss.X1=[m.ss.X1;mz.ss.X1]; mm.ss.P1=[m.ss.P1,zeros(nx,nu);zeros(nu,nx),mz.ss.P1];
+0041     mm.ss.Q=[m.ss.Q,zeros(nx,nu);zeros(nu,nx),mz.ss.Q]; mm.ss.R=m.ss.R;
+0042     mm.ss.S=[m.ss.S;zeros(nu,ny)];
+0043 
+0044     <span class="comment">% Find smoothed estimate of system state for current parameters</span>
+0045     zz.y = y; zz.u = [z(2:<span class="keyword">end</span>,:);zeros(1,nu)];
+0046     g = <a href="ks.html" class="code" title="function G = ks(Z,M,OPT)">ks</a>(zz,mm,opt);
+0047     zhat = g.ss.X(nx+1:nx+nu,1:N);  <span class="comment">% Estimate of Hamm Non-lin output</span>
+0048 
+0049     G.PE(count) = ny*g.mse; G.LL(count) = g.LL;
+0050     <span class="keyword">if</span> OPT.dsp,
+0051         <span class="keyword">if</span> G.LL(count) &lt; 0,
+0052             disp(sprintf( <span class="string">'Iteration # = %3d, LL = %3.7e, PE cost = %3.7e'</span>,count,G.LL(count),G.PE(count)));
+0053         <span class="keyword">else</span>
+0054             disp(sprintf( <span class="string">'Iteration # = %3d, LL =  %3.7e, PE cost = %3.7e'</span>,count,G.LL(count),G.PE(count)));
+0055         <span class="keyword">end</span>
+0056     <span class="keyword">end</span>;
+0057 
+0058     <span class="comment">% Use Results of KS step to find necessary conditional expectations</span>
+0059     Ptsum=zeros(nx+nu,nx+nu); Mtsum = Ptsum;
+0060     <span class="keyword">for</span> t=1:N Ptsum=Ptsum+g.ss.Pt{t};  Mtsum=Mtsum+g.ss.Mt{t}; <span class="keyword">end</span>;
+0061     xy = [g.ss.X(1:nx,2:end); y'];  Phi = xy*xy';
+0062     Psi = xy*g.ss.X(:,1:N)';  Sigma=g.ss.X(:,1:N)*g.ss.X(:,1:N)';
+0063     Sigma = Sigma+Ptsum; Psi(1:nx,:)=Psi(1:nx,:)+Mtsum(1:nx,:);
+0064     p1=g.ss.Pt{1}; pn=g.ss.Pt{N+1};
+0065     Phi(1:nx,1:nx)=Phi(1:nx,1:nx)+Ptsum(1:nx,1:nx)-p1(1:nx,1:nx)+pn(1:nx,1:nx);
+0066 
+0067     <span class="comment">% Now for the M-Step: Re-estimate parametrization of linear dynamics first</span>
+0068     H = chol([Sigma Psi'; Psi Phi]);
+0069     Gamma = H(1:nx+nu,nx+nu+1:end)'/H(1:nx+nu,1:nx+nu)';
+0070     Pi = H(nx+nu+1:<span class="keyword">end</span>,nx+nu+1:end)'*H(nx+nu+1:<span class="keyword">end</span>,nx+nu+1:end)/N;
+0071     G.X1 = g.ss.X(1:nx,1); Px = g.ss.Pt{1}; G.P1=Px(1:nx,1:nx);
+0072 
+0073     <span class="comment">% separate out the system matrices.</span>
+0074     G.A = Gamma(1:nx,1:nx); G.C = Gamma(nx+1:<span class="keyword">end</span>,1:nx);
+0075     <span class="keyword">if</span> nu&gt;0, G.B = Gamma(1:nx,nx+1:end); G.D = Gamma(nx+1:<span class="keyword">end</span>,nx+1:end); <span class="keyword">end</span>;
+0076     G.Q = Pi(1:nx,1:nx); G.S = Pi(1:nx,nx+1:end); G.R = Pi(nx+1:<span class="keyword">end</span>,nx+1:end);
+0077 
+0078     <span class="comment">% Now re-estimate parametrization of input non-linearity</span>
+0079     <span class="keyword">for</span> k=1:nu  <span class="comment">% Do once for each input</span>
+0080         <span class="keyword">if</span> ~strcmp(M.in(k).type,<span class="string">'linear'</span>)
+0081             m1.A=0; m1.in = G.in(k);
+0082             opt.dsp=0; opt.subtol=1e-18;
+0083             g1 = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>([zhat(k,:)',u(:,k)],m1,opt); G.in(k)=g1.in;
+0084         <span class="keyword">end</span>;
+0085     <span class="keyword">end</span>;
+0086     zest     = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(u,G);
+0087     zerr     = zhat'-zest;
+0088     mz.ss.Q  = (zerr'*zerr+Ptsum(nx+1:nx+nu,nx+1:nx+nu))/N;
+0089     mz.ss.P1 = Px(nx+1:nx+nu,nx+1:nx+nu);
+0090     mz.ss.X1 = g.ss.X(nx+1:nx+nu,1);
+0091 
+0092     <span class="comment">%Update stopping criterion</span>
+0093     <span class="keyword">if</span> (count&gt;=OPT.miter), stop_crit=1; <span class="keyword">end</span>
+0094     <span class="keyword">if</span> count&gt;1,
+0095         Ldiff = G.LL(count)-G.LL(count-1); Rdiff = Ldiff/(abs(G.LL(count))+abs(G.LL(count-1)));
+0096         <span class="keyword">if</span> (Ldiff &lt; 0 )
+0097             disp(<span class="string">'Quitting due to decrease in likelihood'</span>); stop_crit = 1;
+0098         <span class="keyword">elseif</span> (Rdiff &lt; OPT.mdec)
+0099             disp(<span class="string">'Quitting due to rel. gain'</span>);  stop_crit=1;
+0100         <span class="keyword">end</span>;
+0101     <span class="keyword">end</span>
+0102 <span class="keyword">end</span>; <span class="comment">% for loop</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

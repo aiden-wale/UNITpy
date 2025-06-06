@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_hammwiener</title>
+  <meta name="keywords" content="demo_hammwiener">
+  <meta name="description" content="Running this demos PEM estimatin of Hammerstein-Weiner Model Structure">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_hammwiener.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_hammwiener
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demos PEM estimatin of Hammerstein-Weiner Model Structure</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demos PEM estimatin of Hammerstein-Weiner Model Structure</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>	Function to deadzone a signal u between a</li><li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>	Function to saturate a signal u in the</li><li><a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>	SHOWBODE: This routine takes the results of an identification experiment</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demos PEM estimatin of Hammerstein-Weiner Model Structure</span>
+0002 
+0003 clear; close all;  
+0004 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0005 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> trans;
+0007 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0008 OPT.dsp = dsp;
+0009 
+0010 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Specify Experiment Conditions</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0015 
+0016 T   = 1;        <span class="comment">% Sampling Period in seconds</span>
+0017 N   = 1000;     <span class="comment">% Duration of Data Recird</span>
+0018 var = 1e-2;     <span class="comment">% Measurement noise variance</span>
+0019 
+0020 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  Specify Linear System</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0025 
+0026 den     = real(poly([-1,-0.1,-0.01-j,-0.01+j,-0.0001-2*j,-0.0001+2*j]));
+0027 num     = 10*den(length(den));
+0028 [bq,aq] = tfdata(c2d(tf(num,den),T,<span class="string">'zoh'</span>),<span class="string">'v'</span>);
+0029 
+0030 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">%  Specify Nonlinear System Parameterisation</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0035 
+0036 out_type = <span class="string">'deadzone'</span>;
+0037 up_out   = 0.5; 
+0038 low_out  = -0.6;    <span class="comment">% `Output non-linearity</span>
+0039 
+0040 in_type = <span class="string">'saturation'</span>;
+0041 up_in = 0.21; 
+0042 low_in = -0.41;     <span class="comment">% Input non-linearity</span>
+0043 
+0044 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">%  Simulate a data record</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0049 
+0050 t     = 0:1:N-1; 
+0051 Z.u   = sign(sin(5*pi*t/N));
+0052 z     = <a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(Z.u,low_in,up_in,1);
+0053 x     = filter(bq,aq,z); 
+0054 noise = sqrt(var)*randn(size(x));
+0055 Z.y   = <a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(x(:),low_out,up_out)+noise(:);
+0056 
+0057 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0058 <span class="comment">%</span>
+0059 <span class="comment">%  Specify Model Structure</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0062 
+0063 Mq.in.type   = in_type;  
+0064 Mq.out.type  = out_type;  
+0065 Mq.A         = length(aq)-1; 
+0066 Mq.B         = length(bq)-2;
+0067 Mq.type      = <span class="string">'oe'</span>;
+0068 Mq.delay     = 1;
+0069 Mq.T         = T;
+0070 
+0071 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0072 <span class="comment">%</span>
+0073 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0074 <span class="comment">%</span>
+0075 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0076 
+0077 OPT.miter = 1000;  <span class="comment">%Set the maximum number of iterations</span>
+0078 Gq = <a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,Mq,OPT);  
+0079 
+0080 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0081 <span class="comment">%</span>
+0082 <span class="comment">%  Plot the results</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0085 
+0086 <span class="keyword">if</span> dsp,
+0087  Gt.A = aq;
+0088  Gt.B = bq;
+0089  Gt.in.type = in_type;
+0090  Gt.in.lower = low_in;
+0091  Gt.in.upper = up_in;
+0092  Gt.out.type = out_type;
+0093  Gt.out.lower = low_out;
+0094  Gt.out.upper = up_out;
+0095  Gt.disp.colour=<span class="string">'b'</span>;
+0096  Gt.disp.legend = <span class="string">'True Response'</span>;
+0097  Gq.disp.error = 0;
+0098  Gt.w = Gq.w;
+0099  
+0100  <a href="showbode.html" class="code" title="function varargout = showbode(varargin)">showbode</a>(Gt,Gq);
+0101  
+0102  figure;
+0103  utest = linspace(-1,1,1000);
+0104  plot(utest(:),<a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(utest(:),Gq.in.lower,Gq.in.upper,1),<span class="string">'xr'</span>); hold on;
+0105  plot(utest(:),<a href="sat.html" class="code" title="function z = sat(u,lower,upper,m)">sat</a>(utest(:),Gt.in.lower,Gt.in.upper,1),<span class="string">'-'</span>,<span class="string">'linewidth'</span>,2);
+0106  legend({<span class="string">'Estimated'</span>,<span class="string">'True'</span>},<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+0107  title(<span class="string">'Input nonlinearity'</span>)
+0108  grid on;
+0109  hold off;
+0110  
+0111  figure;
+0112  utest = linspace(-1,1,1000);
+0113  plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),Gq.out.lower,Gq.out.upper),<span class="string">'xr'</span>); hold on;
+0114  plot(utest(:),<a href="dzone.html" class="code" title="function z = dzone(u,lower,upper)">dzone</a>(utest(:),Gt.out.lower,Gt.out.upper),<span class="string">'-'</span>,<span class="string">'linewidth'</span>,2);
+0115  
+0116  
+0117  legend({<span class="string">'Estimated'</span>,<span class="string">'True'</span>},<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+0118  title(<span class="string">'Output nonlinearity'</span>)
+0119  grid on;
+0120  hold off;    
+0121 <span class="keyword">end</span>
+0122 
+0123 echo off;
+0124 
+0125 <span class="keyword">if</span> dm
+0126  disp(<span class="string">'  '</span>)
+0127  disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0128  disp(<span class="string">'  '</span>)
+0129  disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0130  disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0131  disp(<span class="string">' '</span>)
+0132  keyboard; 
+0133 <span class="keyword">end</span>;
+0134 
+0135 
+0136 
+0137 
+0138 
+0139 
+0140 
+0141 
+0142</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

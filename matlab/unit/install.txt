@@ -1,0 +1,47 @@
+Thanks for your interest in the University of Newcastle Identification
+Toolbox (UNIT) release 4.0, the fourth major release of the toolbox. 
+
+To install this toolbox for use under Matlab, please follow these 
+instructions:
+
+1.  Copy the zip file into a directory of your choice.
+
+2.  Unzip the archive. This should unpack the archive into a
+    directory named "unit". 
+
+3.  If desired, add this directory (unit) to the Matlab path. 
+    Otherwise just change to this directory (unit) and run either
+
+    est
+
+    or
+
+    demo_unit
+
+    at the Matlab command prompt.
+
+To get started the user may be interested in browsing the document:
+
+unit.pdf 
+
+in this directory.  This provides a very brief overview of some aspects
+of the toolbox functions and usage. 
+
+Please email 
+
+Brett Ninness (Brett.Ninness@newcastle.edu.au)
+
+if you have any questions regarding the toolbox.
+
+--------------- 
+
+Brett Ninness
+
+The University of Newcastle	  
+Australia.
+
+
+
+		
+
+

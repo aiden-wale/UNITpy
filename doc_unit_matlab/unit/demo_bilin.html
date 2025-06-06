@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_bilin</title>
+  <meta name="keywords" content="demo_bilin">
+  <meta name="description" content="Running this demos estimation of multivariable bilinear system">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_bilin.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_bilin
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Running this demos estimation of multivariable bilinear system</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Running this demos estimation of multivariable bilinear system
+  via both PEM criterion with gradient based search, and ML 
+  criterion using the EM algorithm</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>	EST: Computes an estimate of either a Box-Jenkins model or a state space</li><li><a href="validate.html" class="code" title="function [handle, cost, pe] = validate(varargin)">validate</a>	This function is used to compare the predictive performance of an</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Running this demos estimation of multivariable bilinear system</span>
+0002 <span class="comment">%  via both PEM criterion with gradient based search, and ML</span>
+0003 <span class="comment">%  criterion using the EM algorithm</span>
+0004 
+0005 clear; close all;
+0006 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0008 <span class="keyword">global</span> trans;
+0009 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0010 
+0011 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%  Specify Experiment Conditions</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0016 
+0017 N    = 1000;    <span class="comment">% Number of data samples</span>
+0018 Rvar = 1e-4;   <span class="comment">% Measurement noise variance</span>
+0019 
+0020 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  Generate Favoreel bilinear test system</span>
+0023 <span class="comment">%  Ref: IEEE TAC 44(6), pp 1157-1165, 1999</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0026 
+0027 A=[0.5,0;0, 0.3]; B=[0,1;-1,0]; C=[1,0;0,2]; D=eye(2,2);
+0028 F=[0.6,0,0.2,0;0,0.4,0,0.5]; H= zeros(2,4);
+0029 R = sqrt(Rvar)*eye(2,2);
+0030 
+0031 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%  Simulate a data record</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0036 
+0037 u      = randn(2,N);
+0038 v      = R*randn(2,N);
+0039 x      = zeros(2,N);
+0040 y      = zeros(2,N);
+0041 x(:,1) = 0*0.5*[1;-1];
+0042 <span class="keyword">for</span> k=1:N,
+0043     ukx = kron(u(:,k),x(:,k));
+0044     x(:,k+1) = A*x(:,k) + B*u(:,k) + F*ukx;
+0045     y(:,k) = C*x(:,k) + D*u(:,k) + H*ukx + v(:,k);
+0046 <span class="keyword">end</span>
+0047 Z.y = y; 
+0048 Z.u = u;
+0049 
+0050 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%  Specify Model Structure</span>
+0053 <span class="comment">%</span>
+0054 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0055 
+0056 M.nx   = 2;             <span class="comment">% Order of state dimension</span>
+0057 M.type = <span class="string">'bilinear'</span>;
+0058 
+0059 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">%  Specify Optional parts about how</span>
+0062 <span class="comment">%  estimation procedure runs</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0065 
+0066 Oem.dsp=dsp; 
+0067 Oem.miter=200; 
+0068 Oem.alg=<span class="string">'em'</span>;
+0069 
+0070 Ogn.dsp=dsp; 
+0071 Ogn.miter=200; 
+0072 Ogn.alg=<span class="string">'gn'</span>;
+0073 
+0074 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0075 <span class="comment">%</span>
+0076 <span class="comment">%  Estimate on basis of noise corrupted data</span>
+0077 <span class="comment">%</span>
+0078 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0079 
+0080 Gem=<a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,Oem);
+0081 Ggn=<a href="est.html" class="code" title="function G = est(Z,M,OPT)">est</a>(Z,M,Ogn);
+0082 
+0083 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0084 <span class="comment">%</span>
+0085 <span class="comment">%  Display validation results on observed data set</span>
+0086 <span class="comment">%</span>
+0087 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0088 <span class="keyword">if</span> dsp,
+0089     <a href="validate.html" class="code" title="function [handle, cost, pe] = validate(varargin)">validate</a>(Z,Gem);
+0090     <a href="validate.html" class="code" title="function [handle, cost, pe] = validate(varargin)">validate</a>(Z,Ggn);
+0091 <span class="keyword">end</span>
+0092 
+0093 echo off;
+0094 
+0095 <span class="keyword">if</span> dm
+0096     disp(<span class="string">'  '</span>)
+0097     disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0098     disp(<span class="string">'  '</span>)
+0099     disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0100     disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0101     disp(<span class="string">' '</span>)
+0102     keyboard;
+0103 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

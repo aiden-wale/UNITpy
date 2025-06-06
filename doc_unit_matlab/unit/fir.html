@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fir</title>
+  <meta name="keywords" content="fir">
+  <meta name="description" content="This function does least squares fitting for FIR models based on">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; fir.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>fir
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This function does least squares fitting for FIR models based on</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = fir(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   This function does least squares fitting for FIR models based on 
+   observed input-output data u and y.
+
+   Usage is:   G = fir(Z,M,OPT)
+
+   Where:
+
+   Z         Input output data in the form Z = [y,u] where y is a column
+             vector of output measurements and u is a matrix whose
+             columns are the input measurements - this means that MISO
+             models are catered for, for MIMO the user should conduct
+             multiple MISO estimation runs (one for each output).
+   M         Data structure which defines the model structure which
+             is to be estimated from the data as follows:
+   M.delay   Number of of samples of delay to include.  In the
+             case of a MISO system, this should be a vector of delays,
+             one for each input being considered.
+   M.T       sampling period in s. (Ignored for q case) Default = 1;
+   M.w       vector of frequencies at which to calculate frequency
+             response of estimated model.  Specify in real frequency,
+             not normalised.  Default is 3 decades up to folding freq.
+   OPT.n     Number of initial samples to discard.
+   OPT.fast  When set to 1, then makes algorithm run maximally fast by
+             avoiding the calculation of error bounds and avoiding
+             calculation of G.GAMMA.  Default is 0.
+   OPT.filt  When set to 1, then algorithm only does filtering to
+             generate G.PHI - no least squares estimation is done.
+   OPT.alg   This structure sets the algorithm used to find the estimate
+             and also sets any parameters that are associated with
+             the algorithm. The components of this structure are as follows:
+   OPT.alg.type - determines the algorithm type used.  It may be set as:
+            'block' - the solution for the least squares
+                      estimate is found in block form (default).
+            'rls'   - the solution is found recursively
+                      the via recursive least squares algorithm.
+            'ct'    - the solution is found recursively via recursive
+                      least squares with a contant trace forced
+                      on the covariance matrix.
+            'lms'   - the solution is found recursively via
+                      least-mean-square (gradient descent) algorithm.
+            'kf'    - the solution is found recursively via
+                      a Kalman Filtering algorithm.
+   OPT.alg.P      - Initialisation of covariance matrix, default is P=10*I
+   OPT.alg.mu     - LMS gain, default is mu=0.001;
+   OPT.alg.lambda - RLS alg. `forgetting factor'. Default is lambda = 1;
+   OPT.alg.R      - Measurement noise variance used by kf alg. Default = 1;
+   OPT.alg.Q      - Parameter variance used by kf alg. Default = 0.1*I;
+   OPT.alg.th     - Initial parameter vector value.  Default = 0.
+
+   Output variables available at the end of this macro are:
+
+   G.B       estimated transfer function for model of dynamics.
+   G.P       Covariance Matrix for Estimated Parameters.
+   G.th      Model estimates as a column vector
+   G.phi     Matrix of regressors generated from data such that y =
+             PHI*G.th</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="recur.html" class="code" title="function G = recur(y,PHI,OPT);">recur</a>	RECUR This routine runs a recursive estimation algorithm on a linear</li><li><a href="startM.html" class="code" title="function M = startM(varargin)">startM</a>	STARTM - function to initialise a model structure in case user has been</li><li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li><li><a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>	This function accepts a data structure and tries to interpret what type</li><li><a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>	U2X - function to pass an input u through a specified non-linearity X so</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>	Function to calculate quadratic cost</li><li><a href="details.html" class="code" title="function handle = details(varargin)">details</a>	DETAILS: This function summarises details about a model structure.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%   This function does least squares fitting for FIR models based on</span>
+0002 <span class="comment">%   observed input-output data u and y.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%   Usage is:   G = fir(Z,M,OPT)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   Where:</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%   Z         Input output data in the form Z = [y,u] where y is a column</span>
+0009 <span class="comment">%             vector of output measurements and u is a matrix whose</span>
+0010 <span class="comment">%             columns are the input measurements - this means that MISO</span>
+0011 <span class="comment">%             models are catered for, for MIMO the user should conduct</span>
+0012 <span class="comment">%             multiple MISO estimation runs (one for each output).</span>
+0013 <span class="comment">%   M         Data structure which defines the model structure which</span>
+0014 <span class="comment">%             is to be estimated from the data as follows:</span>
+0015 <span class="comment">%   M.delay   Number of of samples of delay to include.  In the</span>
+0016 <span class="comment">%             case of a MISO system, this should be a vector of delays,</span>
+0017 <span class="comment">%             one for each input being considered.</span>
+0018 <span class="comment">%   M.T       sampling period in s. (Ignored for q case) Default = 1;</span>
+0019 <span class="comment">%   M.w       vector of frequencies at which to calculate frequency</span>
+0020 <span class="comment">%             response of estimated model.  Specify in real frequency,</span>
+0021 <span class="comment">%             not normalised.  Default is 3 decades up to folding freq.</span>
+0022 <span class="comment">%   OPT.n     Number of initial samples to discard.</span>
+0023 <span class="comment">%   OPT.fast  When set to 1, then makes algorithm run maximally fast by</span>
+0024 <span class="comment">%             avoiding the calculation of error bounds and avoiding</span>
+0025 <span class="comment">%             calculation of G.GAMMA.  Default is 0.</span>
+0026 <span class="comment">%   OPT.filt  When set to 1, then algorithm only does filtering to</span>
+0027 <span class="comment">%             generate G.PHI - no least squares estimation is done.</span>
+0028 <span class="comment">%   OPT.alg   This structure sets the algorithm used to find the estimate</span>
+0029 <span class="comment">%             and also sets any parameters that are associated with</span>
+0030 <span class="comment">%             the algorithm. The components of this structure are as follows:</span>
+0031 <span class="comment">%   OPT.alg.type - determines the algorithm type used.  It may be set as:</span>
+0032 <span class="comment">%            'block' - the solution for the least squares</span>
+0033 <span class="comment">%                      estimate is found in block form (default).</span>
+0034 <span class="comment">%            'rls'   - the solution is found recursively</span>
+0035 <span class="comment">%                      the via recursive least squares algorithm.</span>
+0036 <span class="comment">%            'ct'    - the solution is found recursively via recursive</span>
+0037 <span class="comment">%                      least squares with a contant trace forced</span>
+0038 <span class="comment">%                      on the covariance matrix.</span>
+0039 <span class="comment">%            'lms'   - the solution is found recursively via</span>
+0040 <span class="comment">%                      least-mean-square (gradient descent) algorithm.</span>
+0041 <span class="comment">%            'kf'    - the solution is found recursively via</span>
+0042 <span class="comment">%                      a Kalman Filtering algorithm.</span>
+0043 <span class="comment">%   OPT.alg.P      - Initialisation of covariance matrix, default is P=10*I</span>
+0044 <span class="comment">%   OPT.alg.mu     - LMS gain, default is mu=0.001;</span>
+0045 <span class="comment">%   OPT.alg.lambda - RLS alg. `forgetting factor'. Default is lambda = 1;</span>
+0046 <span class="comment">%   OPT.alg.R      - Measurement noise variance used by kf alg. Default = 1;</span>
+0047 <span class="comment">%   OPT.alg.Q      - Parameter variance used by kf alg. Default = 0.1*I;</span>
+0048 <span class="comment">%   OPT.alg.th     - Initial parameter vector value.  Default = 0.</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%   Output variables available at the end of this macro are:</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%   G.B       estimated transfer function for model of dynamics.</span>
+0053 <span class="comment">%   G.P       Covariance Matrix for Estimated Parameters.</span>
+0054 <span class="comment">%   G.th      Model estimates as a column vector</span>
+0055 <span class="comment">%   G.phi     Matrix of regressors generated from data such that y =</span>
+0056 <span class="comment">%             PHI*G.th</span>
+0057 
+0058 <span class="comment">%</span>
+0059 <span class="comment">%   If a recursive solution algorithm is used then also available is:</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">%   G.th_hist History of how parameter space estimates evolved.</span>
+0062 <span class="comment">%   G.pe      Time history of how prediction error evolved.</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0065 <span class="comment">%                             University of Newcastle</span>
+0066 <span class="comment">%                             Australia.</span>
+0067 
+0068 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0069 
+0070 <a name="_sub0" href="#_subfunctions" class="code">function G = fir(Z,M,OPT)</a>
+0071 
+0072 <span class="comment">%  Extract output and inputs along with their dimensions</span>
+0073 Z=<a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>(Z);  [y,u,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0074 
+0075 <span class="comment">% Unspecified parts of OPT -&gt; defaults</span>
+0076 OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT);
+0077 <span class="keyword">if</span> ~isfield(OPT.alg,<span class="string">'type'</span>),
+0078  OPT=rmfield(OPT,<span class="string">'alg'</span>);
+0079  OPT.alg.type = <span class="string">'block'</span>;
+0080 <span class="keyword">end</span>
+0081 
+0082 <span class="comment">% Unspecified parts of M -&gt; defaults</span>
+0083 <span class="keyword">if</span> (OPT.n&gt;=Ny) 
+0084  error(<span class="string">'Cannot have OPT.n larger than height of Z!'</span>); 
+0085 <span class="keyword">end</span>
+0086 <span class="keyword">if</span> ~exist(<span class="string">'M'</span>,<span class="string">'var'</span>), 
+0087  error(<span class="string">'Need to specify initial model structure M!'</span>);
+0088 <span class="keyword">else</span>
+0089  M = <a href="startM.html" class="code" title="function M = startM(varargin)">startM</a>(Z,M);
+0090 <span class="keyword">end</span>
+0091 
+0092 <span class="comment">% Include delays specified in model structure on inputs</span>
+0093 <span class="keyword">for</span> r=1:nu
+0094  u(:,r) = [zeros(M.delay(r),1);u(1:Ny-M.delay(r),r)];
+0095 <span class="keyword">end</span>;
+0096 
+0097 <span class="comment">% Pass input through a non-linearity if required by model structure</span>
+0098 x = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(u,M);
+0099 
+0100 <span class="comment">% For regressor matrix</span>
+0101 PHI = zeros(Ny,sum(M.nB+1));
+0102 idx = 0;
+0103 <span class="keyword">for</span> idu = 1:nu
+0104  PHI(:,idx+1:idx+M.nB(idu)+1) = toeplitz(x(:,idu),[x(1,idu),zeros(1,M.nB(idu))]);
+0105  idx = idx + M.nB(idu) + 1;
+0106 <span class="keyword">end</span>;
+0107 
+0108 <span class="comment">% Save initial model into G</span>
+0109 G = M;
+0110 
+0111 <span class="comment">%  Now get the estimate via least squares (block) or some recursive method</span>
+0112 <span class="keyword">if</span> ~OPT.filt
+0113  <span class="keyword">switch</span> lower(OPT.alg.type)
+0114   <span class="keyword">case</span> {<span class="string">'block'</span>}, 
+0115    G.th = PHI(OPT.n+1:length(y),:)\y(OPT.n+1:length(y)); <span class="comment">% Block solution</span>
+0116   <span class="keyword">case</span> {<span class="string">'rls'</span>,<span class="string">'lms'</span>,<span class="string">'kf'</span>,<span class="string">'ct'</span>},    
+0117    g    = <a href="recur.html" class="code" title="function G = recur(y,PHI,OPT);">recur</a>(y(:),PHI,OPT);             <span class="comment">% Solve recursively</span>
+0118    fn   = fieldnames(g);
+0119    <span class="keyword">for</span> i=1:length(fn),
+0120     <span class="keyword">if</span> ~isfield(G,fn{i}),
+0121      G = setfield(G,fn{i},getfield(g,fn{i}));
+0122     <span class="keyword">elseif</span> isempty(getfield(G,fn{i}))
+0123      G = setfield(G,fn{i},getfield(g,fn{i}));
+0124     <span class="keyword">end</span>
+0125    <span class="keyword">end</span>
+0126    
+0127   <span class="keyword">otherwise</span>
+0128    warning(<span class="string">'Algorithm type not recognised, resetting to &quot;block&quot;'</span>)
+0129    OPT.alg.type = <span class="string">'block'</span>;
+0130    G.th = PHI(OPT.n+1:length(y),:)\y(OPT.n+1:length(y)); <span class="comment">% Block solution if alg not recognised.</span>
+0131  <span class="keyword">end</span>;   <span class="comment">% End of switch statement</span>
+0132 <span class="keyword">end</span>;    <span class="comment">% End of check on OPT.filt</span>
+0133 
+0134 <span class="comment">% Put theta into model structure</span>
+0135 idx = 0;
+0136 mxB = max(M.nB);
+0137 G.B = zeros(nu,mxB+1);
+0138 <span class="keyword">for</span> idu = 1:nu
+0139  G.B(idu,:) = [G.th(idx+1:idx+M.nB(idu)+1)' zeros(1,mxB-M.nB(idu))];
+0140  idx        = idx + M.nB(idu) + 1;
+0141 <span class="keyword">end</span>;
+0142 
+0143 
+0144 <span class="comment">% Do luxurious extras (if not doing fast version)</span>
+0145 <span class="keyword">if</span> ~OPT.fast
+0146  <span class="comment">% Parameter space variance of estimates:</span>
+0147  pe    = y(OPT.n+1:length(y)) - PHI(OPT.n+1:length(y),:)*G.th;
+0148  G.var = pe'*pe/length(pe);
+0149  G.P   = G.var*pinv(PHI(OPT.n+1:length(y),:)'*PHI(OPT.n+1:length(y),:));
+0150  
+0151  <span class="comment">% Now load up matrix specifying standard deviations</span>
+0152  P = real(sqrt(diag(G.P))); 
+0153  P = P(:); 
+0154  d = 0;
+0155  <span class="keyword">for</span> r=1:nu 
+0156   G.SD.th(:,r) = [P(d+1:d+M.nB(r)+1);  zeros(mxB-M.nB(r),1)];
+0157   d = d + M.nB(r)+1;
+0158  <span class="keyword">end</span>
+0159 <span class="keyword">end</span>
+0160 
+0161 <span class="comment">% Load up output with model properties</span>
+0162 G.phi   = PHI; 
+0163 
+0164 <span class="comment">% Record that validate should use VN as the cost function to obtain</span>
+0165 <span class="comment">% prediction errors</span>
+0166 G.costfcn = <span class="string">'VN'</span>;
+0167 G.OPT = OPT;
+0168 
+0169 <span class="comment">% Add legend for prospective plotting</span>
+0170 G.disp.legend=[<span class="string">'Estimated n_b='</span>,int2str(max(M.nB)),<span class="string">'th order FIR model'</span>];
+0171 G.alg=<span class="string">'block'</span>; <span class="comment">% Record that block solution was used</span>
+0172 
+0173</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

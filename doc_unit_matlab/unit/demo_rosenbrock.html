@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo_rosenbrock</title>
+  <meta name="keywords" content="demo_rosenbrock">
+  <meta name="description" content="This test file is intended to test argmin against a well-known">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; demo_rosenbrock.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo_rosenbrock
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This test file is intended to test argmin against a well-known</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> This test file is intended to test argmin against a well-known
+ optimisation problem, i.e. Rosenbrock's banana function</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="argmin.html" class="code" title="function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)">argmin</a>	Function to find minimum of function that is defined by user supplied</li><li><a href="rosenbrock.html" class="code" title="function [cost,pe,grad,phi] = rosenbrock(Z,x,OPT,M,div);">rosenbrock</a>	Compute cost</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_unit.html" class="code" title="">demo_unit</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% This test file is intended to test argmin against a well-known</span>
+0002 <span class="comment">% optimisation problem, i.e. Rosenbrock's banana function</span>
+0003 
+0004 clear; close all;
+0005 <span class="keyword">global</span> dm; <span class="keyword">if</span> isempty(dm), clear <span class="keyword">global</span> dm; dm=0; <span class="keyword">end</span>
+0006 <span class="keyword">global</span> dsp; <span class="keyword">if</span> isempty(dsp), clear <span class="keyword">global</span> dsp; dsp=1; <span class="keyword">end</span>
+0007 <span class="keyword">global</span> trans;
+0008 <span class="keyword">if</span> dsp&gt;1, clc; echo on; <span class="keyword">end</span>
+0009 
+0010 <span class="keyword">if</span> dsp,
+0011     Z.y = [0;0]; <span class="comment">% i.e. no data</span>
+0012     Z.u = [0;0]; <span class="comment">% i.e. no data</span>
+0013     M   = []; <span class="comment">% i.e. no model structure</span>
+0014     OPT = []; <span class="comment">% i.e. use default opt settings</span>
+0015 
+0016     n   = 5; <span class="comment">%Number of initial points</span>
+0017     <span class="comment">%x0  = repmat([1;1],1,n) + 2*randn(2,n); % initial guess</span>
+0018     x0  = 3.0*[<span class="keyword">...</span>
+0019         kron(linspace(-1,1,n),ones(1,n));<span class="keyword">...</span>
+0020         kron(ones(1,n),linspace(-1,1,n))];
+0021 
+0022     OPT.dsp=dsp;
+0023     OPT.saveit=1;
+0024     OPT.miter=100;
+0025     <span class="comment">%OPT.subtol=1;</span>
+0026 
+0027     disp(<span class="string">' '</span>)
+0028     disp(<span class="string">' Rosenbrocks Banana Function '</span>)
+0029     disp(<span class="string">' The following optimization methods are available '</span>)
+0030     disp(<span class="string">' '</span>)
+0031     disp(<span class="string">'(1) Robust Gauss-Newton'</span>)
+0032     disp(<span class="string">'(2) Levenberg-Marquardt'</span>)
+0033     disp(<span class="string">'(3) Trust Region'</span>)
+0034     disp(<span class="string">'(4) Quasi-Newton + trust region (QNTR)'</span>)
+0035     disp(<span class="string">'(5) Quasi-Newton + line search  (BFGS)'</span>)
+0036     disp(<span class="string">'(6) Steepest descent'</span>)
+0037     disp(<span class="string">' '</span>)
+0038     inp=input(<span class="string">'PLEASE SELECT ONE:  '</span>,<span class="string">'s'</span>);
+0039 
+0040     <span class="keyword">switch</span> inp,
+0041         <span class="keyword">case</span> <span class="string">'1'</span>
+0042             OPT.dir=<span class="string">'rgn'</span>; OPT.subtol=1;
+0043         <span class="keyword">case</span> <span class="string">'2'</span>
+0044             OPT.dir=<span class="string">'lm'</span>;
+0045         <span class="keyword">case</span> <span class="string">'3'</span>
+0046             OPT.dir=<span class="string">'trust'</span>;
+0047         <span class="keyword">case</span> <span class="string">'4'</span>
+0048             OPT.dir=<span class="string">'bfgs_trust'</span>;
+0049         <span class="keyword">case</span> <span class="string">'5'</span>
+0050             OPT.dir=<span class="string">'bfgs'</span>;
+0051         <span class="keyword">case</span> <span class="string">'6'</span>
+0052             OPT.dir=<span class="string">'grad'</span>;
+0053         <span class="keyword">otherwise</span>
+0054             error(<span class="string">'Not a valid selection'</span>);
+0055     <span class="keyword">end</span>
+0056 
+0057 
+0058     <span class="keyword">for</span> i=1:n*n,
+0059         [x(:,i),cost_log,M] = <a href="argmin.html" class="code" title="function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)">argmin</a>(Z,<span class="string">'rosenbrock'</span>,x0(:,i),OPT,M); Ms{i}=M;
+0060     <span class="keyword">end</span>
+0061 
+0062     <span class="keyword">if</span> dsp,
+0063         x0
+0064         x
+0065     <span class="keyword">end</span>
+0066 
+0067     <span class="comment">%Plot some stuff</span>
+0068     x1max=max(x0(1,:)); x1min=min(x0(1,:));
+0069     x2max=max(x0(2,:)); x2min=min(x0(2,:));
+0070 
+0071     np=100;
+0072     x1=linspace(min(-1.5,x1min),max(2.5,x1max),np);
+0073     x2=linspace(min(-1.5,x2min),max(2.5,x2max),np);
+0074 
+0075     <span class="keyword">for</span> i=1:np,
+0076         <span class="keyword">for</span> j=1:np,
+0077             J(i,j)=<a href="rosenbrock.html" class="code" title="function [cost,pe,grad,phi] = rosenbrock(Z,x,OPT,M,div);">rosenbrock</a>([],[x1(i);x2(j)],[],[],0);
+0078         <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080 
+0081     <span class="keyword">if</span> dsp,
+0082         contour(x2,x1,log10(J));
+0083         hold on;
+0084 
+0085         <span class="keyword">for</span> i=1:n*n,
+0086             plot(Ms{i}.thetait(2,:),Ms{i}.thetait(1,:),<span class="string">'-k*'</span>);
+0087         <span class="keyword">end</span>
+0088         
+0089         plot(1,1,<span class="string">'xr'</span>,<span class="string">'linewidth'</span>,2)
+0090     <span class="keyword">end</span>
+0091 
+0092     echo off;
+0093 <span class="keyword">end</span>
+0094 
+0095 <span class="keyword">if</span> dm
+0096     disp(<span class="string">'  '</span>)
+0097     disp(<span class="string">'---------------------------------------------------------------------'</span>)
+0098     disp(<span class="string">'  '</span>)
+0099     disp(<span class="string">'You now have access to the MATLAB workspace so that you may examine'</span>)
+0100     disp(<span class="string">'the results of this simulation.  To return to the demos, type &quot;dbcont&quot;'</span>)
+0101     disp(<span class="string">' '</span>)
+0102     keyboard;
+0103 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

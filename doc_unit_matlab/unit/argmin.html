@@ -1,0 +1,951 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of argmin</title>
+  <meta name="keywords" content="argmin">
+  <meta name="description" content="Function to find minimum of function that is defined by user supplied">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; argmin.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>argmin
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to find minimum of function that is defined by user supplied</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Function to find minimum of function that is defined by user supplied
+  m file.  Algorithm used is a Damped Newton direction line-search, possibly
+  switching to a Gradient line search if the Newton direction is unable to
+  decrease the cost on a particular iteration.
+
+  Usage is
+
+  [theta,cost_log,args] = argmin(Z,'FUN',theta0,OPT,ARGS)
+
+  where
+
+  Z           = data that cost defined by `FUN' depends upon.
+  FUN         = Handle for function that accepts Z and theta,OPT,ARGS
+                (in that order) and returns the cost, prediction error sequence,
+                gradient and Jacobian (in that order) at the point
+                theta.  If OPT.cmpgrad = 1, then gradient and Jacobian
+                will be computed using finite differences and only cost
+                and prediction error sequence are required.
+  theta0      = initial guess for minimising vector argument.
+  OPT.lmax    = maximum number of bisections in line search direction. Default = 52.
+  OPT.tol     = minimum norm on gradient vector before stopping search. Default = 1e-6.
+  OPT.miter   = maximum number of iterations in search for minimum.  Default = 100.
+  OPT.dsp     = 0 =&gt; quiet, 1 =&gt; verbose output.  Default = 0
+  OPT.mdec    = Minimum relative decrease of cost before search is
+                terminated.  Default = 1e-4.
+  OPT.subtol  = Relative sngular value tolerance, which determines how many singular
+                values (r) to include in the Hessian approximation according to the
+                rule r=max(i : s(i) &gt; s(1)*OPT.subtol), where s(i) are singular
+                values in descending order (where s(1) is the largest). Default = 1e-6.
+  OPT.adapt   = If set to 1 (default) then the relative singular value tolerance
+                OPT.subtol is selected adaptively according to algorithm progress.
+                If set to 0 then the relative singular value tolerance OPT.subtol
+                is held at a constant value throughout the algorithm. Default = 1;
+  OPT.cmpgrd  = If set to 1 will numerically evaluate gradient and
+                Jacobian so that FUN does not have to supply them, 
+  OPT.ngt     = If set to 1 will numerically evaluate the gradient and
+                display it relative to the analytical gradient supplied
+                by FUN.  Handy for debugging.
+  OPT.saveit  = If set to 1 then the parameters values theta_k are saved
+                in ARGS.thetait as the k'th column upon return.
+  ARGS        = Structure which is passed to FUN and GRADFUN in case
+                auxiliary variables are required by them.
+
+  theta       = Terminal value of vector at end of minimisation search.
+                That is, theta is (hopefully) the minimising argument of
+                the specified cost function;
+  cost_log    = Vector recording history of how cost was gradually
+                decreased as iterative search proceeded;
+  args        = If optional ARGS are passed to cost function, which may
+                be modified by optional function fargs at end of each
+                line-search iteration, then their terminal value is
+                passed back out as args.
+
+   written by Brett Ninness  School of EE &amp; CS
+              Adrian Wills   University of Newcastle
+                              Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li><li><a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>	This function accepts a data structure and tries to interpret what type</li><li><a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_rosenbrock.html" class="code" title="">demo_rosenbrock</a>	This test file is intended to test argmin against a well-known</li><li><a href="fem.html" class="code" title="function g = fem(z,mm,opt);">fem</a>	This function tries to compute the maximum likelihood estimate of a</li><li><a href="foe.html" class="code" title="function G = foe(Z,M,OPT)">foe</a>	Computes an estimate using an output-error model</li><li><a href="gn.html" class="code" title="function G = gn(Z,M,OPT);">gn</a>	This function calls underlying gradient-based search algorithms, based on</li><li><a href="nlss_test_mstep.html" class="code" title="function G = nlss_test_mstep(Z,M,O)">nlss_test_mstep</a>	call argmin with the correct arguments</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Function to find minimum of function that is defined by user supplied</span>
+0002 <span class="comment">%  m file.  Algorithm used is a Damped Newton direction line-search, possibly</span>
+0003 <span class="comment">%  switching to a Gradient line search if the Newton direction is unable to</span>
+0004 <span class="comment">%  decrease the cost on a particular iteration.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%  Usage is</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%  [theta,cost_log,args] = argmin(Z,'FUN',theta0,OPT,ARGS)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%  where</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Z           = data that cost defined by `FUN' depends upon.</span>
+0013 <span class="comment">%  FUN         = Handle for function that accepts Z and theta,OPT,ARGS</span>
+0014 <span class="comment">%                (in that order) and returns the cost, prediction error sequence,</span>
+0015 <span class="comment">%                gradient and Jacobian (in that order) at the point</span>
+0016 <span class="comment">%                theta.  If OPT.cmpgrad = 1, then gradient and Jacobian</span>
+0017 <span class="comment">%                will be computed using finite differences and only cost</span>
+0018 <span class="comment">%                and prediction error sequence are required.</span>
+0019 <span class="comment">%  theta0      = initial guess for minimising vector argument.</span>
+0020 <span class="comment">%  OPT.lmax    = maximum number of bisections in line search direction. Default = 52.</span>
+0021 <span class="comment">%  OPT.tol     = minimum norm on gradient vector before stopping search. Default = 1e-6.</span>
+0022 <span class="comment">%  OPT.miter   = maximum number of iterations in search for minimum.  Default = 100.</span>
+0023 <span class="comment">%  OPT.dsp     = 0 =&gt; quiet, 1 =&gt; verbose output.  Default = 0</span>
+0024 <span class="comment">%  OPT.mdec    = Minimum relative decrease of cost before search is</span>
+0025 <span class="comment">%                terminated.  Default = 1e-4.</span>
+0026 <span class="comment">%  OPT.subtol  = Relative sngular value tolerance, which determines how many singular</span>
+0027 <span class="comment">%                values (r) to include in the Hessian approximation according to the</span>
+0028 <span class="comment">%                rule r=max(i : s(i) &gt; s(1)*OPT.subtol), where s(i) are singular</span>
+0029 <span class="comment">%                values in descending order (where s(1) is the largest). Default = 1e-6.</span>
+0030 <span class="comment">%  OPT.adapt   = If set to 1 (default) then the relative singular value tolerance</span>
+0031 <span class="comment">%                OPT.subtol is selected adaptively according to algorithm progress.</span>
+0032 <span class="comment">%                If set to 0 then the relative singular value tolerance OPT.subtol</span>
+0033 <span class="comment">%                is held at a constant value throughout the algorithm. Default = 1;</span>
+0034 <span class="comment">%  OPT.cmpgrd  = If set to 1 will numerically evaluate gradient and</span>
+0035 <span class="comment">%                Jacobian so that FUN does not have to supply them,</span>
+0036 <span class="comment">%  OPT.ngt     = If set to 1 will numerically evaluate the gradient and</span>
+0037 <span class="comment">%                display it relative to the analytical gradient supplied</span>
+0038 <span class="comment">%                by FUN.  Handy for debugging.</span>
+0039 <span class="comment">%  OPT.saveit  = If set to 1 then the parameters values theta_k are saved</span>
+0040 <span class="comment">%                in ARGS.thetait as the k'th column upon return.</span>
+0041 <span class="comment">%  ARGS        = Structure which is passed to FUN and GRADFUN in case</span>
+0042 <span class="comment">%                auxiliary variables are required by them.</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%  theta       = Terminal value of vector at end of minimisation search.</span>
+0045 <span class="comment">%                That is, theta is (hopefully) the minimising argument of</span>
+0046 <span class="comment">%                the specified cost function;</span>
+0047 <span class="comment">%  cost_log    = Vector recording history of how cost was gradually</span>
+0048 <span class="comment">%                decreased as iterative search proceeded;</span>
+0049 <span class="comment">%  args        = If optional ARGS are passed to cost function, which may</span>
+0050 <span class="comment">%                be modified by optional function fargs at end of each</span>
+0051 <span class="comment">%                line-search iteration, then their terminal value is</span>
+0052 <span class="comment">%                passed back out as args.</span>
+0053 <span class="comment">%</span>
+0054 <span class="comment">%   written by Brett Ninness  School of EE &amp; CS</span>
+0055 <span class="comment">%              Adrian Wills   University of Newcastle</span>
+0056 <span class="comment">%                              Australia.</span>
+0057 
+0058 
+0059 <span class="comment">% Copyright (C) Brett Ninness, Adrian Wills</span>
+0060 
+0061 <a name="_sub0" href="#_subfunctions" class="code">function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)</a>
+0062 
+0063 <span class="comment">% Figure out what has not been specified in OPT structure and set to</span>
+0064 <span class="comment">% defaults</span>
+0065 OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT);
+0066 
+0067 <span class="comment">%Detect if gui is running</span>
+0068 gui = 0; guih = [];
+0069 <span class="keyword">if</span> isfield(OPT,<span class="string">'gui'</span>),
+0070  <span class="keyword">if</span> ~isempty(OPT.gui)
+0071   gui  = 1;         <span class="comment">%GUI is running</span>
+0072   guih = OPT.gui;   <span class="comment">%GUI handle</span>
+0073  <span class="keyword">end</span>
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="comment">%make sure data is in correct format</span>
+0077 Z=<a href="startZ.html" class="code" title="function Z = startZ(Z)">startZ</a>(Z);
+0078 
+0079 <span class="comment">%Start the display of information if desired</span>
+0080 <span class="keyword">if</span> OPT.dsp, 
+0081  <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Algorithm: Gradient Based Search'</span>,gui,guih);
+0082  <span class="keyword">switch</span> OPT.cost,
+0083   <span class="keyword">case</span> {<span class="string">'det'</span>,<span class="string">'ml'</span>}
+0084    mincost = <span class="string">'Maximum Likelihood'</span>;
+0085   <span class="keyword">otherwise</span>
+0086    mincost = <span class="string">'Mean Squared Error'</span>;
+0087  <span class="keyword">end</span>
+0088  <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>([<span class="string">'Cost: '</span>,mincost],gui,guih);
+0089 <span class="keyword">end</span>
+0090 sglines=<span class="string">'----------------------------------------------------------------------------'</span>;
+0091 
+0092 <span class="comment">% Do we want to save iterates or not?</span>
+0093 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'saveit'</span>),
+0094  OPT.saveit = 0;
+0095 <span class="keyword">elseif</span> OPT.saveit,
+0096  theta_saved = [theta];
+0097 <span class="keyword">end</span>
+0098 
+0099 <span class="comment">% determiine if we have a theta structure</span>
+0100 <span class="keyword">if</span> isfield(ARGS,<span class="string">'theta_struct'</span>),
+0101  theta_struct = ARGS.theta_struct;
+0102 <span class="keyword">else</span>
+0103  theta_struct = find(ones(size(theta)));
+0104 <span class="keyword">end</span>
+0105 
+0106 <span class="comment">% Initialisation</span>
+0107 count     = 1; 
+0108 cost_log  = []; 
+0109 svtol     = OPT.subtol; 
+0110 delta     = OPT.delta; 
+0111 delta_rgn = 0;
+0112 trust_1st = 1;
+0113 Ith       = eye(length(theta_struct)); 
+0114 H         = Ith; 
+0115 
+0116 hess_supplied = 0;
+0117 <span class="comment">%If we already have a good inv Hessian then use it</span>
+0118 <span class="keyword">if</span> ~isempty(ARGS),
+0119  <span class="keyword">if</span> isfield(ARGS,<span class="string">'invHess'</span>),
+0120   H = ARGS.invHess;
+0121   hess_supplied = 1;
+0122  <span class="keyword">end</span>
+0123 <span class="keyword">end</span>
+0124 
+0125 
+0126 <span class="comment">%If the user wants things displayed then we should popup the stop</span>
+0127 <span class="comment">%estimation GUI so that they can stop the performance...</span>
+0128 <span class="keyword">if</span> ~gui &amp; OPT.dsp,
+0129  <span class="keyword">try</span>
+0130   stopEstGui=stopEstimation();
+0131   stopEstGui.setVisible(true);
+0132   stopEstGuiRunning = 1;
+0133  <span class="keyword">catch</span>
+0134   stopEstGuiRunning = 0;
+0135  <span class="keyword">end</span>
+0136 <span class="keyword">else</span>
+0137  stopEstGuiRunning = 0;
+0138 <span class="keyword">end</span>
+0139 <span class="comment">%Enter main loop</span>
+0140 <span class="keyword">while</span> count&lt;=OPT.miter,
+0141  <span class="comment">%----------------------------------------------------------------------</span>
+0142  <span class="comment">% Get cost, prediction error, gradient and Hessian(approx) and save</span>
+0143  <span class="comment">% cost into log</span>
+0144  <span class="comment">%----------------------------------------------------------------------</span>
+0145  <span class="keyword">if</span> OPT.cmpgrd,
+0146   [cost,pe]       = feval(FUN,Z,theta,OPT,ARGS,0); 
+0147   cost_log(count) = cost;
+0148   map = eye(length(theta_struct));
+0149  <span class="keyword">else</span>
+0150   <span class="keyword">try</span>,
+0151    [cost,pe,grad,phi,map] = feval(FUN,Z,theta,OPT,ARGS,1);
+0152   <span class="keyword">catch</span>
+0153    [cost,pe,grad,phi]     = feval(FUN,Z,theta,OPT,ARGS,1);
+0154    map = eye(length(theta_struct));
+0155   <span class="keyword">end</span>
+0156   cost_log(count)        = cost;
+0157  <span class="keyword">end</span>
+0158  
+0159  <span class="comment">%----------------------------------------------------------------------</span>
+0160  <span class="comment">% Make sure cost is sensible</span>
+0161  <span class="comment">%----------------------------------------------------------------------</span>
+0162  <span class="keyword">if</span> isnan(cost) | isinf(cost),
+0163   <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Cost is either Inf or NaN. Terminating'</span>,gui,guih); 
+0164   <span class="keyword">break</span>; 
+0165  <span class="keyword">end</span>
+0166 
+0167  <span class="comment">%----------------------------------------------------------------------</span>
+0168  <span class="comment">% This part of the code will compute numerical gradients and Jacobians</span>
+0169  <span class="comment">% If desired (via OPT.ngt = 1), it will compare the numerical gradient</span>
+0170  <span class="comment">% with the one returned from the user defined function.</span>
+0171  <span class="comment">%----------------------------------------------------------------------</span>
+0172  <span class="keyword">if</span> OPT.ngt || OPT.cmpgrd || OPT.nht,
+0173   epsdiff=(eps)^(2/3);
+0174   npar = length(theta_struct);
+0175   <span class="keyword">for</span> ngti=1:npar,
+0176    thngt = theta; thngt(theta_struct(ngti)) = thngt(theta_struct(ngti)) + epsdiff;
+0177    <span class="keyword">if</span> OPT.nht,
+0178     [cngtp,pepos,gradp,phip] = feval(FUN,Z,thngt,OPT,ARGS,1);
+0179    <span class="keyword">else</span>
+0180     [cngtp,pepos] = feval(FUN,Z,thngt,OPT,ARGS,0);
+0181    <span class="keyword">end</span>
+0182    thngt = theta; thngt(theta_struct(ngti)) = thngt(theta_struct(ngti)) - epsdiff;
+0183    <span class="keyword">if</span> OPT.nht,
+0184     [cngtm,peneg,gradn,phin] = feval(FUN,Z,thngt,OPT,ARGS,1);
+0185    <span class="keyword">else</span>
+0186     [cngtm,peneg] = feval(FUN,Z,thngt,OPT,ARGS,0);
+0187    <span class="keyword">end</span>
+0188    ngrad(ngti)   = (cngtp-cngtm)/(2*epsdiff);
+0189    nphi(:,ngti)  = (pepos(:)-peneg(:))/(2*epsdiff);
+0190    <span class="keyword">if</span> OPT.nht,
+0191     nhess(:,ngti) = (gradp(:)-gradn(:))/(2*epsdiff);
+0192    <span class="keyword">end</span>
+0193   <span class="keyword">end</span>
+0194   
+0195   <span class="comment">%Make sure we copy the lower triangle to the upper</span>
+0196   <span class="keyword">if</span> OPT.nht,
+0197    <span class="keyword">for</span> jj=1:npar,
+0198     <span class="keyword">for</span> ii=jj+1:npar,
+0199      nhess(jj,ii) = nhess(ii,jj);
+0200     <span class="keyword">end</span>
+0201    <span class="keyword">end</span>
+0202   <span class="keyword">end</span>
+0203   
+0204   <span class="comment">%If no gradient returned then use numerical gradient</span>
+0205   <span class="keyword">if</span> OPT.cmpgrd,
+0206    grad = ngrad(:);
+0207    phi  = nphi;
+0208   <span class="keyword">end</span>
+0209   
+0210   <span class="comment">%If user wants to know how close numerical gradient is compared</span>
+0211   <span class="comment">%with the one they compute in their own function...</span>
+0212   <span class="keyword">if</span> OPT.ngt,
+0213    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">' '</span>,gui,guih)
+0214    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">' '</span>,gui,guih)
+0215    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'  Num. Grad.,   Anal. Grad.'</span>,gui,guih);
+0216    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>([ngrad(:) map*grad(:)],gui,guih)
+0217    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sprintf(<span class="string">'Numerical Gradient Difference = %13.3e'</span>,norm((map*grad(:)-ngrad(:))./(eps+map*grad(:)),<span class="string">'inf'</span>)),gui,guih)
+0218    keyboard
+0219   <span class="keyword">end</span>
+0220  <span class="keyword">end</span>
+0221 
+0222  <span class="comment">%----------------------------------------------------------------------</span>
+0223  <span class="comment">% COMPUTE SEARCH DIRECTION:</span>
+0224  <span class="comment">%</span>
+0225  <span class="comment">% Try and compute search direction, otherwise just compute neg gradient</span>
+0226  <span class="comment">%----------------------------------------------------------------------</span>
+0227  redo = 1;
+0228  <span class="keyword">while</span> redo
+0229   
+0230   redo = 0;
+0231   <span class="keyword">switch</span> OPT.dir,
+0232    
+0233    <span class="comment">%------------------------------------------------------</span>
+0234    <span class="comment">% Robust Gauss-Newton method</span>
+0235    <span class="comment">%------------------------------------------------------</span>
+0236    <span class="keyword">case</span> <span class="string">'rgn'</span>
+0237     <span class="comment">%Get search direction</span>
+0238     [U,S,V] = svd(full(phi),0);
+0239     s       = diag(S);
+0240     loop_count = 0;
+0241     <span class="keyword">while</span> loop_count&lt;length(s),
+0242      r  = sum(s&gt;=s(1)*svtol);
+0243      s(r+1:end) = s(r+1:end) + svtol./(s(r+1:end)+eps);
+0244      g  = -(V*((U'*pe(:))./s));
+0245       <span class="keyword">if</span> abs(g'*grad)&gt;=1e-8*max(norm(g)*norm(grad)), <span class="keyword">break</span>; <span class="keyword">end</span>
+0246      <span class="keyword">if</span> svtol&lt;=sqrt(eps),
+0247       OPT.dir = <span class="string">'trust'</span>;
+0248       redo    = 1; <span class="comment">%recalculate search direction using new method</span>
+0249      <span class="keyword">else</span>,
+0250       svtol=max(eps,svtol/2);
+0251      <span class="keyword">end</span>
+0252      loop_count=loop_count+1;
+0253     <span class="keyword">end</span>
+0254 
+0255     <span class="comment">%Compute robust norm of gradient</span>
+0256     tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(cost));
+0257     direction=<span class="string">'rGN'</span>;
+0258     <span class="keyword">if</span> strcmp(OPT.dir,<span class="string">'trust'</span>), direction=<span class="string">'trust'</span>; <span class="keyword">end</span>
+0259     
+0260     
+0261     <span class="comment">%------------------------------------------------------</span>
+0262     <span class="comment">% Gauss-Newton method</span>
+0263     <span class="comment">%------------------------------------------------------</span>
+0264    <span class="keyword">case</span> <span class="string">'gn'</span>
+0265     <span class="comment">%Get search direction</span>
+0266     g = -phi\pe(:); r=size(phi,2);
+0267 
+0268     <span class="comment">%Compute robust norm of gradient</span>
+0269     tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0270     direction=<span class="string">'GN'</span>;
+0271 
+0272     <span class="comment">%------------------------------------------------------</span>
+0273     <span class="comment">% Levenberg-Marquardt method</span>
+0274     <span class="comment">%------------------------------------------------------</span>
+0275    <span class="keyword">case</span> <span class="string">'lm'</span>
+0276     <span class="comment">%Get search direction</span>
+0277     [U,S,V] = svd(phi,0); 
+0278     s       = diag(S);
+0279     snew    = s+delta./(s+eps); 
+0280     r       = sum(snew &gt; sqrt(eps));
+0281     g       = -(V(:,1:r)*((U(:,1:r)'*pe(:))./snew(1:r)));
+0282     tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0283     direction = <span class="string">'LM'</span>;
+0284 
+0285     <span class="comment">%------------------------------------------------------</span>
+0286     <span class="comment">% Trust method (exact solution)</span>
+0287     <span class="comment">%------------------------------------------------------</span>
+0288    <span class="keyword">case</span> <span class="string">'trust'</span>
+0289     <span class="comment">%Hack to invert delta value between LM and trust</span>
+0290     <span class="keyword">if</span> trust_1st, 
+0291      delta     = 1/OPT.delta;  
+0292      trust_1st = 0;
+0293     <span class="keyword">end</span>
+0294     [U,S,V] = svd(full(phi),0); 
+0295     s       = diag(S); 
+0296     scal    = 2/(Z.Ny-OPT.n);
+0297     lam     = eps;
+0298     
+0299     <span class="comment">%Get trust region delta</span>
+0300     <span class="keyword">for</span> bisec=1:OPT.lmax,
+0301      sn = s+lam./(s+eps); 
+0302      r  = sum(sn&gt;sn(1)*eps);
+0303      q  = U(:,1:r)'*pe(:);
+0304      p  = -(V(:,1:r)*(q./sn(1:r)));
+0305      <span class="keyword">if</span> norm(p)&gt;delta,
+0306       hitdel=1;
+0307       <span class="keyword">for</span> inloop=1:50,
+0308        n1   = p'*p;
+0309        n2   = q'*((q.*s(1:r).^2)./((s(1:r).^2+lam).^3));
+0310        dlam = (n1/n2)*((sqrt(n1)-delta)/delta);
+0311        lam  = max(eps,lam+dlam);
+0312        sn   = s+lam./(s+eps); 
+0313        r    = sum(sn&gt;sn(1)*eps);
+0314        q    = U(:,1:r)'*pe(:);
+0315        p    = -(V(:,1:r)*(q./sn(1:r)));
+0316        <span class="keyword">if</span> abs(norm(p)-delta)&lt;1e-2*delta, <span class="keyword">break</span>; <span class="keyword">end</span>
+0317       <span class="keyword">end</span>
+0318      <span class="keyword">else</span>
+0319       hitdel=0;
+0320      <span class="keyword">end</span>
+0321      
+0322      <span class="comment">%tnorm=abs(p'*grad)/max(sqrt(eps),sqrt(abs(cost)));</span>
+0323      tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0324 
+0325      theta_new = theta;
+0326      theta_new(theta_struct)=theta(theta_struct)+map*p; 
+0327      nc=feval(FUN,Z,theta_new,OPT,ARGS,0);
+0328      <span class="keyword">if</span> isnan(nc), nc=inf; <span class="keyword">end</span>
+0329 
+0330      <span class="comment">%Compute actual/predicted cost reduction</span>
+0331      
+0332      pp   = phi*p; tmp1=pp'*pe(:)*scal; tmp2=pp'*pp*scal;
+0333      rho  = (cost - nc)/(1*eps-tmp1-0.5*tmp2);
+0334 
+0335      <span class="comment">%Adaptively change trust region according to local performance.</span>
+0336      method = <span class="string">'new'</span>; <span class="comment">%'old' is other option</span>
+0337      <span class="keyword">if</span> strcmp(method,<span class="string">'new'</span>),
+0338       alp1 = 0.5;  alp2 = 2;    alp3 = 1.01;
+0339       eta1 = 0.01; eta2 = 0.95; eta3 = 1.05;
+0340       <span class="keyword">if</span> rho &lt;= 0,
+0341        delta = max(alp1*delta,eps);
+0342       <span class="keyword">elseif</span> rho &lt; eta2,
+0343        delta = delta*(alp1 + (1-alp1)*(rho/eta2)^2);
+0344       <span class="keyword">elseif</span> rho &gt;= eta2,
+0345        delta = delta*min(1e12,alp3 + (alp2-alp3)*exp(-((rho-1)/(eta2-1))^2));
+0346       <span class="keyword">end</span>
+0347      <span class="keyword">else</span> <span class="comment">%Old method</span>
+0348       <span class="keyword">if</span> rho &lt; 0.25,
+0349        delta = max(0.25*norm(p),eps);
+0350       <span class="keyword">elseif</span> rho &gt; 0.75 &amp; hitdel,
+0351        delta = min(2*delta,1e16);
+0352       <span class="keyword">end</span>
+0353      <span class="keyword">end</span>
+0354      
+0355      <span class="comment">%If we reduced the cost sufficiently then stop.</span>
+0356      <span class="keyword">if</span> rho &gt; 0.01, theta=theta_new; <span class="keyword">break</span>; <span class="keyword">end</span>
+0357     <span class="keyword">end</span>
+0358     direction=<span class="string">'trust'</span>;
+0359 
+0360     <span class="comment">%Store some stuff</span>
+0361     phi_old=phi; grad_old=grad;
+0362 
+0363     <span class="comment">%------------------------------------------------------</span>
+0364     <span class="comment">% Trust method (exact solution)</span>
+0365     <span class="comment">%------------------------------------------------------</span>
+0366    <span class="keyword">case</span> <span class="string">'trust_scaled'</span>
+0367     <span class="comment">%Hack to invert delta value between LM and trust</span>
+0368     <span class="keyword">if</span> count==1, delta=1/delta; <span class="keyword">end</span>
+0369     lam  = eps; 
+0370     scal = 2/(Z.Ny-OPT.n);
+0371     R    = triu(qr([phi pe]));
+0372     nmp  = size(phi,2);    
+0373     phi  = sqrt(scal)*R(1:nmp,1:nmp);
+0374     pe   = sqrt(scal)*R(1:nmp,end);
+0375     dpi  = diag(phi'*phi);
+0376     r    = nmp;
+0377     
+0378     <span class="comment">%Compute a diagonal scaling term.</span>
+0379     <span class="comment">%Dscal = diag(min(1/sqrt(eps),max(sqrt(eps),1./(abs(dpi)))));</span>
+0380     
+0381     <span class="comment">%Get trust region delta</span>
+0382     <span class="keyword">for</span> bisec=1:OPT.lmax,
+0383      <span class="comment">%Factor phi'*phi + lambda*Dscal</span>
+0384      R = triu(qr([phi;sqrt(lam)*eye(nmp)]));
+0385      R = R(1:nmp,:);
+0386      
+0387      <span class="comment">%Solve for p,   R'*Rp=-g</span>
+0388      p = -R\((R')\(grad));
+0389      q = (R')\p;
+0390      
+0391      <span class="keyword">if</span> norm(p)&gt;delta,
+0392       hitdel=1;
+0393       <span class="keyword">for</span> inloop=1:50,
+0394        np   = norm(p);
+0395        nq   = norm(q);
+0396        dlam = (np/nq)^2*((np-delta)/delta);
+0397        lam  = max(eps,lam+dlam);
+0398 
+0399        <span class="comment">%Factor phi'*phi + lambda*I</span>
+0400        R = triu(qr([phi;sqrt(lam)*eye(nmp)]));
+0401        R = R(1:nmp,:);
+0402        
+0403        <span class="comment">%Solve for p,   R'*Rp=-g</span>
+0404        p = -R\((R')\(grad));
+0405        q = (R')\p;
+0406        
+0407        <span class="keyword">if</span> abs(norm(p)-delta)&lt;1e-2*delta, <span class="keyword">break</span>; <span class="keyword">end</span>
+0408       <span class="keyword">end</span>
+0409      <span class="keyword">else</span>
+0410       hitdel=0;
+0411      <span class="keyword">end</span>
+0412      
+0413      tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0414 
+0415      theta_new = theta;
+0416      theta_new(theta_struct)=theta(theta_struct)+map*p; 
+0417      nc = feval(FUN,Z,theta_new,OPT,ARGS,0);
+0418      <span class="keyword">if</span> isnan(nc), nc=inf; <span class="keyword">end</span>
+0419 
+0420      <span class="comment">%Compute actual/predicted cost reduction</span>
+0421      pp   = phi*p; 
+0422      tmp1 = pp'*pe(:); 
+0423      tmp2 = pp'*pp;
+0424      rho1 = (cost - nc);
+0425      rho2 = (1*eps-tmp1-0.5*tmp2);
+0426      
+0427      <span class="comment">%Adaptively change trust region according to local performance.</span>
+0428      <span class="keyword">if</span> rho1 &lt; 0.25*rho2,
+0429       delta = max(0.25*norm(p),eps);
+0430      <span class="keyword">elseif</span> rho1 &gt; 0.75*rho2 &amp; hitdel,
+0431       delta = min(2*delta,1e16);
+0432      <span class="keyword">end</span>
+0433 
+0434      <span class="comment">%If we reduced the cost sufficiently then stop.</span>
+0435      <span class="keyword">if</span> rho1 &gt; 0.01*rho2, theta=theta_new; <span class="keyword">break</span>; <span class="keyword">end</span>
+0436     <span class="keyword">end</span>
+0437     direction=<span class="string">'tst_scl'</span>;
+0438 
+0439     <span class="comment">%Store some stuff</span>
+0440     phi_old=phi; grad_old=grad;
+0441     
+0442     <span class="comment">%------------------------------------------------------</span>
+0443     <span class="comment">% BFGS quasi-Newton method</span>
+0444     <span class="comment">%------------------------------------------------------</span>
+0445    <span class="keyword">case</span> <span class="string">'bfgs'</span>
+0446     <span class="comment">%Do BFGS update</span>
+0447     <span class="keyword">if</span> count&gt;1
+0448      td=theta(theta_struct)-theta_old(theta_struct);
+0449      gd=grad-grad_old;     
+0450      <span class="keyword">if</span> td'*gd &gt; sqrt(eps)*norm(td)*norm(gd),
+0451       rho=1/(eps+gd'*td);
+0452 
+0453       <span class="comment">%Set initial Hessian inverse for BFGS</span>
+0454       <span class="keyword">if</span> count==2 &amp;&amp; ~hess_supplied, 
+0455        H = Ith*(td'*gd)/(gd'*gd); 
+0456       <span class="keyword">end</span>
+0457       
+0458       H = (Ith-rho*td*gd')*H*(Ith-rho*gd*td') + rho*td*td';
+0459       
+0460       <span class="comment">%me=min(eig(H)); if me&lt;=0, H=H+(2*abs(me)+1e-9)*Ith; end</span>
+0461      <span class="keyword">end</span>
+0462     <span class="keyword">elseif</span> ~hess_supplied;
+0463      H = 1/norm(grad)*H;
+0464     <span class="keyword">end</span>
+0465     
+0466     <span class="comment">%Store inverse Hessian approximation</span>
+0467     ARGS.invHess=H;
+0468 
+0469     <span class="comment">%Get search direction</span>
+0470     g=-H*grad;
+0471     tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0472     r=length(theta_struct);
+0473     direction=<span class="string">'QNLS'</span>;
+0474 
+0475     <span class="comment">%------------------------------------------------------</span>
+0476     <span class="comment">% BFGS + Trust region quasi-Newton method</span>
+0477     <span class="comment">%------------------------------------------------------</span>
+0478    <span class="keyword">case</span> <span class="string">'bfgs_trust'</span>
+0479     <span class="comment">%Do BFGS update</span>
+0480     <span class="keyword">if</span> count&gt;1,
+0481      td=theta(theta_struct)-theta_old(theta_struct);
+0482      gd=grad-grad_old;
+0483 
+0484      <span class="keyword">if</span> td'*gd &gt; sqrt(eps)*norm(td)*norm(gd),
+0485      
+0486       <span class="comment">%Set initial Hessian inverse for BFGS</span>
+0487       <span class="keyword">if</span> count==2, H = Ith*(gd'*gd)/(td'*gd); <span class="keyword">end</span>
+0488       
+0489       Htd = H*td;
+0490       H   = H + (gd*gd')/(td'*gd) - (Htd*Htd')/(td'*Htd);
+0491      <span class="keyword">end</span>
+0492     <span class="keyword">else</span>
+0493      delta = 1/delta;
+0494      H     = 1/norm(grad)*H;
+0495     <span class="keyword">end</span>
+0496 
+0497     ARGS.Hess = H;
+0498 
+0499     <span class="comment">%Use trust region method.</span>
+0500     S=eig(H); 
+0501     <span class="keyword">if</span> ~isreal(S), 
+0502      <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Hessian has complex eigenvalues'</span>,gui,guih); 
+0503     <span class="keyword">end</span>
+0504     lam_min=min(0,min(real(S)));
+0505     r=length(theta_struct);
+0506 
+0507     <span class="keyword">if</span> lam_min &lt; 0, lam=-2*lam_min; <span class="keyword">else</span>, lam_min=0; lam=0; <span class="keyword">end</span>
+0508     eta=0.01;
+0509 
+0510     <span class="keyword">for</span> bisec=0:OPT.lmax,
+0511      <span class="comment">%Get search direction</span>
+0512      [cH,pp]=chol(H+lam*eye(size(H)));
+0513      <span class="keyword">while</span> pp~=0,
+0514       lam=2*(lam+1e-3);
+0515       [cH,pp]=chol(H+(lam+eps)*eye(size(H)));
+0516      <span class="keyword">end</span>
+0517      p=-(cH\(cH'\grad));
+0518 
+0519      <span class="comment">%Check that search direction satisfies ||dp|| &lt;= del,</span>
+0520      <span class="comment">%if not then find Lagrange multiplier for constrained</span>
+0521      <span class="comment">%problem.</span>
+0522      <span class="keyword">if</span> norm(p)&gt;delta,
+0523       hitdel=1;
+0524       <span class="keyword">for</span> i=1:100,
+0525        q=cH'\p;
+0526        dlam=(norm(p)/norm(q))^2*((norm(p)-delta)/delta);
+0527        lam=max(-lam_min,lam+dlam);
+0528        [cH,pp]=chol(H+(lam+eps)*eye(size(H)));
+0529        <span class="keyword">while</span> pp~=0,
+0530         lam=2*(lam+1e-1);
+0531         [cH,pp]=chol(H+(lam+eps)*eye(size(H)));
+0532        <span class="keyword">end</span>
+0533        p=-cH\(cH'\grad);
+0534        <span class="keyword">if</span> abs(norm(p)-delta) &lt; 1e-3, <span class="keyword">break</span>; <span class="keyword">end</span>
+0535       <span class="keyword">end</span>
+0536      <span class="keyword">else</span>
+0537       hitdel=0;
+0538      <span class="keyword">end</span>
+0539 
+0540      <span class="comment">%Get norm of step</span>
+0541      tnorm = norm(grad,<span class="string">'inf'</span>)/max(sqrt(eps),sqrt(abs(cost)));
+0542 
+0543      <span class="comment">%Get new cost</span>
+0544      theta_new=theta; 
+0545      theta_new(theta_struct)=theta(theta_struct)+map*p; 
+0546      nc=feval(FUN,Z,theta_new,OPT,ARGS,0);
+0547      <span class="keyword">if</span> isnan(nc), nc=inf; <span class="keyword">end</span>
+0548 
+0549      <span class="comment">%Compute actual/predicted cost reduction</span>
+0550      rho = (cost - nc)/(eps-grad'*p-0.5*(p'*(H*p + lam*p)));
+0551 
+0552      <span class="comment">%Adaptively change trust region according to local</span>
+0553      <span class="comment">%performance.</span>
+0554      <span class="keyword">if</span> rho &lt; 0.25,
+0555       delta=0.25*norm(p);
+0556      <span class="keyword">elseif</span> rho &gt; 0.75 &amp; hitdel,
+0557       delta=min(2*delta,1e16);
+0558      <span class="keyword">end</span>
+0559 
+0560      <span class="comment">%If delta is too small then quit searching</span>
+0561      <span class="keyword">if</span> delta&lt;= eps, <span class="keyword">break</span>; <span class="keyword">end</span>
+0562 
+0563      <span class="comment">%If we reduced the cost sufficiently then stop.</span>
+0564      <span class="keyword">if</span> rho &gt; eta, theta_old=theta; theta=theta_new; <span class="keyword">break</span>; <span class="keyword">end</span>
+0565     <span class="keyword">end</span>
+0566     direction=<span class="string">'QNTR'</span>;
+0567 
+0568     <span class="comment">%------------------------------------------------------</span>
+0569     <span class="comment">% Steepest-descent method</span>
+0570     <span class="comment">%------------------------------------------------------</span>
+0571    <span class="keyword">case</span> <span class="string">'grad'</span>
+0572     <span class="comment">%Get search direction</span>
+0573     g=-grad; tnorm=norm(g); <span class="keyword">if</span> tnorm&gt;eps, g=g/tnorm; <span class="keyword">end</span>; r=length(theta_struct);
+0574     direction=<span class="string">'Grad.'</span>;
+0575 
+0576 
+0577    <span class="keyword">otherwise</span>,
+0578     error(<span class="string">'OPT.dir not known!'</span>);
+0579 
+0580   <span class="keyword">end</span>
+0581  <span class="keyword">end</span>
+0582  <span class="comment">%----------------------------------------------------------------------</span>
+0583  <span class="comment">% END OF SEARCH DIRECTION COMPUTATION:</span>
+0584  <span class="comment">%----------------------------------------------------------------------</span>
+0585 
+0586 
+0587  <span class="comment">%-----------------------------------------------------------------------</span>
+0588  <span class="comment">% COMPUTE STEP LENGTH:</span>
+0589  <span class="comment">%</span>
+0590  <span class="comment">% Perform bisection determination of step length.</span>
+0591  <span class="comment">%----------------------------------------------------------------------</span>
+0592  alp=1; grad_old=grad; panic=0; theta_old = theta;
+0593  c1=0*sqrt(eps); pdn=norm(grad); pdir=grad; <span class="keyword">if</span> pdn&gt;eps, pdir=pdir/pdn; <span class="keyword">end</span>
+0594  <span class="keyword">if</span> ~strcmp(OPT.dir,{<span class="string">'agn'</span>,<span class="string">'trust'</span>,<span class="string">'trust_scaled'</span>,<span class="string">'bfgs_trust'</span>})
+0595   bisec=0;
+0596   <span class="keyword">while</span> 1,
+0597    <span class="keyword">if</span> ~panic,
+0598     <span class="keyword">switch</span> OPT.dir,
+0599      <span class="keyword">case</span> <span class="string">'lm'</span>,
+0600       sn = s+delta./(s+eps); 
+0601       r  = sum(sn&gt;sqrt(eps));
+0602       p  = -(V(:,1:r)*((U(:,1:r)'*pe(:))./sn(1:r)));      
+0603      <span class="keyword">otherwise</span>,
+0604       p  = g*alp;
+0605     <span class="keyword">end</span>
+0606    <span class="keyword">else</span>
+0607     p=alp*pdir;
+0608    <span class="keyword">end</span>
+0609    theta_new = theta;
+0610    theta_new(theta_struct) = theta(theta_struct)+map*p;
+0611    nc=feval(FUN,Z,theta_new,OPT,ARGS,0);
+0612    <span class="keyword">if</span> isnan(nc), nc=inf; <span class="keyword">end</span>
+0613    <span class="keyword">if</span> nc&lt;cost+c1*grad'*p, <span class="keyword">break</span>; <span class="keyword">end</span>
+0614    alp=alp/2; delta=min(1e16,2*delta); bisec=bisec+1;
+0615    <span class="keyword">if</span> bisec&gt;=OPT.lmax,
+0616     <span class="keyword">if</span> panic,
+0617      <span class="keyword">break</span>;
+0618     <span class="keyword">else</span>
+0619      direction=<span class="string">'Max-BS'</span>;
+0620      <span class="keyword">break</span>;
+0621      panic=1;
+0622      bisec=0;
+0623     <span class="keyword">end</span>
+0624    <span class="keyword">end</span>
+0625   <span class="keyword">end</span>
+0626   <span class="keyword">if</span> nc&lt;cost, theta=theta_new; <span class="keyword">else</span>, nc=cost; <span class="keyword">end</span>
+0627  <span class="keyword">end</span>
+0628  <span class="comment">%-----------------------------------------------------------------------</span>
+0629  <span class="comment">% END OF STEP LENGTH CALCULATION VIA BACKTRACKING</span>
+0630  <span class="comment">%----------------------------------------------------------------------</span>
+0631 
+0632  <span class="comment">%----------------------------------------------------------------------</span>
+0633  <span class="comment">% COMPUTE ADAPTIVE CONDITION NUMBER SVTOL</span>
+0634  <span class="comment">%----------------------------------------------------------------------</span>
+0635  <span class="keyword">if</span> OPT.adapt,
+0636   <span class="keyword">switch</span> OPT.dir,
+0637    <span class="keyword">case</span> <span class="string">'rgn'</span>
+0638     <span class="keyword">if</span> bisec&gt;5,
+0639      svtol=2*svtol;
+0640     <span class="keyword">elseif</span> bisec==0,
+0641      svtol=max(sqrt(eps),svtol/4);
+0642     <span class="keyword">end</span>
+0643 
+0644    <span class="keyword">case</span> <span class="string">'lm'</span>
+0645     <span class="keyword">if</span> bisec==0, delta=delta/2; <span class="keyword">end</span>
+0646   <span class="keyword">end</span>
+0647  <span class="keyword">end</span>
+0648 
+0649 
+0650  <span class="comment">%----------------------------------------------------------------------</span>
+0651  <span class="comment">% SAVE THINGS</span>
+0652  <span class="comment">%----------------------------------------------------------------------</span>
+0653  <span class="keyword">if</span> OPT.saveit, theta_saved=[theta_saved theta]; <span class="keyword">end</span>
+0654 
+0655  <span class="comment">%----------------------------------------------------------------------</span>
+0656  <span class="comment">% Update ARGS for certain parametrizations (e.g. DDLC)</span>
+0657  <span class="comment">%----------------------------------------------------------------------</span>
+0658  <span class="keyword">if</span> nargin&gt;5, [ARGS,theta]=feval(fargs,theta,ARGS); <span class="keyword">end</span>
+0659 
+0660 
+0661  <span class="comment">%----------------------------------------------------------------------</span>
+0662  <span class="comment">% Display stuff if meant to</span>
+0663  <span class="comment">%----------------------------------------------------------------------</span>
+0664  <span class="keyword">if</span> OPT.dsp,
+0665   <span class="keyword">if</span> count==1,
+0666    <span class="keyword">switch</span> OPT.dir,
+0667     <span class="keyword">case</span> <span class="string">'rgn'</span>,
+0668      tol_name=<span class="string">'SV Tol'</span>;
+0669      tol_value=svtol;
+0670     <span class="keyword">case</span> <span class="string">'agn'</span>,
+0671      tol_name=<span class="string">'Delta'</span>;
+0672      tol_value=delta;
+0673     <span class="keyword">case</span> <span class="string">'gn'</span>,
+0674      tol_name=<span class="string">'SV Tol'</span>;
+0675      tol_value=OPT.subtol;
+0676     <span class="keyword">case</span> <span class="string">'lm'</span>,
+0677      tol_name=<span class="string">'Delta'</span>;
+0678      tol_value=delta;
+0679     <span class="keyword">case</span> <span class="string">'trust'</span>,
+0680      tol_name=<span class="string">'Delta'</span>;
+0681      tol_value=delta;
+0682     <span class="keyword">case</span> <span class="string">'trust_scaled'</span>,
+0683      tol_name=<span class="string">'Delta'</span>;
+0684      tol_value=delta;
+0685     <span class="keyword">case</span> <span class="string">'bfgs_trust'</span>,
+0686      tol_name=<span class="string">'Delta'</span>;
+0687      tol_value=delta;
+0688     <span class="keyword">otherwise</span>
+0689      tol_name=<span class="string">'N/A'</span>;
+0690      tol_value=0;
+0691    <span class="keyword">end</span>
+0692    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0693    str1=sprintf(<span class="string">'%s%13s%13s%9s%7s%2i)%13s%7s'</span>,<span class="string">'Iter#'</span>,<span class="string">'Cost'</span>,<span class="string">'G-N Norm'</span>,<span class="string">'Bisec#'</span>,<span class="string">'SV#(/'</span>,size(map,2),tol_name,<span class="string">'Dir'</span>);
+0694    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(str1,gui,guih);
+0695    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0696    str2=sprintf(<span class="string">'%5i%13.3e%13s%9s%10s%13.3e%8s'</span>,0,cost,<span class="string">'-'</span>,<span class="string">'-'</span>,<span class="string">'-'</span>,tol_value,<span class="string">'-'</span>);
+0697    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>([str2],gui,guih)
+0698   <span class="keyword">end</span>
+0699   <span class="keyword">switch</span> OPT.dir,
+0700    <span class="keyword">case</span> <span class="string">'rgn'</span>,
+0701     tol_name=<span class="string">'SV Tol'</span>;
+0702     tol_value=svtol;
+0703    <span class="keyword">case</span> <span class="string">'agn'</span>,
+0704     tol_name=<span class="string">'Delta'</span>;
+0705     tol_value=delta;
+0706    <span class="keyword">case</span> <span class="string">'gn'</span>,
+0707     tol_name=<span class="string">'SV Tol'</span>;
+0708     tol_value=OPT.subtol;
+0709    <span class="keyword">case</span> <span class="string">'lm'</span>,
+0710     tol_name=<span class="string">'Delta'</span>;
+0711     tol_value=delta;
+0712    <span class="keyword">case</span> <span class="string">'trust'</span>,
+0713     tol_name=<span class="string">'Delta'</span>;
+0714     tol_value=delta;
+0715    <span class="keyword">case</span> <span class="string">'trust_scaled'</span>,
+0716     tol_name=<span class="string">'Delta'</span>;
+0717     tol_value=delta;
+0718    <span class="keyword">case</span> <span class="string">'bfgs_trust'</span>,
+0719     tol_name=<span class="string">'Delta'</span>;
+0720     tol_value=delta;
+0721    <span class="keyword">otherwise</span>
+0722     tol_name=<span class="string">'N/A'</span>;
+0723     tol_value=0;
+0724   <span class="keyword">end</span>
+0725   str1=sprintf(<span class="string">'%5i%13.3e%13.3e%9i%10i%13.3e%8s'</span>,count,nc,tnorm,bisec,r,tol_value,direction);
+0726   <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(str1,gui,guih)
+0727  <span class="keyword">end</span>
+0728 
+0729  <span class="comment">%----------------------------------------------------------------------</span>
+0730  <span class="comment">% Update main loop counter</span>
+0731  <span class="comment">%----------------------------------------------------------------------</span>
+0732  count=count+1;
+0733 
+0734  <span class="comment">%----------------------------------------------------------------------</span>
+0735  <span class="comment">% Check termination conditions (do not test until tried to decrease)</span>
+0736  <span class="comment">%----------------------------------------------------------------------</span>
+0737  <span class="keyword">if</span> count&gt;1,
+0738   <span class="comment">%Poll the Stop Estimation Gui Button Pressed variable</span>
+0739   <span class="keyword">if</span> stopEstGuiRunning,
+0740    stopEst = stopEstGui.buttonPressed;
+0741   <span class="keyword">else</span>
+0742    stopEst = 0;
+0743   <span class="keyword">end</span>
+0744   <span class="keyword">if</span> ~isempty(guih),
+0745    <span class="keyword">if</span>(guih.gui.eto.myEstModelPopup.check == 1)
+0746     stopEst = 1;
+0747    <span class="keyword">end</span>
+0748   <span class="keyword">end</span>
+0749   <span class="keyword">if</span> stopEst
+0750    <span class="comment">%Stopping because the user wants to</span>
+0751    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0752    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to Users wishes    '</span>,gui,guih);
+0753    <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0754    ARGS.whystop=<span class="string">'Termination due to Users wishes'</span>;
+0755    <span class="keyword">break</span>;
+0756   <span class="keyword">elseif</span> isfield(OPT,<span class="string">'sv'</span>) &amp; nc &lt; OPT.sv,
+0757    <span class="comment">%Termination due to cost falling below given value</span>
+0758    <span class="keyword">if</span> OPT.dsp,
+0759     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0760     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to cost falling below given value in OPT.sv    '</span>,gui,guih);
+0761     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0762    <span class="keyword">end</span>
+0763    ARGS.whystop=<span class="string">'Termination due to cost falling below given value in OPT.sv'</span>;
+0764    <span class="keyword">break</span>;
+0765   <span class="keyword">elseif</span> tnorm&lt;OPT.tol,
+0766    <span class="comment">%Termination due to gradient norm less than OPT.tol</span>
+0767    <span class="keyword">if</span> OPT.dsp,
+0768     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0769     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to gradient norm less than OPT.tol           '</span>,gui,guih);
+0770     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0771    <span class="keyword">end</span>
+0772    ARGS.whystop=<span class="string">'Termination due to gradient norm less than OPT.tol'</span>;
+0773    <span class="keyword">break</span>;
+0774   <span class="keyword">elseif</span> count&gt;OPT.miter,
+0775    <span class="comment">%Termination due to number of iterations exceeding OPT.miter</span>
+0776    <span class="keyword">if</span> OPT.dsp,
+0777     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0778     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to number of iterations exceeding OPT.miter  '</span>,gui,guih);
+0779     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0780    <span class="keyword">end</span>
+0781    ARGS.whystop=<span class="string">'Termination due to number of iterations exceeding OPT.miter'</span>;
+0782    <span class="keyword">break</span>;
+0783   <span class="keyword">elseif</span> bisec&gt;=OPT.lmax,
+0784    <span class="comment">%Termination due to number of bisections exceeding OPT.lmax</span>
+0785    <span class="keyword">if</span> OPT.dsp,
+0786     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0787     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to number of bisections exceeding OPT.lmax   '</span>,gui,guih);
+0788     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0789    <span class="keyword">end</span>
+0790    ARGS.whystop=<span class="string">'Termination due to number of bisections exceeding OPT.lmax'</span>;
+0791    <span class="keyword">break</span>;
+0792   <span class="keyword">elseif</span> delta&lt;2*eps,
+0793    <span class="comment">%Termination due to trust region too small</span>
+0794    <span class="keyword">if</span> OPT.dsp,
+0795     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0796     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to trust region being too small (&lt; 2*eps)    '</span>,gui,guih);
+0797     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0798    <span class="keyword">end</span>
+0799    ARGS.whystop=<span class="string">'Termination due to number of bisections exceeding OPT.lmax'</span>;
+0800    <span class="keyword">break</span>;
+0801   <span class="keyword">elseif</span> 0 &amp; abs(cost-nc)&lt;OPT.mdec*abs(p'*grad),
+0802    <span class="comment">%Termination due to cost difference less than OPT.mdec</span>
+0803    <span class="keyword">if</span> OPT.dsp,
+0804     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0805     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to cost difference less than OPT.mdec        '</span>,gui,guih);
+0806     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0807    <span class="keyword">end</span>
+0808    <span class="keyword">break</span>;
+0809   <span class="keyword">elseif</span> 0 &amp; (bisec&lt;OPT.lmax) &amp; (norm(theta-theta_old)&lt;sqrt(eps)*norm(theta_old)),
+0810    <span class="comment">%Termination due to insufficient progress</span>
+0811    <span class="keyword">if</span> OPT.dsp,
+0812     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0813     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to parameters not changing                   '</span>,gui,guih);
+0814     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0815    <span class="keyword">end</span>
+0816    <span class="keyword">break</span>;
+0817   <span class="keyword">elseif</span> isinf(delta),
+0818    <span class="comment">%Termination due to delta being too big</span>
+0819    <span class="keyword">if</span> OPT.dsp,
+0820     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0821     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(<span class="string">'Termination due to delta being too large                     '</span>,gui,guih);
+0822     <a href="udisp.html" class="code" title="function udisp(str,guiRunning,guiHandle)">udisp</a>(sglines,gui,guih);
+0823    <span class="keyword">end</span>
+0824    <span class="keyword">break</span>;
+0825   <span class="keyword">end</span>
+0826  <span class="keyword">end</span>
+0827 <span class="keyword">end</span>
+0828 
+0829 <span class="comment">%If stopEstimation GUI is running then close it</span>
+0830 <span class="keyword">if</span> stopEstGuiRunning,
+0831  stopEstGui.setVisible(false);
+0832  clear stopEstGui;
+0833 <span class="keyword">end</span>
+0834 
+0835 <span class="comment">% Make sure we save some important info.</span>
+0836 ARGS.OPT   = OPT;
+0837 ARGS.theta = theta;
+0838 <span class="keyword">if</span> OPT.miter&gt;0,
+0839  cost_log(end+1) = nc;
+0840  <span class="keyword">if</span> OPT.saveit, ARGS.thetait = theta_saved; <span class="keyword">end</span>
+0841 <span class="keyword">else</span>
+0842  nc=feval(FUN,Z,theta,OPT,ARGS,0);
+0843  cost_log(end+1) = nc;
+0844 <span class="keyword">end</span>
+0845 
+0846 <span class="keyword">if</span> exist(<span class="string">'phi'</span>,<span class="string">'var'</span>),
+0847  ARGS.jacobian = phi;
+0848 <span class="keyword">end</span>
+0849</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

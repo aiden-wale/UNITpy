@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of foe</title>
+  <meta name="keywords" content="foe">
+  <meta name="description" content="Computes an estimate using an output-error model">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; foe.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>foe
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Computes an estimate using an output-error model</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = foe(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Computes an estimate using an output-error model
+
+  F(w_s) = B(p)/A(p)cos(2*pi*w_s) + V(w_s)
+
+  from frequency domain data observations F(w_s) that are corrupted by
+  additive noise V(w_s).  The operator p can be the Z tranform variable
+  with z=e^(j*w_s*T) (with T being the sampling period in seconds), the
+  Euler differencing (delta) operator d = (q-1)/T with d =
+  (e^(j*w_s*T)-1)/T or the Laplace Transform variable s with s=j*w.  A
+  quadratic (least squares) loss criterion is used.
+
+  Usage is 
+
+  G = foe(Z,M,OPT);
+ 
+  Z          = observed frequency response data [F(:),w(:)] where
+               plot(w,abs(F)) should plot the measured  frequency
+               response.   Units for w are real *not* normalised freq.
+  M          = Data structure which defines the model structure which
+               is to be estimated from the data as follows:
+   M.A       = Number of poles to be estimated in denominator - which is
+               then set as equal to # of zeros to be estimated in numerator.
+   M.op      = set to 'q' for shift, 'd' for delta, 's' for Laplace  
+               Default = 's'.
+   M.T       = sampling period in s. (Ignored for q case) Default = 1;
+
+  OPT        = Data structure which defines options for the estimation
+               algorithm as follows:
+   OPT.basis = only applicable for 's' operator models, and selects either
+               Chebychev ('cheby') or Laguerre ('ortho') orthonormal bases,
+               or normal non-orthonormal polynomial ('polyb') basis.  
+               Default is 'ortho'.
+   OPT.W     = Vector of same dimension as w that specifies a
+               frequency weighting for the least squares fit.  That is,
+               plot(w,W) should give a graphical interpretation of the
+               weighting.  The default is a flat (unprejudiced)
+               weighting.
+   OPT.mdec  = Minimum relative decrease of cost before search is
+               terminated.  Default is 1e-8;spl
+
+  G          = Data structure which specifies the estimated model as
+               follows:
+   G.B/G.A   = estimated transfer function for model of dynamics.
+   G.G       = Frequency response of estimated model for dynamics.
+   G.th      = Estimated Parameter vector from which G.B, G.A are formed. 
+
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="argmin.html" class="code" title="function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)">argmin</a>	Function to find minimum of function that is defined by user supplied</li><li><a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>	Computes ARX model:</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Computes an estimate using an output-error model</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  F(w_s) = B(p)/A(p)cos(2*pi*w_s) + V(w_s)</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  from frequency domain data observations F(w_s) that are corrupted by</span>
+0006 <span class="comment">%  additive noise V(w_s).  The operator p can be the Z tranform variable</span>
+0007 <span class="comment">%  with z=e^(j*w_s*T) (with T being the sampling period in seconds), the</span>
+0008 <span class="comment">%  Euler differencing (delta) operator d = (q-1)/T with d =</span>
+0009 <span class="comment">%  (e^(j*w_s*T)-1)/T or the Laplace Transform variable s with s=j*w.  A</span>
+0010 <span class="comment">%  quadratic (least squares) loss criterion is used.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Usage is</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%  G = foe(Z,M,OPT);</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%  Z          = observed frequency response data [F(:),w(:)] where</span>
+0017 <span class="comment">%               plot(w,abs(F)) should plot the measured  frequency</span>
+0018 <span class="comment">%               response.   Units for w are real *not* normalised freq.</span>
+0019 <span class="comment">%  M          = Data structure which defines the model structure which</span>
+0020 <span class="comment">%               is to be estimated from the data as follows:</span>
+0021 <span class="comment">%   M.A       = Number of poles to be estimated in denominator - which is</span>
+0022 <span class="comment">%               then set as equal to # of zeros to be estimated in numerator.</span>
+0023 <span class="comment">%   M.op      = set to 'q' for shift, 'd' for delta, 's' for Laplace</span>
+0024 <span class="comment">%               Default = 's'.</span>
+0025 <span class="comment">%   M.T       = sampling period in s. (Ignored for q case) Default = 1;</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%  OPT        = Data structure which defines options for the estimation</span>
+0028 <span class="comment">%               algorithm as follows:</span>
+0029 <span class="comment">%   OPT.basis = only applicable for 's' operator models, and selects either</span>
+0030 <span class="comment">%               Chebychev ('cheby') or Laguerre ('ortho') orthonormal bases,</span>
+0031 <span class="comment">%               or normal non-orthonormal polynomial ('polyb') basis.</span>
+0032 <span class="comment">%               Default is 'ortho'.</span>
+0033 <span class="comment">%   OPT.W     = Vector of same dimension as w that specifies a</span>
+0034 <span class="comment">%               frequency weighting for the least squares fit.  That is,</span>
+0035 <span class="comment">%               plot(w,W) should give a graphical interpretation of the</span>
+0036 <span class="comment">%               weighting.  The default is a flat (unprejudiced)</span>
+0037 <span class="comment">%               weighting.</span>
+0038 <span class="comment">%   OPT.mdec  = Minimum relative decrease of cost before search is</span>
+0039 <span class="comment">%               terminated.  Default is 1e-8;spl</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%  G          = Data structure which specifies the estimated model as</span>
+0042 <span class="comment">%               follows:</span>
+0043 <span class="comment">%   G.B/G.A   = estimated transfer function for model of dynamics.</span>
+0044 <span class="comment">%   G.G       = Frequency response of estimated model for dynamics.</span>
+0045 <span class="comment">%   G.th      = Estimated Parameter vector from which G.B, G.A are formed.</span>
+0046 <span class="comment">%</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0049 <span class="comment">%                             University of Newcastle</span>
+0050 <span class="comment">%                             Australia.</span>
+0051 
+0052 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0053 
+0054 <a name="_sub0" href="#_subfunctions" class="code">function G = foe(Z,M,OPT)</a>
+0055 
+0056 <span class="comment">% Extract out relevant vectors from input data</span>
+0057 [F,w,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z); F=squeeze(F); F=F(:); wmax = max(w);
+0058 
+0059 <span class="comment">% Check what options not specified explicitly by user and set to defaults</span>
+0060 
+0061 <span class="keyword">if</span> ~exist(<span class="string">'OPT'</span>) 
+0062   OPT.dsp=0; OPT.miter=20; OPT.tol=1e-5; 
+0063   OPT.lmax=20; OPT.basis = <span class="string">'ortho'</span>; OPT.mdec = 1e-8;
+0064   OPT.W = ones(size(F));  
+0065 <span class="keyword">else</span>
+0066   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'dsp'</span>)   OPT.dsp=0;           <span class="keyword">end</span>;
+0067   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'miter'</span>) OPT.miter=20;        <span class="keyword">end</span>;  
+0068   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'tol'</span>)   OPT.tol=1e-5;        <span class="keyword">end</span>;    
+0069   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'lmax'</span>)  OPT.lmax=20;         <span class="keyword">end</span>;      
+0070   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'mdec'</span>)  OPT.mdec=1e-8;       <span class="keyword">end</span>;        
+0071   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'basis'</span>) OPT.basis=<span class="string">'ortho'</span>;   <span class="keyword">end</span>;
+0072   <span class="keyword">if</span> ~isfield(OPT,<span class="string">'W'</span>)     OPT.W=ones(size(F)); <span class="keyword">end</span>;   
+0073   <span class="keyword">if</span> (length(OPT.basis) ~=5) 
+0074     error(<span class="string">'Not a recognised basis from: ortho,cheby,polyb'</span>); <span class="keyword">end</span>;      
+0075 <span class="keyword">end</span>;
+0076 
+0077 <span class="comment">% Check which parts of model structure were unspecified and set to defaults.</span>
+0078 
+0079 <span class="keyword">if</span> ~exist(<span class="string">'M'</span>) error(<span class="string">'Need to specify initial model structure M!'</span>); 
+0080   <span class="keyword">else</span>
+0081   <span class="keyword">if</span> ~isfield(M,<span class="string">'op'</span>)    M.op=<span class="string">'q'</span>;   <span class="keyword">end</span>;
+0082   <span class="keyword">if</span> ~isfield(M,<span class="string">'T'</span>)     M.T=1;      <span class="keyword">end</span>;  
+0083   <span class="keyword">if</span> ~isfield(M,<span class="string">'B'</span>)     M.B=M.A;    <span class="keyword">end</span>;  
+0084   <span class="keyword">if</span> ~isfield(M,<span class="string">'delay'</span>) M.delay=0;  <span class="keyword">end</span>;    
+0085   <span class="keyword">if</span> ~isfield(M,<span class="string">'w'</span>)     M.w= logspace(log10(pi/M.T/1000),log10(pi/M.T)); <span class="keyword">end</span>;      
+0086   M.A = M.A(:); M.B = M.B(:);
+0087 <span class="keyword">end</span>;
+0088 
+0089 <span class="comment">%  Establish frequency domain variable appropriate to time domain operator</span>
+0090 <span class="keyword">if</span> (M.op==<span class="string">'q'</span>) ww = exp(j*M.w*M.T); 
+0091 <span class="keyword">elseif</span> (M.op==<span class="string">'d'</span>) ww = (exp(j*M.w*M.T)-ones(size(M.w)))/M.T; 
+0092 <span class="keyword">else</span> ww = j*M.w; <span class="keyword">end</span>;  
+0093 
+0094 <span class="comment">%  Is frequency normalisation necessary?</span>
+0095 normw=0;  <span class="keyword">if</span> [M.op == <span class="string">'s'</span>, OPT.basis ~= <span class="string">'ortho'</span>] normw = 1; <span class="keyword">end</span>;
+0096 
+0097 <span class="comment">% Check to see of only integer orders where specified as initial guesses</span>
+0098 <span class="comment">% for dynamics: if so get initial estimate by fitting ARX model structure.</span>
+0099 
+0100 <span class="keyword">if</span> [length(M.A)&lt;2  floor(M.A(:)')==M.A(:)']  
+0101  <span class="comment">% Get initial ARX estimate of specified order;</span>
+0102  g = <a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>(Z,M,OPT); th0 = g.th; X = g.X; 
+0103  M.A = g.A; M.B = g.B; n = length(g.B);
+0104 <span class="keyword">else</span>  <span class="comment">% Otherwise, re-express initial guess wrt chosen basis</span>
+0105  ff = polyval(M.B,ww)./polyval(M.A,ww);  <span class="comment">% Response of initial guess</span>
+0106  <span class="comment">% Use farx to translate this initial guess to requested basis.</span>
+0107  g = <a href="farx.html" class="code" title="function G = farx(Z,M,OPT);">farx</a>([ff(:),M.w(:)],M,OPT); th0 = g.th; X = g.X;  
+0108  M.A = g.A; M.B = g.B; n = length(g.B); 
+0109 <span class="keyword">end</span>;
+0110 
+0111 <span class="comment">%  Now use iterative Gauss-Newton search to find minimum of quadratic cost.</span>
+0112 
+0113 th = <a href="argmin.html" class="code" title="function [theta,cost_log,ARGS] = argmin(Z,FUN,theta,OPT,ARGS,fargs)">argmin</a>(Z,<span class="string">'VNf'</span>,th0,OPT,M);
+0114 
+0115 <span class="comment">%  Extract A and B polynomials from theta parameter vector</span>
+0116 
+0117 G.B = th(1:n)'; G.A = th(n+1:length(th))'; 
+0118 
+0119 <span class="comment">%  Revert basis to normal polynomial one.</span>
+0120 
+0121 G.B = G.B*X; G.A = [1,G.A]*X;
+0122 
+0123 <span class="comment">%  Undo frequency normalisation if it was applied</span>
+0124 
+0125 <span class="keyword">if</span> (normw)
+0126   G.A = G.A.*(wmax.^(1:n));   <span class="comment">%  Undo frequency Normalisation if</span>
+0127   G.B = G.B.*(wmax.^(1:n));   <span class="comment">%  it was applied</span>
+0128 <span class="keyword">end</span>;  
+0129 
+0130 <span class="comment">% Pack results into output data structure.</span>
+0131 
+0132 G.B = G.B/G.A(1); G.A = G.A/G.A(1); G.delay=M.delay; 
+0133 G.T = M.T; G.w = M.w; G.op = M.op; G.th = th; G.type=<span class="string">'foe'</span>;
+0134 G.C=[]; G.D=[];
+0135 
+0136 <span class="comment">% Add legend for prospective plotting</span>
+0137 G.disp.legend=[<span class="string">'Estimated '</span>,G.type,<span class="string">' model'</span>];
+0138 
+0139 G.alg=<span class="string">'gn'</span>; <span class="comment">% Record that Gauss-Newton search was employed</span>
+0140 
+0141 
+0142 
+0143 
+0144 
+0145 
+0146 
+0147 
+0148 
+0149 
+0150 
+0151 
+0152 
+0153 
+0154 
+0155 
+0156</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

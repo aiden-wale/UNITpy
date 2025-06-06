@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of sysfr</title>
+  <meta name="keywords" content="sysfr">
+  <meta name="description" content="written by Brett Ninness, School of EE &amp; CS">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; sysfr.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>sysfr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>written by Brett Ninness, School of EE &amp; CS</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [dy] = sysfr(N,y,XB,CX,dAKC,dBKD,dK,dC,dD,isK,isD) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   written by Brett Ninness, School of EE &amp; CS
+              Adrian Wills   University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VNssf.html" class="code" title="function [cost,pe,grad,phi,map]=VNssf(Z,theta,OPT,M,div)">VNssf</a>	Function to calculate quadratic cost</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0003 <span class="comment">%              Adrian Wills   University of Newcastle</span>
+0004 <span class="comment">%                             Australia.</span>
+0005 <span class="comment">%</span>
+0006 
+0007 <span class="comment">% Copyright (C) Brett Ninness</span>
+0008 
+0009 <a name="_sub0" href="#_subfunctions" class="code">function [dy] = sysfr(N,y,XB,CX,dAKC,dBKD,dK,dC,dD,isK,isD)</a>
+0010 
+0011 <span class="keyword">if</span> isK &amp;&amp; isD,
+0012  <span class="keyword">for</span> k=1:N,
+0013   dX            = dBKD + dAKC*XB(:,:,k) + dK*y(:,:,k);
+0014   dy(:,:,k)     = dC*XB(:,:,k) + CX(:,:,k)*dX + dD;
+0015  <span class="keyword">end</span>
+0016 <span class="keyword">elseif</span> isK &amp;&amp; ~isD,
+0017  <span class="keyword">for</span> k=1:N,
+0018   dX            = dBKD + dAKC*XB(:,:,k) + dK*y(:,:,k);
+0019   dy(:,:,k)     = dC*XB(:,:,k) + CX(:,:,k)*dX;
+0020  <span class="keyword">end</span>
+0021 <span class="keyword">elseif</span> ~isK &amp;&amp; isD,
+0022  <span class="keyword">for</span> k=1:N,
+0023   dX            = dBKD + dAKC*XB(:,:,k);
+0024   dy(:,:,k)     = dC*XB(:,:,k) + CX(:,:,k)*dX + dD;
+0025  <span class="keyword">end</span>
+0026 <span class="keyword">else</span>
+0027  <span class="keyword">for</span> k=1:N,
+0028   dX            = dBKD + dAKC*XB(:,:,k);
+0029   dy(:,:,k)     = dC*XB(:,:,k) + CX(:,:,k)*dX;
+0030  <span class="keyword">end</span>
+0031 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

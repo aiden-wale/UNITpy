@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of pratio</title>
+  <meta name="keywords" content="pratio">
+  <meta name="description" content="PRATIO: Compute the ratio of the posteriors distribution of parameters">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; pratio.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>pratio
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PRATIO: Compute the ratio of the posteriors distribution of parameters</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [prat,cold] = pratio(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  PRATIO: Compute the ratio of the posteriors distribution of parameters
+  given data for transfer function models.  This function is not meant
+  to be called directly by the user.  Rather, it is meant to be called
+  by POSTDIST via it employing a Metropolis-Hastings method to which
+  a handle to this function is passed.
+
+  [prat,cold] = pratio(Z,M,OPT)
+  
+  where:
+
+   Z:          Input-Output data in one of two forms.  The standard form
+               is for it to be a record with elements Z.y and Z.u, each
+               of which are matrices with number of rows equal to the
+               number of data samples, and number of columns equal (respectively)
+               to the number of outputs and the number of inputs.
+
+   M:          Data structure which defines the model structure for
+               which the posterior distribution of the parameters or functions of
+               them is required.  Type &quot;help est&quot;  for a detailed
+               description.  
+
+  OPT:         Data structure which defines options for the computation
+               of the probability ratio.
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                              Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>	Function to calculate quadratic cost</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  PRATIO: Compute the ratio of the posteriors distribution of parameters</span>
+0002 <span class="comment">%  given data for transfer function models.  This function is not meant</span>
+0003 <span class="comment">%  to be called directly by the user.  Rather, it is meant to be called</span>
+0004 <span class="comment">%  by POSTDIST via it employing a Metropolis-Hastings method to which</span>
+0005 <span class="comment">%  a handle to this function is passed.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  [prat,cold] = pratio(Z,M,OPT)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  where:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Z:          Input-Output data in one of two forms.  The standard form</span>
+0012 <span class="comment">%               is for it to be a record with elements Z.y and Z.u, each</span>
+0013 <span class="comment">%               of which are matrices with number of rows equal to the</span>
+0014 <span class="comment">%               number of data samples, and number of columns equal (respectively)</span>
+0015 <span class="comment">%               to the number of outputs and the number of inputs.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%   M:          Data structure which defines the model structure for</span>
+0018 <span class="comment">%               which the posterior distribution of the parameters or functions of</span>
+0019 <span class="comment">%               them is required.  Type &quot;help est&quot;  for a detailed</span>
+0020 <span class="comment">%               description.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  OPT:         Data structure which defines options for the computation</span>
+0023 <span class="comment">%               of the probability ratio.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0026 <span class="comment">%                             University of Newcastle</span>
+0027 <span class="comment">%                              Australia.</span>
+0028 
+0029 
+0030 <span class="comment">% Copyright (C) Brett Ninness</span>
+0031 
+0032 <a name="_sub0" href="#_subfunctions" class="code">function [prat,cold] = pratio(Z,M,OPT)</a>
+0033 
+0034 <span class="comment">% First, set or not flag for a GOFAST, that only works for OE structures.</span>
+0035 <span class="comment">% It's here only for testing purposes because it is insanely faster than</span>
+0036 <span class="comment">% a call to VN.</span>
+0037  
+0038 GOFAST = 1;   <span class="comment">% Do gofast in case we have OE structure</span>
+0039 
+0040 <span class="keyword">if</span> GOFAST
+0041  <span class="comment">% If OPT.cold has a value in it, then metropolis.m is telling us that on</span>
+0042  <span class="comment">% previous iteration proposal was not accepted, and hence value in</span>
+0043  <span class="comment">% OPT.cold need not be recomputed</span>
+0044  <span class="keyword">if</span> isempty(OPT.cold)
+0045   num = M.thold(1:length(M.B));
+0046   den = [1,M.thold(length(M.B)+1:end)'];
+0047   yp = filter([zeros(1,M.delay),num],den,Z.u);   
+0048   peold = Z.y(:)-yp(:); <span class="comment">% Prediction error</span>
+0049   cold = peold'*peold/length(peold);
+0050  <span class="keyword">else</span>
+0051   cold = OPT.cold;
+0052  <span class="keyword">end</span>;
+0053   
+0054  num = M.thnew(1:length(M.B));
+0055  den = [1,M.thnew(length(M.B)+1:end)'];
+0056  yp = filter([zeros(1,M.delay),num],den,Z.u);   
+0057  penew = Z.y(:)-yp(:); <span class="comment">% Prediction error</span>
+0058  cnew = penew'*penew/length(penew);
+0059 <span class="keyword">else</span>   
+0060  <span class="comment">% This should automatically handle any model structure that VN has been</span>
+0061  <span class="comment">% writtent to handle - but it will be sloooowwww.</span>
+0062  [cold,peold] = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(Z,M.thold,OPT,M);   
+0063  [cnew,penew] = <a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>(Z,M.thnew,OPT,M);  
+0064 <span class="keyword">end</span>;
+0065 
+0066 <span class="comment">% Use cold, cnew, peold, penew to compute acceptance probabilities</span>
+0067 
+0068 <span class="keyword">if</span> OPT.rej  <span class="comment">% Is a rejection sampling ratio requested?</span>
+0069  <span class="keyword">if</span> strcmpi(OPT.dens,<span class="string">'gaussian'</span>) 
+0070   prat = exp((-0.5/OPT.var)*(cnew-cold)*length(penew));   
+0071  <span class="keyword">elseif</span> strcmpi(OPT.dens,<span class="string">'uniform'</span>)    
+0072   ptop = 1-max(abs(penew)&gt;sqrt((3*OPT.var)));  
+0073   pbot = (1/(sqrt(2*pi)))*exp(-0.5*M.thnew'*M.thnew);
+0074   prat = ptop/pbot;
+0075  <span class="keyword">end</span>;
+0076 <span class="keyword">else</span> <span class="comment">% Case of a Metropolis ratio being requested</span>
+0077  <span class="keyword">if</span> strcmpi(OPT.dens,<span class="string">'gaussian'</span>) 
+0078   <span class="comment">%prat = exp((-0.5/OPT.var)*(cnew-cold)*length(penew));</span>
+0079   
+0080   prat = ((sqrt(OPT.varold/OPT.var))^length(penew))*exp( -0.5*length(penew)*(cnew/OPT.var-cold/OPT.varold) );   
+0081   
+0082  <span class="keyword">elseif</span> strcmpi(OPT.dens,<span class="string">'anneal'</span>)
+0083   prat = exp(-(cnew-cold)/Temp);       
+0084   <span class="keyword">if</span> ~mod(k,10) Temp = dfac*Temp; <span class="keyword">end</span>;
+0085  <span class="keyword">elseif</span> strcmpi(OPT.dens,<span class="string">'uniform'</span>)    
+0086   
+0087   knew = sqrt((3*OPT.var));
+0088   kold = sqrt((3*OPT.varold));
+0089 
+0090   p1 = max(abs(penew)&gt;knew);  
+0091   prat = ((kold/knew)^length(penew))*(1-p1);
+0092     
+0093  <span class="keyword">end</span>;
+0094 <span class="keyword">end</span>;
+0095</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

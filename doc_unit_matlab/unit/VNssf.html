@@ -1,0 +1,334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of VNssf</title>
+  <meta name="keywords" content="VNssf">
+  <meta name="description" content="Function to calculate quadratic cost">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; VNssf.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>VNssf
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to calculate quadratic cost</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [cost,pe,grad,phi,map]=VNssf(Z,theta,OPT,M,div) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Function to calculate quadratic cost
+
+  V_N(theta) = 1/N\sum_{k=1}^N[Y(w_k) - G(theta,w_k)]^2
+
+  Associated with the state-space model for observed frequency domain data:
+
+  G(theta,w_k) = C (pI - A)^{-1} B + D
+
+  The operator p can be the Z tranform variable with z=e^(j*w_k*T) (with T
+  being the sampling period in seconds), or the Laplace Transform
+  variable s with s=j*w_k.
+
+  This function is not meant to be directly called by users - instead it
+  is an auxiliary function used by foe.m for frequency domain system
+  identification.
+
+  Usage is
+
+  [cost,pe,grad,psi] = VNssf(Z,theta,OPT.n)
+
+  Z        = Frequency-Response-Function (FRF) data. Z.y(i,j,k) holds
+             the i'th output, j'th input FRF data for the k'th
+             frequency point. The frequency points are stored in Z.w.
+  theta    = [A(:);B(:);C(:);D(:)]: specification of point to calculate cost at.
+  M        = Data structure which defines the model structure which
+             is to be estimated from the data as follows:
+  OPT      = Data structure which defines options for an estimation
+             algorithm.
+
+   written by Brett Ninness,  School of EE &amp; CS
+              Adrian Wills    University of Newcastle
+                                    Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ddlc.html" class="code" title="function [m]=ddlc(th,M);">ddlc</a>	Function used as part of DDLC method for estimation of state-space</li><li><a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>	Function to compute frequency response of LTI system in state space form</li><li><a href="samplek.html" class="code" title="function M = samplek(mm)">samplek</a>	SAMPLEK: This routine takes a continuous time stochastic state</li><li><a href="sysfr.html" class="code" title="function [dy] = sysfr(N,y,XB,CX,dAKC,dBKD,dK,dC,dD,isK,isD)">sysfr</a>	written by Brett Ninness, School of EE & CS</li><li><a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>	THETA2M - function to convert from stacked parameter vector to model</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Function to calculate quadratic cost</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  V_N(theta) = 1/N\sum_{k=1}^N[Y(w_k) - G(theta,w_k)]^2</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  Associated with the state-space model for observed frequency domain data:</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  G(theta,w_k) = C (pI - A)^{-1} B + D</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  The operator p can be the Z tranform variable with z=e^(j*w_k*T) (with T</span>
+0010 <span class="comment">%  being the sampling period in seconds), or the Laplace Transform</span>
+0011 <span class="comment">%  variable s with s=j*w_k.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%  This function is not meant to be directly called by users - instead it</span>
+0014 <span class="comment">%  is an auxiliary function used by foe.m for frequency domain system</span>
+0015 <span class="comment">%  identification.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%  Usage is</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%  [cost,pe,grad,psi] = VNssf(Z,theta,OPT.n)</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%  Z        = Frequency-Response-Function (FRF) data. Z.y(i,j,k) holds</span>
+0022 <span class="comment">%             the i'th output, j'th input FRF data for the k'th</span>
+0023 <span class="comment">%             frequency point. The frequency points are stored in Z.w.</span>
+0024 <span class="comment">%  theta    = [A(:);B(:);C(:);D(:)]: specification of point to calculate cost at.</span>
+0025 <span class="comment">%  M        = Data structure which defines the model structure which</span>
+0026 <span class="comment">%             is to be estimated from the data as follows:</span>
+0027 <span class="comment">%  OPT      = Data structure which defines options for an estimation</span>
+0028 <span class="comment">%             algorithm.</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%   written by Brett Ninness,  School of EE &amp; CS</span>
+0031 <span class="comment">%              Adrian Wills    University of Newcastle</span>
+0032 <span class="comment">%                                    Australia.</span>
+0033 
+0034 
+0035 <span class="comment">% Copyright (C) Brett Ninness</span>
+0036 
+0037 <a name="_sub0" href="#_subfunctions" class="code">function [cost,pe,grad,phi,map]=VNssf(Z,theta,OPT,M,div)</a>
+0038 
+0039 <span class="comment">%Get state-space model</span>
+0040 g=<a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta,M,1);
+0041 
+0042 <span class="comment">%Find out if there is a structure that we must obey</span>
+0043 <span class="keyword">if</span> isfield(M,<span class="string">'theta_struct'</span>),
+0044  theta_struct = M.theta_struct;
+0045 <span class="keyword">else</span>
+0046  theta_struct = find(ones(length(theta),1));
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="comment">% Compute cost associated with this state-space model</span>
+0050 [p,m,N]=size(Z.y); n=size(g.ss.A,1);
+0051 <span class="keyword">if</span> strcmp(M.op,<span class="string">'q'</span>),
+0052  ew=exp(j*Z.w(:)*M.T);
+0053 <span class="keyword">elseif</span> strcmp(M.op,<span class="string">'s'</span>),
+0054  ew=j*Z.w(:);
+0055 <span class="keyword">else</span>
+0056  error([<span class="string">'OPT.op '</span> OPT.op <span class="string">' not supported'</span>]);
+0057 <span class="keyword">end</span>
+0058 
+0059 <span class="comment">%Get data in useful form</span>
+0060 y=Z.y;
+0061 
+0062 <span class="comment">%Extract system matrices</span>
+0063 A  = g.ss.A;
+0064 B  = g.ss.B;
+0065 C  = g.ss.C;
+0066 D  = g.ss.D;
+0067 K  = g.ss.K;
+0068 X1 = g.ss.X1;
+0069 Ms = M; <span class="comment">%Save initial system</span>
+0070 
+0071 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'R'</span>),
+0072  R=ones(p*m*N,1);
+0073 <span class="keyword">else</span>
+0074  R=sqrt(OPT.R(:));
+0075  OPT.cost=<span class="string">'mse'</span>;
+0076 <span class="keyword">end</span>
+0077 OPT.cost=<span class="string">'mse'</span>;
+0078 
+0079 <span class="comment">%Construct matrices depending on D</span>
+0080 isD  = ~isempty(D);
+0081 isK  = ~isempty(K);
+0082 isX1 = ~isempty(X1);
+0083 
+0084 <span class="comment">%Form (A-KC)</span>
+0085 <span class="keyword">if</span> isK,
+0086  AKC = A-K*C;
+0087 <span class="keyword">else</span>
+0088  AKC = A;
+0089  K   = zeros(n,p);
+0090 <span class="keyword">end</span>
+0091 <span class="keyword">if</span> isK &amp;&amp; isD,
+0092  BKD = B-K*D;
+0093 <span class="keyword">else</span>
+0094  BKD = B;
+0095 <span class="keyword">end</span>
+0096 <span class="keyword">if</span> ~isD,
+0097  D = zeros(p,m);
+0098 <span class="keyword">end</span>
+0099 
+0100 <span class="comment">% Get frequency response</span>
+0101 onN  = ones(1,N); pe = zeros(N*p,m); In = eye(n,n);
+0102 <span class="keyword">if</span> div, 
+0103  XB   = <a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(AKC,BKD,In,ew);
+0104  CX   = <a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(AKC,eye(n),C,ew);
+0105 <span class="keyword">end</span>
+0106 pe = y - <a href="frmimo.html" class="code" title="function G = frmimo(A,B,C,s);">frmimo</a>(AKC,BKD,C,ew);
+0107 <span class="keyword">if</span> isD,
+0108  pe = pe - D(:,:,onN);
+0109 <span class="keyword">end</span>
+0110 <span class="keyword">if</span> isK,
+0111  <span class="keyword">for</span> im=1:m,
+0112   pe(:,im,:) = pe(:,im,:) - reshape(C*K*squeeze(y(:,im,:)),p,N);
+0113  <span class="keyword">end</span>
+0114 <span class="keyword">end</span>
+0115 
+0116 <span class="comment">% Scale the prediction error according to user defined weighting</span>
+0117 pe_saved = pe;
+0118 pe = R.*pe(:);
+0119 
+0120 <span class="comment">%Calculate cost according to selection OPT.cost</span>
+0121 <span class="keyword">switch</span> OPT.cost,
+0122  <span class="keyword">case</span> {<span class="string">'mse'</span>,<span class="string">'trace'</span>}
+0123   cost  = real(pe'*pe)/N;
+0124   pe    = [real(pe(:));imag(pe(:))];
+0125  <span class="keyword">case</span> {<span class="string">'det'</span>,<span class="string">'ml'</span>}
+0126   pe    = reshape(pe,p,m*N);
+0127   V     = (pe*pe')/N;
+0128   cost  = real(log(det(V)));
+0129   sV    = sqrtm(V)\eye(size(V));
+0130   scal  = 1;<span class="comment">%sqrt(det(V));</span>
+0131   pe    = scal*sV*pe;
+0132   pe    = [real(pe(:));imag(pe(:))];
+0133  <span class="keyword">otherwise</span>
+0134   error(<span class="string">'Value in OPT.cost is not valid!'</span>);
+0135 <span class="keyword">end</span>
+0136 
+0137 
+0138 <span class="keyword">if</span> div,
+0139  deps = eps^(2/3);
+0140  
+0141  <span class="keyword">if</span> strcmpi(M.par,<span class="string">'ddlc'</span>),
+0142   Md  = <a href="ddlc.html" class="code" title="function [m]=ddlc(th,M);">ddlc</a>(theta,Ms);
+0143   nQp = size(Md.Qp,2);
+0144   map = Md.Qp;
+0145   <span class="keyword">if</span> isX1,
+0146    nth = nQp + n;
+0147    map = blkdiag(map,eye(n));
+0148   <span class="keyword">else</span>
+0149    nth = nQp;
+0150   <span class="keyword">end</span>
+0151  <span class="keyword">else</span>
+0152   nth = length(theta_struct);
+0153  <span class="keyword">end</span>
+0154  phi  = zeros(2*m*p*N,nth);
+0155  dy   = zeros(p,m,N);
+0156  dX   = zeros(n,m);
+0157  
+0158  <span class="comment">%Set some default matrix sizes</span>
+0159  dA = zeros(n,n);
+0160  dB = zeros(n,m);
+0161  dC = zeros(p,n);
+0162  dD = zeros(p,m);
+0163  dK = zeros(n,p);
+0164  dx = zeros(n,1);
+0165  
+0166  <span class="comment">%Loop over the parameters we are allowed to vary</span>
+0167  <span class="keyword">for</span> i=1:nth,
+0168   <span class="comment">%Compute derivative of system matrices wrt theta based on</span>
+0169   <span class="comment">%parametrization (note that op='s' or M.par='grey' will result in numerical</span>
+0170   <span class="comment">%derivatives being used).</span>
+0171   <span class="keyword">if</span> strcmpi(M.par,<span class="string">'grey'</span>),
+0172    <span class="comment">%Use finite difference to get derivative estimate of state-space</span>
+0173    <span class="comment">%model w.r.t. theta (this will often be exact to machine eps)</span>
+0174    thn    = zeros(size(theta));
+0175    thn(theta_struct(i)) = deps;
+0176    <span class="keyword">switch</span> lower(OPT.sysnd),
+0177     <span class="keyword">case</span> <span class="string">'forward'</span> <span class="comment">%Use forward numerical differentiation</span>
+0178      pM = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta+thn,Ms);
+0179      <span class="comment">%If continuous model required then sample these systems</span>
+0180      <span class="keyword">if</span> M.op==<span class="string">'s'</span>, pM  = <a href="samplek.html" class="code" title="function M = samplek(mm)">samplek</a>(pM); <span class="keyword">end</span>
+0181      nM = M;
+0182      sc = 1;
+0183     <span class="keyword">case</span> <span class="string">'backward'</span> <span class="comment">%Use backward numerical differentiation</span>
+0184      nM = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta-thn,Ms);
+0185      <span class="comment">%If continuous model required then sample these systems</span>
+0186      <span class="keyword">if</span> M.op==<span class="string">'s'</span>, nM  = feval(M.sample,nM); <span class="keyword">end</span>
+0187      pM = M;
+0188      sc = 1;
+0189     <span class="keyword">otherwise</span>  <span class="comment">%Use mid-point numerical differentiation</span>
+0190      pM = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta+thn,Ms);
+0191      nM = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta-thn,Ms);
+0192      <span class="keyword">if</span> M.op==<span class="string">'s'</span>,
+0193       <span class="comment">%If continuous model required then sample these systems</span>
+0194       pM = feval(M.sample,pM);
+0195       nM = feval(M.sample,nM);
+0196      <span class="keyword">end</span>
+0197      sc = 2;
+0198    <span class="keyword">end</span>
+0199    
+0200    <span class="comment">%Now compute numerical derivative</span>
+0201    dA  = (pM.ss.A-nM.ss.A)/(sc*deps);
+0202    dB  = (pM.ss.B-nM.ss.B)/(sc*deps);
+0203    dC  = (pM.ss.C-nM.ss.C)/(sc*deps);
+0204    <span class="keyword">if</span> isD,  dD  = (pM.ss.D-nM.ss.D)/(sc*deps);   <span class="keyword">end</span>
+0205    <span class="keyword">if</span> isK,  dK  = (pM.ss.K-nM.ss.K)/(sc*deps);   <span class="keyword">end</span>
+0206    <span class="keyword">if</span> isX1, dx  = (pM.ss.X1-nM.ss.X1)/(sc*deps); <span class="keyword">end</span>
+0207    
+0208   <span class="keyword">else</span> <span class="comment">%OK we can compute the derivative directly</span>
+0209    <span class="keyword">if</span> strcmpi(M.par,<span class="string">'ddlc'</span>),
+0210     <span class="keyword">if</span> isX1, <span class="comment">%Need to handle the case of initial state separately</span>
+0211      <span class="keyword">if</span> i&lt;=nQp, <span class="comment">%This gives the derivative of system matrices wrt theta</span>
+0212       thn = [Md.Qp(:,i);zeros(n,1)];
+0213      <span class="keyword">else</span> <span class="comment">%This is derivative of initial state wrt theta</span>
+0214       thn = zeros(length(theta),1);
+0215       thn(size(Md.Qp,1)+i-nQp) = 1;
+0216      <span class="keyword">end</span>
+0217     <span class="keyword">else</span> <span class="comment">%This gives the derivative of system matrices wrt theta</span>
+0218      thn   = Md.Qp(:,i);
+0219     <span class="keyword">end</span>
+0220     dA(:) = thn(1:n*n);         idx=n*n;
+0221     dB(:) = thn(idx+1:idx+n*m); idx=idx+n*m;
+0222     dC(:) = thn(idx+1:idx+p*n); idx=idx+p*n;
+0223     <span class="keyword">if</span> isD,  dD(:) = thn(idx+1:idx+p*m);   idx=idx+p*m;   <span class="keyword">end</span>
+0224     <span class="keyword">if</span> isK,  dK(:) = thn(idx+1:idx+n*p);   idx=idx+n*p;   <span class="keyword">end</span>
+0225     <span class="keyword">if</span> isX1, dx(:) = thn(idx+1:idx+n);     idx=idx+n;     <span class="keyword">end</span>
+0226    <span class="keyword">else</span> <span class="comment">%For all other parametrizations, we just cycle through theta</span>
+0227     thn = zeros(size(theta));
+0228     thn(theta_struct(i)) = 1;
+0229     dM  = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(thn,Ms);
+0230     dA  = dM.ss.A;
+0231     dB  = dM.ss.B;
+0232     dC  = dM.ss.C;
+0233     <span class="keyword">if</span> isD,  dD  = dM.ss.D;  <span class="keyword">end</span>
+0234     <span class="keyword">if</span> isK,  dK  = dM.ss.K;  <span class="keyword">end</span>
+0235     <span class="keyword">if</span> isX1, dx  = dM.ss.X1; <span class="keyword">end</span>
+0236    <span class="keyword">end</span>
+0237   <span class="keyword">end</span>
+0238   
+0239   <span class="comment">%Now run the filter to get the derivative</span>
+0240   dAKC = dA-dK*C-K*dC;
+0241   dBKD = dB-dK*D-K*dD;
+0242   dy = <a href="sysfr.html" class="code" title="function [dy] = sysfr(N,y,XB,CX,dAKC,dBKD,dK,dC,dD,isK,isD)">sysfr</a>(N,y,XB,CX,dAKC,dBKD,dK,dC,dD,isK,isD);        
+0243   phi(:,i) = -[real(dy(:));imag(dy(:))]; 
+0244   <span class="keyword">if</span> strcmpi(OPT.cost,<span class="string">'det'</span>),
+0245    e        = sV*reshape(phi(:,i),p,2*N*m);
+0246    phi(:,i) = pe(:);
+0247   <span class="keyword">end</span>
+0248  <span class="keyword">end</span>
+0249   
+0250  <span class="comment">%Now rotate the Jacobian and gradient into right format for argmin</span>
+0251  grad = 2*phi'*pe(:)/N;
+0252  nphi = size(phi,2);
+0253  R    = triu(qr([phi pe(:)]));
+0254  phi  = R(1:nphi,1:nphi);
+0255  pe   = R(1:nphi,nphi+1);
+0256 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

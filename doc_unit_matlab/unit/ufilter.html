@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ufilter</title>
+  <meta name="keywords" content="ufilter">
+  <meta name="description" content="This function takes a numerator and denominator polynomial in either">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; ufilter.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>ufilter
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This function takes a numerator and denominator polynomial in either</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y=ufilter(b,a,u,M,x) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> This function takes a numerator and denominator polynomial in either
+ backward shift or inverse delta operator, and calls underlying filter
+ routines based on the operator. It is not intended to be called by the
+ user, but rather from other routines in the toolbox.
+
+ Function use:
+
+       y = ufilter(b,a,u,M);
+  
+ where:
+
+        b:  numerator polynomial
+        a:  denominator polynomial
+        u:  input time sequence
+        y:  output time sequence
+        M:  model structure containing at least M.op, which can be either 
+            'q' for backward shift operator, or, 'd' for inverse delta
+            operator, i.e. d = (q-1)/Delta and the polynomials are in 
+            d^{-1}.
+
+    Written by Adrian Wills,  Department of EE &amp; CE
+               Brett Ninness  University of Newcastle
+                                Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>	Delta operator version of filter.  That is, given a vector of inputs u() to</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="VN.html" class="code" title="function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)">VN</a>	Function to calculate quadratic cost</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% This function takes a numerator and denominator polynomial in either</span>
+0002 <span class="comment">% backward shift or inverse delta operator, and calls underlying filter</span>
+0003 <span class="comment">% routines based on the operator. It is not intended to be called by the</span>
+0004 <span class="comment">% user, but rather from other routines in the toolbox.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Function use:</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%       y = ufilter(b,a,u,M);</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% where:</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%        b:  numerator polynomial</span>
+0013 <span class="comment">%        a:  denominator polynomial</span>
+0014 <span class="comment">%        u:  input time sequence</span>
+0015 <span class="comment">%        y:  output time sequence</span>
+0016 <span class="comment">%        M:  model structure containing at least M.op, which can be either</span>
+0017 <span class="comment">%            'q' for backward shift operator, or, 'd' for inverse delta</span>
+0018 <span class="comment">%            operator, i.e. d = (q-1)/Delta and the polynomials are in</span>
+0019 <span class="comment">%            d^{-1}.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%    Written by Adrian Wills,  Department of EE &amp; CE</span>
+0022 <span class="comment">%               Brett Ninness  University of Newcastle</span>
+0023 <span class="comment">%                                Australia.</span>
+0024 
+0025 <span class="comment">% Copyright (C) Brett Ninness</span>
+0026 
+0027 <a name="_sub0" href="#_subfunctions" class="code">function y=ufilter(b,a,u,M,x)</a>
+0028 
+0029 <span class="keyword">if</span> nargin&lt;3,
+0030  error(<span class="string">'ufilter requires at least 3 input arguments'</span>);
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="keyword">if</span> nargin&lt;4,
+0034  M.op = <span class="string">'q'</span>; 
+0035  M.T  = 1;
+0036  x    = [];
+0037 <span class="keyword">end</span>
+0038 
+0039 <span class="keyword">if</span> nargin&lt;5,
+0040  x  = [];
+0041 <span class="keyword">end</span>
+0042 
+0043 <span class="comment">% Call appropriate filter based on operator.</span>
+0044 
+0045 <span class="keyword">if</span> (M.op==<span class="string">'d'</span>)
+0046  y=<a href="delfilter.html" class="code" title="function y = delfilter(num,den,u,delta,y0)">delfilter</a>(b,a,u,M.T);
+0047 <span class="keyword">else</span>
+0048  y=filter(b,a,u);
+0049 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

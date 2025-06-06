@@ -1,0 +1,251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ssmod</title>
+  <meta name="keywords" content="ssmod">
+  <meta name="description" content="Function to compute the probability updates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; ssmod.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>ssmod
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to compute the probability updates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [q,X,yp,PY]=ssmod(Z,M,OPT,X) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">   Function to compute the probability updates
+
+   x_{t+1} ~ p_1(x_{t+1}|x_t)
+       y_t ~ p_2(y_t|x_t)
+
+   for the linear time invariant model
+
+    x_{t+1} = Ax_t + Bu_(t-delay) + Lw_t
+    y_t = Cx_t + Du_(t-delay) + v_t
+
+   Where w_t and v_t are zero mean vector white Gaussian processes with covariances
+
+   E(w_tw_t^T) = Q, E(v_tv_t^T) = R, E(w_tv_t^T) = S
+
+   and y_t, u_t are observed output and input processes.  This function
+   is intended for possible use with the SIR.m sequential importance
+   resampler routine.
+
+   Usage is:  [q,X1,yp]=ssmod(Z,M,OPT,X)
+
+   where
+   
+   Z:           Input-Output data in one of two forms.  The standard form 
+                is for it to be a record with elements Z.y and Z.u, each
+                of which are matrices with number of rows equal to the
+                number of data samples, and number of columns equal (respectively)
+                to the number of outputs and the number of inputs.  On
+                the other hand, Z can be a matrix of the form Z = [y,u] 
+                where it is assumed that y is a column vector of output 
+                measurements and u is a matrix whose columns are the
+                input measurements; in this latter MISO models are 
+                being considered.  
+   M:           Data structure which defines the above model:
+   M.delay:     Number of samples of delay to include (see above model).  
+                In the case of a multi input system, this should be a vector of 
+                delays, one for each input being considered.  Default is all delays 
+                equal to zero.
+M.ss.A,M.ss.B:  [A,B,C,D] matrices/vectors defining state space description. 
+M.ss.C,M.ss.D:  of underlying dynamic system as shown above. 
+  M.ss.L:       Matrix defining how state noise enters.  Default is M.ss.L=I. 
+M.ss.Q,M.ss.R:  Covariance matrices for state and measurement noise.
+  M.ss.S:       as described above.  Defaults are M.ss.R = I, M.ss.Q=0.01*I, M.ss.S=0;
+  M.ss.X0:      Initial *predicted* state estimate.  That is M.ss.X0 =
+                an initial estimate of state at time t=1 given data up
+                to t=0.  Default is M.ss.X0 = 0;
+  M.ss.P0:      Covariance in initial *predicted* state estimate (see above).  
+                Default is M.ss.P0 = 100*I.
+   OPT:         Data structure which defines options for the estimation
+                algorithm as follows:
+    OPT.pnum    Number of particles to use.  Default is OPT.pnum=100.
+
+  X:            Array of particles. Each column represents a
+                particle, and hence it has width equal to the number of
+                particles (OPT.pnum) and height equal to the state
+                dimension.
+  
+  q:            Aarray of probabilities:
+
+                q(i) = p_2(y_t|x_t^i)
+
+                where x_t^i is specified by the i'th column of X.  That
+                is, it is the i'th particle at time t.
+
+  X1:           Matrix containing sample realisations of
+                particles x_{t+1}^i according to the model 
+
+                x_{t+1} ~ p_1(x_{t+1}|x_t)
+
+                That is, for each column of X, and with the i'th one
+                representing a realisation of the particle x_t^i, a new
+                particle x_{t+1}^i is formed by drawing from the
+                probability distribution 
+
+                x_{t+1}^i ~ p_1(|x_t^i).
+
+  yp:           Vector of model outputs, with the i'th
+                column being the value associated with the i'th column
+                of X, and hence the i'th particle realisation x_t^i.
+
+  IMPORTANT: In order to inform SIR what the underlying state dimension is,
+                this function checks to see if it is called as ssmod(Z,M) -
+                that is, with only two parameters - and in this special
+                case it must return an integer which represents the state
+                dimension.
+
+   written by Brett Ninness, School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_sir.html" class="code" title="">demo_sir</a>	Running this demos signal estimation using Sequential</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%   Function to compute the probability updates</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%   x_{t+1} ~ p_1(x_{t+1}|x_t)</span>
+0004 <span class="comment">%       y_t ~ p_2(y_t|x_t)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%   for the linear time invariant model</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%    x_{t+1} = Ax_t + Bu_(t-delay) + Lw_t</span>
+0009 <span class="comment">%    y_t = Cx_t + Du_(t-delay) + v_t</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Where w_t and v_t are zero mean vector white Gaussian processes with covariances</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%   E(w_tw_t^T) = Q, E(v_tv_t^T) = R, E(w_tv_t^T) = S</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%   and y_t, u_t are observed output and input processes.  This function</span>
+0016 <span class="comment">%   is intended for possible use with the SIR.m sequential importance</span>
+0017 <span class="comment">%   resampler routine.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%   Usage is:  [q,X1,yp]=ssmod(Z,M,OPT,X)</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%   where</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">%   Z:           Input-Output data in one of two forms.  The standard form</span>
+0024 <span class="comment">%                is for it to be a record with elements Z.y and Z.u, each</span>
+0025 <span class="comment">%                of which are matrices with number of rows equal to the</span>
+0026 <span class="comment">%                number of data samples, and number of columns equal (respectively)</span>
+0027 <span class="comment">%                to the number of outputs and the number of inputs.  On</span>
+0028 <span class="comment">%                the other hand, Z can be a matrix of the form Z = [y,u]</span>
+0029 <span class="comment">%                where it is assumed that y is a column vector of output</span>
+0030 <span class="comment">%                measurements and u is a matrix whose columns are the</span>
+0031 <span class="comment">%                input measurements; in this latter MISO models are</span>
+0032 <span class="comment">%                being considered.</span>
+0033 <span class="comment">%   M:           Data structure which defines the above model:</span>
+0034 <span class="comment">%   M.delay:     Number of samples of delay to include (see above model).</span>
+0035 <span class="comment">%                In the case of a multi input system, this should be a vector of</span>
+0036 <span class="comment">%                delays, one for each input being considered.  Default is all delays</span>
+0037 <span class="comment">%                equal to zero.</span>
+0038 <span class="comment">%M.ss.A,M.ss.B:  [A,B,C,D] matrices/vectors defining state space description.</span>
+0039 <span class="comment">%M.ss.C,M.ss.D:  of underlying dynamic system as shown above.</span>
+0040 <span class="comment">%  M.ss.L:       Matrix defining how state noise enters.  Default is M.ss.L=I.</span>
+0041 <span class="comment">%M.ss.Q,M.ss.R:  Covariance matrices for state and measurement noise.</span>
+0042 <span class="comment">%  M.ss.S:       as described above.  Defaults are M.ss.R = I, M.ss.Q=0.01*I, M.ss.S=0;</span>
+0043 <span class="comment">%  M.ss.X0:      Initial *predicted* state estimate.  That is M.ss.X0 =</span>
+0044 <span class="comment">%                an initial estimate of state at time t=1 given data up</span>
+0045 <span class="comment">%                to t=0.  Default is M.ss.X0 = 0;</span>
+0046 <span class="comment">%  M.ss.P0:      Covariance in initial *predicted* state estimate (see above).</span>
+0047 <span class="comment">%                Default is M.ss.P0 = 100*I.</span>
+0048 <span class="comment">%   OPT:         Data structure which defines options for the estimation</span>
+0049 <span class="comment">%                algorithm as follows:</span>
+0050 <span class="comment">%    OPT.pnum    Number of particles to use.  Default is OPT.pnum=100.</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%  X:            Array of particles. Each column represents a</span>
+0053 <span class="comment">%                particle, and hence it has width equal to the number of</span>
+0054 <span class="comment">%                particles (OPT.pnum) and height equal to the state</span>
+0055 <span class="comment">%                dimension.</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%  q:            Aarray of probabilities:</span>
+0058 <span class="comment">%</span>
+0059 <span class="comment">%                q(i) = p_2(y_t|x_t^i)</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">%                where x_t^i is specified by the i'th column of X.  That</span>
+0062 <span class="comment">%                is, it is the i'th particle at time t.</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%  X1:           Matrix containing sample realisations of</span>
+0065 <span class="comment">%                particles x_{t+1}^i according to the model</span>
+0066 <span class="comment">%</span>
+0067 <span class="comment">%                x_{t+1} ~ p_1(x_{t+1}|x_t)</span>
+0068 <span class="comment">%</span>
+0069 <span class="comment">%                That is, for each column of X, and with the i'th one</span>
+0070 <span class="comment">%                representing a realisation of the particle x_t^i, a new</span>
+0071 <span class="comment">%                particle x_{t+1}^i is formed by drawing from the</span>
+0072 <span class="comment">%                probability distribution</span>
+0073 <span class="comment">%</span>
+0074 <span class="comment">%                x_{t+1}^i ~ p_1(|x_t^i).</span>
+0075 <span class="comment">%</span>
+0076 <span class="comment">%  yp:           Vector of model outputs, with the i'th</span>
+0077 <span class="comment">%                column being the value associated with the i'th column</span>
+0078 <span class="comment">%                of X, and hence the i'th particle realisation x_t^i.</span>
+0079 <span class="comment">%</span>
+0080 <span class="comment">%  IMPORTANT: In order to inform SIR what the underlying state dimension is,</span>
+0081 <span class="comment">%                this function checks to see if it is called as ssmod(Z,M) -</span>
+0082 <span class="comment">%                that is, with only two parameters - and in this special</span>
+0083 <span class="comment">%                case it must return an integer which represents the state</span>
+0084 <span class="comment">%                dimension.</span>
+0085 <span class="comment">%</span>
+0086 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0087 <span class="comment">%                             University of Newcastle</span>
+0088 <span class="comment">%                             Australia.</span>
+0089 
+0090 <span class="comment">% Copyright (C) Brett Ninness, Adrian Wills</span>
+0091 
+0092 <a name="_sub0" href="#_subfunctions" class="code">function [q,X,yp,PY]=ssmod(Z,M,OPT,X)</a>
+0093  
+0094 nx = size(M.ss.A,1);  <span class="comment">% Determine state dimension</span>
+0095 
+0096 chol_Q=sqrtm(M.ss.Q); <span class="comment">% Form Cholesky factor outside main loop</span>
+0097 
+0098 <span class="keyword">if</span> nargin&lt;3 <span class="comment">% Nargin&lt;3 =&gt; user just wants state dimension returned</span>
+0099  q=nx;
+0100 <span class="keyword">else</span>
+0101  <span class="comment">% Compute Measurement update weights q_t^i = p(y_t|x^i_t|t-i)</span>
+0102  yp = M.ss.C*X(:,:)+M.ss.D*repmat(Z.u(:),1,OPT.pnum);
+0103  pe=repmat(Z.y(:),1,OPT.pnum)-yp; 
+0104  
+0105  PY=pe*pe'/OPT.pnum;
+0106  
+0107  qpe = pe.*(M.ss.R\pe);
+0108  <span class="keyword">if</span> size(qpe,1)&gt;1 qpe=sum(qpe); <span class="keyword">end</span>;
+0109  q=exp(-qpe/2); q=q/sum(q);        
+0110  
+0111  <span class="comment">% Pass back predicted y based on passed in (predicted) state</span>
+0112  yp=mean(yp,2);
+0113  
+0114  <span class="comment">% Now do time update of particles x^i_t+1|t \sim p(x_t+1|x_t^i)</span>
+0115  X = M.ss.A*X+M.ss.B*repmat(Z.u(:),1,OPT.pnum)+chol_Q*randn(nx,OPT.pnum); 
+0116 <span class="keyword">end</span>;    
+0117</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

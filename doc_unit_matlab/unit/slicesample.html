@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of slicesample</title>
+  <meta name="keywords" content="slicesample">
+  <meta name="description" content="SLICESAMPLE:  Slice sampler for generating realisations theta_1,">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; slicesample.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>slicesample
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SLICESAMPLE:  Slice sampler for generating realisations theta_1,</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function G = slicesample(Z,M,OPT) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  SLICESAMPLE:  Slice sampler for generating realisations theta_1,
+  theta_2,..... whose distribution converges to an arbitrary density 
+  p(theta|Z) which may be specified by the user.
+
+  Usage is 
+
+  G = slicesample(Z,M,OPT)
+  
+  where:
+
+   Z:          A matlab structure which contains the data which is 
+               used in the conditioning in the density p(theta|Z) that 
+               this routine is seeking to compute. The format is
+               arbitrary, but must be consistent with what the user
+               expects in the user defined function M.pratio
+   M:          A matlab structure which</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>	STARTOPT - function to initialise estimation options in case user has been</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="postdist.html" class="code" title="function G = postdist(Z,M,OPT)">postdist</a>	POSTDIST: Compute the posterior distribution marginals p(theta_k|y) of parameters</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  SLICESAMPLE:  Slice sampler for generating realisations theta_1,</span>
+0002 <span class="comment">%  theta_2,..... whose distribution converges to an arbitrary density</span>
+0003 <span class="comment">%  p(theta|Z) which may be specified by the user.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  Usage is</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  G = slicesample(Z,M,OPT)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  where:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Z:          A matlab structure which contains the data which is</span>
+0012 <span class="comment">%               used in the conditioning in the density p(theta|Z) that</span>
+0013 <span class="comment">%               this routine is seeking to compute. The format is</span>
+0014 <span class="comment">%               arbitrary, but must be consistent with what the user</span>
+0015 <span class="comment">%               expects in the user defined function M.pratio</span>
+0016 <span class="comment">%   M:          A matlab structure which</span>
+0017 <span class="comment">%</span>
+0018 
+0019 <span class="comment">%   written by Brett Ninness, School of EE &amp; CS</span>
+0020 <span class="comment">%                             University of Newcastle</span>
+0021 <span class="comment">%                      Australia.</span>
+0022 
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Copyright (C) Brett Ninness</span>
+0025 
+0026 
+0027 <a name="_sub0" href="#_subfunctions" class="code">function G = slicesample(Z,M,OPT)</a>
+0028 
+0029 <span class="comment">% Unspecified parts of OPT -&gt; defaults</span>
+0030 <span class="keyword">if</span> ~exist(<span class="string">'OPT'</span>) OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>([]); <span class="keyword">else</span> OPT = <a href="startOPT.html" class="code" title="function OPT = startOPT(OPTin,Min)">startOPT</a>(OPT); <span class="keyword">end</span>;
+0031 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'Mmax'</span>)   OPT.Mmax=1e5;               <span class="keyword">end</span>;
+0032 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'dens'</span>)   OPT.dens=<span class="string">'gaussian'</span>;        <span class="keyword">end</span>;
+0033 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'mcvar'</span>)  OPT.mcvar=mcvar;            <span class="keyword">end</span>;
+0034 <span class="keyword">if</span> ~isfield(OPT,<span class="string">'burn'</span>)   OPT.burn=0.1;               <span class="keyword">end</span>;
+0035 
+0036 <span class="comment">% Set aside memory to store sampler realisation from parametrization of and initialise first column</span>
+0037 <span class="keyword">if</span> isfield(M,<span class="string">'theta'</span>)
+0038  theta = M.theta;  thetan = length(theta);
+0039 <span class="keyword">else</span>
+0040  error(<span class="string">'Must specify starting value M.theta!'</span>);
+0041 <span class="keyword">end</span>;
+0042 
+0043 <span class="keyword">if</span> isfield(OPT,<span class="string">'var'</span>)
+0044  var = OPT.var;  
+0045 <span class="keyword">else</span>
+0046  error(<span class="string">'Must specify starting value OPT.var!'</span>);
+0047 <span class="keyword">end</span>;
+0048 
+0049 G.TH = zeros(length(theta),OPT.Mmax); G.TH(:,1)=theta(:); thn = length(theta); 
+0050 G.varlog = zeros(1,OPT.Mmax);
+0051 
+0052 <span class="comment">% Set aside memory to store realisations of noise variance</span>
+0053 opt=OPT; G.varlog=zeros(1,OPT.Mmax); G.varlog(1) = OPT.var;
+0054 
+0055 idx =  2;                  <span class="comment">% Where we are up to in recording a MC realisation;</span>
+0056 pcom = 0;                  <span class="comment">% Percentage complete count initialised to zero;</span>
+0057 mark = cputime;            <span class="comment">% Used to keep track of elapsed time</span>
+0058 
+0059 <span class="comment">% Get target density value at initialisation point</span>
+0060 M.thnew = theta; Pstar = feval(M.ptarget,Z,M,OPT);
+0061 
+0062 <span class="comment">% Initialise candidate models</span>
+0063 Mleft = M; Mright = M; Mprime = M;
+0064 OPTleft = OPT; OPTright = OPT; OPTprime = OPT;
+0065 
+0066 width = 0.01;  <span class="comment">% Width for stepping out on each axis.</span>
+0067 
+0068 
+0069 <span class="comment">% Now ready to run the slice sampler</span>
+0070 <span class="keyword">if</span> OPT.dsp
+0071  disp(<span class="string">'Running Slice Sampler........'</span>)
+0072  disp(<span class="string">''</span>);
+0073 <span class="keyword">end</span>;
+0074 
+0075 <span class="keyword">for</span> k=2:OPT.Mmax  
+0076  
+0077 <span class="comment">% If requested, give feedback on our status</span>
+0078  <span class="keyword">if</span> OPT.dsp 
+0079   pcent=10; dcent=100/pcent;
+0080   <span class="keyword">if</span> ( (mod(k,floor(OPT.Mmax/dcent))==0)|k==2)
+0081    disp(sprintf(<span class="string">'Percentage Complete = %d%%, Time since last update = %f s'</span>,pcom,cputime-mark)); 
+0082    pcom=pcom+pcent;
+0083    <span class="keyword">if</span> k&gt;2
+0084     remaining = (dcent - k/floor(OPT.Mmax/dcent))*(cputime-mark);
+0085     hrs  = floor(remaining/3600); remaining = rem(remaining,3600);
+0086     mins = floor(remaining/60); 
+0087     secs = floor(rem(remaining,60));
+0088     disp(sprintf(<span class="string">'Predicted completion in %d:%d:%d hrs:mins:secs'</span>,hrs,mins,secs))
+0089    <span class="keyword">end</span>;
+0090    mark=cputime;
+0091   <span class="keyword">end</span>;
+0092  <span class="keyword">end</span>; 
+0093  
+0094  <span class="comment">% Drop a line a random distance down from Pstar</span>
+0095  Puprime = Pstar*rand;
+0096  
+0097  Puprime = Pstar + log(rand);
+0098  
+0099  <span class="keyword">for</span> i=1:thetan   <span class="comment">% Sample from each value in parameter vector in turn</span>
+0100   
+0101   Mleft.thnew = theta; Mright.thnew = theta;  Mprime.thnew = theta;
+0102   
+0103   <span class="comment">% Generate a random horizonal interval around current value</span>
+0104   bit = rand;
+0105   Mleft.thnew(i)  = theta(i) - bit*width; 
+0106   Mright.thnew(i) = theta(i) + (1-bit)*width; 
+0107    
+0108   <span class="comment">% Now step out until our horizontal interval spans the target density</span>
+0109   <span class="keyword">while</span> ( feval(M.ptarget,Z,Mleft,OPT) &gt; Puprime)
+0110    Mleft.thnew(i) = Mleft.thnew(i) - width;
+0111   <span class="keyword">end</span>;
+0112 
+0113   <span class="keyword">while</span> ( feval(M.ptarget,Z,Mright,OPT) &gt; Puprime)
+0114    Mright.thnew(i) = Mright.thnew(i) + width;
+0115   <span class="keyword">end</span>;
+0116   
+0117   stepcount = 0;
+0118   <span class="keyword">while</span> 1
+0119    stepcount = stepcount+1;
+0120    <span class="comment">%fprintf('Iteration %d Step %d     \r',i,stepcount);</span>
+0121    
+0122    <span class="comment">% Draw a candidte value uniformly distributed in interval [Mleft,Mright]</span>
+0123    Mprime.thnew(i) = rand()*(Mright.thnew(i) - Mleft.thnew(i)) + Mleft.thnew(i);
+0124    Pstar = feval(M.ptarget,Z,Mprime,OPT);
+0125    
+0126    <span class="keyword">if</span> (Pstar &gt; Puprime)  <span class="comment">% Have we generated a sample under the curve?</span>
+0127     <span class="keyword">break</span>;  <span class="comment">% If so, leave while loop</span>
+0128    <span class="keyword">else</span>  <span class="comment">% If not, reverse the step out - shrink in</span>
+0129     <span class="keyword">if</span>  (Mprime.thnew(i) &gt; theta(i))
+0130      Mright.thnew(i) = Mprime.thnew(i);
+0131     <span class="keyword">elseif</span>  (Mprime.thnew(i) &lt; theta(i))
+0132      Mleft.thnew(i) = Mprime.thnew(i);
+0133     <span class="keyword">else</span>
+0134      error(<span class="string">'What?  Cannot find a theta point under target probability'</span>);
+0135     <span class="keyword">end</span>;
+0136    <span class="keyword">end</span>;
+0137   <span class="keyword">end</span>;  <span class="comment">% While loop that we exit only if we find a Puprime&lt;Pstar</span>
+0138   
+0139   <span class="comment">% The random sample found under the target is used to update theta</span>
+0140   theta(i) = Mprime.thnew(i);
+0141   
+0142  <span class="keyword">end</span>;  <span class="comment">% Loop over the i number of terms in theta</span>
+0143  
+0144  <span class="comment">% Record this realsation of the whole vector theta</span>
+0145  G.TH(:,k) = theta(:);
+0146 
+0147  <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0148  <span class="comment">% Now do exactly the same for the variance</span>
+0149  <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0150  
+0151  estvar = 1;
+0152  
+0153  <span class="keyword">if</span> estvar
+0154   <span class="comment">% Generate a random horizonal interval around current value</span>
+0155   bit = rand;
+0156   OPTleft.var  = (sqrt(var) - bit*width)^2; 
+0157   OPTright.var = (sqrt(var) + (1-bit)*width)^2; 
+0158    
+0159   <span class="comment">% Now step out until our horizontal interval spans the target density</span>
+0160   <span class="keyword">while</span> ( feval(M.ptarget,Z,Mprime,OPTleft) &gt; Puprime)
+0161    OPTleft.var = OPTleft.var - width;
+0162   <span class="keyword">end</span>;
+0163  
+0164   <span class="keyword">while</span> ( feval(M.ptarget,Z,Mprime,OPTright) &gt; Puprime)
+0165    OPTright.var = OPTright.var + width;
+0166   <span class="keyword">end</span>;
+0167   
+0168   stepcount = 0;
+0169   <span class="keyword">while</span> 1
+0170    stepcount = stepcount+1;
+0171    <span class="comment">%fprintf('Iteration %d Step %d     \r',i,stepcount);</span>
+0172    
+0173    <span class="comment">% Draw a candidate value uniformly distributed in interval [Mleft,Mright]</span>
+0174    OPTprime.var = rand()*(OPTright.var - OPTleft.var) + OPTleft.var;
+0175    Pstar = feval(M.ptarget,Z,Mprime,OPTprime);
+0176    
+0177    <span class="keyword">if</span> (Pstar &gt; Puprime)  <span class="comment">% Have we generated a sample under the curve?</span>
+0178    <span class="keyword">break</span>;  <span class="comment">% If so, leave while loop</span>
+0179    <span class="keyword">else</span>  <span class="comment">% If not, reverse the step out - shrink in</span>
+0180     <span class="keyword">if</span>  (OPTprime.var &gt; var)
+0181      OPTright.var = OPTprime.var;
+0182     <span class="keyword">elseif</span>  (OPTprime.var &lt; var)
+0183      OPTleft.var = OPTprime.var;
+0184     <span class="keyword">else</span>
+0185      error(<span class="string">'What?  Cannot find a var point under target probability'</span>);
+0186     <span class="keyword">end</span>;
+0187    <span class="keyword">end</span>;
+0188   <span class="keyword">end</span>;  <span class="comment">% While loop that we exit only if we find a Puprime&lt;Pstar</span>
+0189   
+0190   <span class="comment">% The random sample found under the target is used to update theta</span>
+0191   var = OPTprime.var;  OPT.var = var;
+0192  
+0193   <span class="comment">% Record this realsation of the whole vector theta</span>
+0194   G.varlog(k) = var;
+0195  <span class="keyword">end</span>;  <span class="comment">%test on estvar</span>
+0196   
+0197 <span class="keyword">end</span>; <span class="comment">% Loop on k up to OPT.Mmax;</span>
+0198 
+0199 G.prop  = 1;
+0200 G.mcvar = [];
+0201 
+0202</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

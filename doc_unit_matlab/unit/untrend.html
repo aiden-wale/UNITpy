@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of untrend</title>
+  <meta name="keywords" content="untrend">
+  <meta name="description" content="UNTREND - Function removes simple trends from data">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; untrend.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>untrend
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>UNTREND - Function removes simple trends from data</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function X = untrend(Z,ord,wc); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> UNTREND - Function removes simple trends from data
+
+ X = untrend(Z,ord,wc)
+
+ Where
+
+ Z   = Data to be detrended
+ ord = Polynomial order of detrending - default is ord=0 which implies
+       that only constant offsets are removed. If specified as the
+       string 'hp', then UNTREND tries to remove DC offsets only by high
+       pass filtering, with optional cutoff specified by third argument.
+ wc  = High pass filter cut-off frequency *normalised* for unity
+       sampling period.   Default is wc=0.01*pi;
+ X   = Detrended data
+
+ written by Brett Ninness, Department of EE &amp; CE
+                           University of Newcastle
+                           Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% UNTREND - Function removes simple trends from data</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% X = untrend(Z,ord,wc)</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Where</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Z   = Data to be detrended</span>
+0008 <span class="comment">% ord = Polynomial order of detrending - default is ord=0 which implies</span>
+0009 <span class="comment">%       that only constant offsets are removed. If specified as the</span>
+0010 <span class="comment">%       string 'hp', then UNTREND tries to remove DC offsets only by high</span>
+0011 <span class="comment">%       pass filtering, with optional cutoff specified by third argument.</span>
+0012 <span class="comment">% wc  = High pass filter cut-off frequency *normalised* for unity</span>
+0013 <span class="comment">%       sampling period.   Default is wc=0.01*pi;</span>
+0014 <span class="comment">% X   = Detrended data</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% written by Brett Ninness, Department of EE &amp; CE</span>
+0017 <span class="comment">%                           University of Newcastle</span>
+0018 <span class="comment">%                           Australia.</span>
+0019 
+0020 <span class="comment">% Copyright (C) Brett Ninness.</span>
+0021 
+0022 <a name="_sub0" href="#_subfunctions" class="code">function X = untrend(Z,ord,wc);</a>
+0023 
+0024 <span class="keyword">if</span> nargin&lt;2 ord = 0; <span class="keyword">end</span>;
+0025 
+0026 <span class="comment">% Extract sizes of input and output from data matrix</span>
+0027 [y,u,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0028 
+0029 <span class="keyword">if</span> strcmp(lower(ord),<span class="string">'hp'</span>)  <span class="comment">% Has user specified hp filter?</span>
+0030  <span class="keyword">if</span> nargin&lt;3 wc = 0.01*pi; <span class="keyword">end</span>;  <span class="comment">% Default HP filter cutoff</span>
+0031 <span class="comment">% b = 4*conv([1,-1],[1,-1]);  % Specify 2nd order Butterworth</span>
+0032 <span class="comment">% a2=wc^2+2*sqrt(2)*wc+4; a1=2*wc^2-8; a0=wc^2-2*sqrt(2)*wc+4;</span>
+0033 <span class="comment">% a = [a2,a1,a0]/a2; b = b/a2;</span>
+0034  [b,a]= butter(2,wc/pi,<span class="string">'high'</span>);
+0035  X.y = filter(b,a,y); X.u = filter(b,a,u);
+0036 <span class="keyword">else</span> <span class="comment">% Otherwise remove polynomial trend of given order</span>
+0037  <span class="comment">% Detrend all the outputs</span>
+0038  idx = 0:1:Ny-1; idx=idx(:);
+0039  <span class="keyword">for</span> k=1:ny
+0040   <span class="comment">% Compute regressors</span>
+0041   ph = [ones(Ny,1),(idx*ones(1,ord)).^(ones(Ny,1)*(1:1:ord))];
+0042   th = ph\y(:,k);
+0043   X.y(:,k) = y(:,k)-ph*th;
+0044  <span class="keyword">end</span>;
+0045  
+0046  <span class="comment">% Now do all the inputs</span>
+0047  <span class="keyword">for</span> k=1:nu
+0048   <span class="comment">% Compute regressors</span>
+0049   ph = [ones(Ny,1),(idx*ones(1,ord)).^(ones(Ny,1)*(1:1:ord))];
+0050   th = ph\u(:,k);
+0051   X.u(:,k) = u(:,k)-ph*th;
+0052  <span class="keyword">end</span>;
+0053 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

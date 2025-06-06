@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of hinge</title>
+  <meta name="keywords" content="hinge">
+  <meta name="description" content="HINGE - function to pass a signal vector u through a nonlinearity X to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; hinge.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>hinge
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>HINGE - function to pass a signal vector u through a nonlinearity X to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [x,w] = hinge(u,alpha) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> HINGE - function to pass a signal vector u through a nonlinearity X to
+ produce an output x = X(u) where X is defined by a set of `hinging
+ hyperplanes'.  That is, a vector alpha made of up groups of pairs of
+ parameters a11, a12, a21, a22,....,am1,am2 specifies X as
+
+ X = a11+a12*u + sum_{k=2}^m X_k(u,ak1,ak2)
+
+ where  X_k(u,ak1,ak2) = ak1 + ak2*u ; u &gt;  -ak1/ak2
+                       = 0           ; u &lt;= -ak1/ak2
+
+ Usage is:
+
+ [x,w] = hinge(u,alpha)
+
+ Where
+
+ u     = input vector
+ alpha = parameters vector specifying X.
+ x     = vector representing output of nonlinearity
+ w     = derivative dX(u)/du
+
+  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.
+                            University of Newcastle
+                            Australia</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo_memoryless.html" class="code" title="">demo_memoryless</a>	Running this demos estimation of a static (memoryless)</li><li><a href="demo_miso_hammer.html" class="code" title="">demo_miso_hammer</a>	Running this demos MISO Hammerstein system estimation</li><li><a href="details.html" class="code" title="function handle = details(varargin)">details</a>	DETAILS: This function summarises details about a model structure.</li><li><a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>	U2X - function to pass an input u through a specified non-linearity X so</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% HINGE - function to pass a signal vector u through a nonlinearity X to</span>
+0002 <span class="comment">% produce an output x = X(u) where X is defined by a set of `hinging</span>
+0003 <span class="comment">% hyperplanes'.  That is, a vector alpha made of up groups of pairs of</span>
+0004 <span class="comment">% parameters a11, a12, a21, a22,....,am1,am2 specifies X as</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% X = a11+a12*u + sum_{k=2}^m X_k(u,ak1,ak2)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% where  X_k(u,ak1,ak2) = ak1 + ak2*u ; u &gt;  -ak1/ak2</span>
+0009 <span class="comment">%                       = 0           ; u &lt;= -ak1/ak2</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Usage is:</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% [x,w] = hinge(u,alpha)</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Where</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% u     = input vector</span>
+0018 <span class="comment">% alpha = parameters vector specifying X.</span>
+0019 <span class="comment">% x     = vector representing output of nonlinearity</span>
+0020 <span class="comment">% w     = derivative dX(u)/du</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%  Written by Brett Ninness: School of Elec. Eng. and Comp. Sci.</span>
+0023 <span class="comment">%                            University of Newcastle</span>
+0024 <span class="comment">%                            Australia</span>
+0025 
+0026 <span class="comment">% Copyright (C) Brett Ninness</span>
+0027 
+0028 <a name="_sub0" href="#_subfunctions" class="code">function [x,w] = hinge(u,alpha)</a>
+0029 
+0030 m = length(alpha);
+0031 <span class="keyword">if</span> rem(m,2) error(<span class="string">'alpha must contain pairs of parameters'</span>); <span class="keyword">end</span>;
+0032 
+0033 wun = ones(size(u)); 
+0034 x   = alpha(1)*wun + alpha(2)*u; 
+0035 w   = alpha(2)*ones(size(u));
+0036 <span class="keyword">for</span> k = 1:m/2-1
+0037  a1 = alpha(2*k+1); 
+0038  a2 = alpha(2*k+2);
+0039  <span class="keyword">if</span> (abs(a2)&gt;eps), 
+0040      breakpoint = -a1/a2; 
+0041  <span class="keyword">else</span>
+0042      breakpoint = 1e20; 
+0043  <span class="keyword">end</span>
+0044  index       = logical(u &gt; breakpoint*wun);
+0045  xnew        = zeros(size(u));
+0046  wnew        = xnew;
+0047  xnew(index) = a1*wun(index) + a2*u(index);
+0048  wnew(index) = a2*wun(index);
+0049  x           = x+xnew; 
+0050  w           = w+wnew;
+0051 <span class="keyword">end</span>;
+0052 
+0053 
+0054 
+0055 
+0056 
+0057</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>

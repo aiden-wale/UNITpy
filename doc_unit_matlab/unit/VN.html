@@ -1,0 +1,440 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of VN</title>
+  <meta name="keywords" content="VN">
+  <meta name="description" content="Function to calculate quadratic cost">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003-2019 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">unit</a> &gt; VN.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for unit&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>VN
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Function to calculate quadratic cost</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">  Function to calculate quadratic cost
+
+  V_N(theta) = 1/N\sum_{t=1}^N[y_t - {(1-D/C)y_t + DB/CA u_t}]^2
+
+  associated with the Box-Jenkins  model:
+
+  y_t = B(p)/A(p)u_{t-delay} + C(p)/D(p)e_t
+
+  where e_t is white noise, p can be the backward shift operator q^{-1} or
+  the Euler differencing (delta) operator d = (q-1)/T (with T being
+  the sampling period).
+
+  Usage is
+
+  [cost,pe,grad,hes,PSI] = VN(Z,theta,OPT,M,div);
+
+  where
+
+   Z         = Input output data in the form Z = [y,u] where y is a column
+               vector of output measurements and u is a matrix whose
+               columns are the input measurements - this means that MISO
+               models are catered for, for MIMO the user should conduct
+               multiple MISO estimation runs (one for each output).
+  theta      = [b,a,c,d] = specification of point to calculate grad/hess
+  M          = Data structure which defines the model structure which
+               is to be estimated from the data as follows:
+    M.A,M.B  = Initial guess for input-output dynamics.
+    M.C,M.D  = Initial guess for measurement noise model.  If not
+               specified, the default is M.C/M.D=1;
+    M.delay  = Number of delays to include (see above model);
+    M.op     = set to 'q' for shift and 'd' for delta.  Default = 'q'.
+    M.T      = sampling period in s. (Ignored for q case) Default = 1;
+  OPT        = Data structure which defines options for the estimation
+               algorithm as follows:
+    OPT.dsp  = optional, set to 'trace' for verbose output.
+    OPT.n    = number of starting data points to discard to get
+               rid of initial condition effects.
+    OPT.M    = Model structure about which the parameter estimate is
+               regularised with weight OPT.delta.
+    OPT.delta= Regularisation weight (see above).
+    OPT.miter= Maximum number of updates of estimate from initial guess.
+    OPT.tol  = Expected improvement must by &gt; OPT.tolx100% to continue.
+    OPT.lmax = Maximum number of times search distance will be shortened
+               by bisection.
+    OPT.step = Number of samples ahead to use in prediction error.
+  div        = flag variable, that if =1 causes gradients and hessians
+               to be calculated, but not otherwise
+
+    cost     = value of quadratic cost V_N(M).
+    pe       = prediction error sequence.
+    grad     = gradient of V_N(M).
+    hes      = estimate of Hessian of V_N(M).
+    PSI      = matrix with columns being prediction error gradients.
+
+   written by Brett Ninness  School of EE &amp; CS
+                             University of Newcastle
+                             Australia.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>	Z2DATA: Takes structure defining input-output data and extracts that</li><li><a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>	This routine takes a record of input-output data [y,u] and fits</li><li><a href="fir.html" class="code" title="function G = fir(Z,M,OPT)">fir</a>	This function does least squares fitting for FIR models based on</li><li><a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>	THETA2M - function to convert from stacked parameter vector to model</li><li><a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>	U2X - function to pass an input u through a specified non-linearity X so</li><li><a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>	This function takes a numerator and denominator polynomial in either</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="gn.html" class="code" title="function G = gn(Z,M,OPT);">gn</a>	This function calls underlying gradient-based search algorithms, based on</li><li><a href="pratio.html" class="code" title="function [prat,cold] = pratio(Z,M,OPT)">pratio</a>	PRATIO: Compute the ratio of the posteriors distribution of parameters</li><li><a href="ptarget.html" class="code" title="function pvalue = ptarget(Z,M,OPT)">ptarget</a>	PTARGET: Compute the value of a given posterior density we could like</li><li><a href="startG.html" class="code" title="function M = startG(Z,M,OPT)">startG</a>	STARTG - function to initialise estimate of dynamics model in case user</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%  Function to calculate quadratic cost</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  V_N(theta) = 1/N\sum_{t=1}^N[y_t - {(1-D/C)y_t + DB/CA u_t}]^2</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  associated with the Box-Jenkins  model:</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  y_t = B(p)/A(p)u_{t-delay} + C(p)/D(p)e_t</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  where e_t is white noise, p can be the backward shift operator q^{-1} or</span>
+0010 <span class="comment">%  the Euler differencing (delta) operator d = (q-1)/T (with T being</span>
+0011 <span class="comment">%  the sampling period).</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%  Usage is</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%  [cost,pe,grad,hes,PSI] = VN(Z,theta,OPT,M,div);</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%  where</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%   Z         = Input output data in the form Z = [y,u] where y is a column</span>
+0020 <span class="comment">%               vector of output measurements and u is a matrix whose</span>
+0021 <span class="comment">%               columns are the input measurements - this means that MISO</span>
+0022 <span class="comment">%               models are catered for, for MIMO the user should conduct</span>
+0023 <span class="comment">%               multiple MISO estimation runs (one for each output).</span>
+0024 <span class="comment">%  theta      = [b,a,c,d] = specification of point to calculate grad/hess</span>
+0025 <span class="comment">%  M          = Data structure which defines the model structure which</span>
+0026 <span class="comment">%               is to be estimated from the data as follows:</span>
+0027 <span class="comment">%    M.A,M.B  = Initial guess for input-output dynamics.</span>
+0028 <span class="comment">%    M.C,M.D  = Initial guess for measurement noise model.  If not</span>
+0029 <span class="comment">%               specified, the default is M.C/M.D=1;</span>
+0030 <span class="comment">%    M.delay  = Number of delays to include (see above model);</span>
+0031 <span class="comment">%    M.op     = set to 'q' for shift and 'd' for delta.  Default = 'q'.</span>
+0032 <span class="comment">%    M.T      = sampling period in s. (Ignored for q case) Default = 1;</span>
+0033 <span class="comment">%  OPT        = Data structure which defines options for the estimation</span>
+0034 <span class="comment">%               algorithm as follows:</span>
+0035 <span class="comment">%    OPT.dsp  = optional, set to 'trace' for verbose output.</span>
+0036 <span class="comment">%    OPT.n    = number of starting data points to discard to get</span>
+0037 <span class="comment">%               rid of initial condition effects.</span>
+0038 <span class="comment">%    OPT.M    = Model structure about which the parameter estimate is</span>
+0039 <span class="comment">%               regularised with weight OPT.delta.</span>
+0040 <span class="comment">%    OPT.delta= Regularisation weight (see above).</span>
+0041 <span class="comment">%    OPT.miter= Maximum number of updates of estimate from initial guess.</span>
+0042 <span class="comment">%    OPT.tol  = Expected improvement must by &gt; OPT.tolx100% to continue.</span>
+0043 <span class="comment">%    OPT.lmax = Maximum number of times search distance will be shortened</span>
+0044 <span class="comment">%               by bisection.</span>
+0045 <span class="comment">%    OPT.step = Number of samples ahead to use in prediction error.</span>
+0046 <span class="comment">%  div        = flag variable, that if =1 causes gradients and hessians</span>
+0047 <span class="comment">%               to be calculated, but not otherwise</span>
+0048 <span class="comment">%</span>
+0049 <span class="comment">%    cost     = value of quadratic cost V_N(M).</span>
+0050 <span class="comment">%    pe       = prediction error sequence.</span>
+0051 <span class="comment">%    grad     = gradient of V_N(M).</span>
+0052 <span class="comment">%    hes      = estimate of Hessian of V_N(M).</span>
+0053 <span class="comment">%    PSI      = matrix with columns being prediction error gradients.</span>
+0054 <span class="comment">%</span>
+0055 <span class="comment">%   written by Brett Ninness  School of EE &amp; CS</span>
+0056 <span class="comment">%                             University of Newcastle</span>
+0057 <span class="comment">%                             Australia.</span>
+0058 
+0059 <span class="comment">% Copyright (C) Brett Ninness</span>
+0060 
+0061 <a name="_sub0" href="#_subfunctions" class="code">function [cost,pe,grad,phi] = VN(Z,theta,OPT,M,div)</a>
+0062 
+0063 <span class="keyword">if</span> (nargin&lt;5)  div = 0; <span class="keyword">end</span>;  <span class="comment">% Default is don't compute gradients</span>
+0064 
+0065 <span class="comment">% Extract input and output from data matrix</span>
+0066 [y,u,ny,nu,Ny] = <a href="Z2data.html" class="code" title="function [y,u,ny,nu,Ny,Z] = Z2data(Z)">Z2data</a>(Z);
+0067 
+0068 <span class="comment">%Make sure the number of inputs and outputs comes from the model, not the</span>
+0069 <span class="comment">%data</span>
+0070 nu = M.nu;
+0071 ny = M.ny;
+0072 
+0073 <span class="comment">% Include delays specified in model structure on inputs</span>
+0074 <span class="keyword">for</span> r=1:nu, 
+0075  u(:,r) = [zeros(M.delay(r),1);u(1:Ny-M.delay(r),r)]; 
+0076 <span class="keyword">end</span>
+0077 
+0078 <span class="comment">% Convert from stacked parameter vector to model structure form</span>
+0079 Mnew = <a href="theta2m.html" class="code" title="function [G,SD] = theta2m(theta,M,fast)">theta2m</a>(theta,M,1);
+0080 
+0081 <span class="comment">%Extract polynomial coefficients and dimensions (which depend on type)</span>
+0082 a = Mnew.A; 
+0083 b = Mnew.B; 
+0084 c = Mnew.C; 
+0085 d = Mnew.D;
+0086 
+0087 <span class="comment">% Apply any specified input non-linearity</span>
+0088 <span class="keyword">if</span> nu &gt;0, [x,z]   = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(u,Mnew); <span class="keyword">end</span>          <span class="comment">% x=X(u_{t-k}), z=dX(u_{t-k})/d(eta).</span>
+0089 Mout    = Mnew;
+0090 Mout.in = Mout.out;  <span class="comment">% Set up defininitions of output non-linearity</span>
+0091 
+0092 <span class="comment">% Calculate prediction errors according to model structure type</span>
+0093 <span class="keyword">switch</span> M.type,
+0094 
+0095  <span class="keyword">case</span> {<span class="string">'arx'</span>,<span class="string">'narx'</span>}
+0096   OPT.dsp   = 0; 
+0097   OPT.fast  = 1;
+0098   g         = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>(Z,Mnew,OPT); 
+0099   [yhat,zz] = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(g.phi*g.th,Mout); 
+0100   pe        = y(:)-yhat(:);
+0101 
+0102  <span class="keyword">case</span> {<span class="string">'arma'</span>}
+0103   pex = zeros(Ny,1);
+0104 
+0105   <span class="comment">% Now figure out appropriate filter for k=OPT.step ahead prediction.</span>
+0106   <span class="comment">% First step is to break H(q) = Hbar_k(q) + H_tilde_k(q) where Hbar_k is FIR of order k=OPT.step.</span>
+0107   ex    = zeros(1,length(a)-length(c));
+0108   [q,r] = deconv([c,ex],a);
+0109   Hbar  = q;
+0110   nc = length(c);
+0111   <span class="keyword">for</span> k=2:OPT.step,
+0112    [q,r] = deconv([r(2:nc),0],a);
+0113    Hbar  = [Hbar,q]; <span class="comment">% Get first OPT.step terms in impulse response of H</span>
+0114   <span class="keyword">end</span>;
+0115   Hden = conv(c,[1,zeros(1,OPT.step-1)]);
+0116   Hnum = conv(a,Hbar);
+0117 
+0118   <span class="comment">%Compute prediction error</span>
+0119   ygu  = y;    <span class="comment">% Prediction error not accounting for noise model</span>
+0120   pe   = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(Hnum,Hden,ygu,Mnew);
+0121  
+0122  <span class="keyword">case</span> {<span class="string">'fir'</span>,<span class="string">'nfir'</span>}
+0123   OPT.dsp   = 0; 
+0124   OPT.fast  = 0;
+0125   g         = <a href="fir.html" class="code" title="function G = fir(Z,M,OPT)">fir</a>(Z,Mnew,OPT); 
+0126   [yhat,zz] = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(g.phi*g.th,Mout); 
+0127   pe        = y(:)-yhat(:);
+0128   
+0129  <span class="keyword">case</span> {<span class="string">'armax'</span>,<span class="string">'narmax'</span>}
+0130   <span class="comment">%  Now Figure out what G(p)X(u_{t-k}) is for all the columns of u</span>
+0131   <span class="keyword">for</span> k=1:nu,
+0132    pex(:,k) = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(b(k,:),c,x(:,k),Mnew);
+0133   <span class="keyword">end</span>
+0134 
+0135   <span class="comment">% Now figure out appropriate filter for k=OPT.step ahead prediction.</span>
+0136   <span class="comment">% First step is to break H(q) = Hbar_k(q) + H_tilde_k(q) where Hbar_k is FIR of order k=OPT.step.</span>
+0137   ex    = zeros(1,length(a)-length(c));
+0138   [q,r] = deconv([c,ex],a);
+0139   Hbar  = q;
+0140   nc = length(c);
+0141   <span class="keyword">for</span> k=2:OPT.step,
+0142    [q,r] = deconv([r(2:nc),0],a);
+0143    Hbar  = [Hbar,q]; <span class="comment">% Get first OPT.step terms in impulse response of H</span>
+0144   <span class="keyword">end</span>;
+0145   Hden = conv(c,[1,zeros(1,OPT.step-1)]);
+0146   Hnum = conv(a,Hbar);
+0147 
+0148   <span class="comment">%Compute prediction error</span>
+0149   pe   = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(Hnum,Hden,y,Mnew) - sum(pex,2);
+0150   
+0151  <span class="keyword">otherwise</span>  <span class="comment">%OE, BJ, ARMA and nonlinear versions</span>
+0152   <span class="comment">%  Now Figure out what G(p)X(u_{t-k}) is for all the columns of u</span>
+0153   <span class="keyword">if</span> nu&gt;0 &amp;&amp; ~strcmp(lower(M.type),<span class="string">'arma'</span>),
+0154    <span class="keyword">for</span> k=1:nu,
+0155     pex(:,k) = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(b(k,:),a(k,:),x(:,k),Mnew);
+0156    <span class="keyword">end</span>
+0157   <span class="keyword">else</span>
+0158    pex = zeros(Ny,1);
+0159   <span class="keyword">end</span>
+0160   
+0161   <span class="comment">% Now take output non-linearity into account</span>
+0162   <span class="comment">% Get total contribution X(G_1u_1 + G_2u_2 + ...) VN</span>
+0163   <span class="keyword">if</span> div, [spex,zz,w] = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(sum(pex,2),Mout); <span class="keyword">else</span> spex = <a href="u2x.html" class="code" title="function [x,z,w] = u2x(u,M)">u2x</a>(sum(pex,2),Mout); <span class="keyword">end</span>;
+0164 
+0165   <span class="comment">% Now figure out appropriate filter for k=OPT.step ahead prediction.</span>
+0166   <span class="comment">% First step is to break H(q) = Hbar_k(q) + H_tilde_k(q) where Hbar_k is FIR of order k=OPT.step.</span>
+0167   ex    = zeros(1,length(d)-length(c));
+0168   [q,r] = deconv([c,ex],d);
+0169   Hbar  = q;
+0170   nc = length(c);
+0171   <span class="keyword">for</span> k=2:OPT.step,
+0172    [q,r] = deconv([r(2:nc),0],d);
+0173    Hbar  = [Hbar,q]; <span class="comment">% Get first OPT.step terms in impulse response of H</span>
+0174   <span class="keyword">end</span>;
+0175   Hden = conv(c,[1,zeros(1,OPT.step-1)]);
+0176   Hnum = conv(d,Hbar);
+0177 
+0178   <span class="comment">%Compute prediction error</span>
+0179   ygu  = y-spex;    <span class="comment">% Prediction error not accounting for noise model</span>
+0180   pe   = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(Hnum,Hden,ygu,Mnew);
+0181 <span class="keyword">end</span>
+0182 
+0183 <span class="comment">% Calculate least-squares cost.</span>
+0184 cost = pe(OPT.n+1:length(pe))'*pe(OPT.n+1:length(pe))/length(pe(OPT.n+1:length(pe)));
+0185 
+0186 <span class="comment">% Calculate gradient and Hessian of cost if it is requested by setting flag div</span>
+0187 <span class="keyword">if</span> div
+0188  PSI = zeros(Ny,length(theta));
+0189  
+0190  <span class="keyword">switch</span> M.type
+0191   
+0192   <span class="keyword">case</span> {<span class="string">'arx'</span>,<span class="string">'narx'</span>}
+0193    OO      = OPT; 
+0194    OO.filt = 1;
+0195    OO.fast = 1;
+0196    <span class="keyword">for</span> k=1:M.in(1).neta
+0197     MM            = Mnew; 
+0198     MM.in(1).type = <span class="string">'linear'</span>;
+0199     gg            = <a href="barx.html" class="code" title="function G = barx(Z,M,OPT)">barx</a>([y(:),z(:,k)],MM,OO);  
+0200     PSI(:,k)      = -gg.phi*g.th;
+0201    <span class="keyword">end</span>
+0202    index = length(g.th)+1;
+0203    
+0204    
+0205   <span class="keyword">case</span> {<span class="string">'fir'</span>,<span class="string">'nfir'</span>}
+0206    OO      = OPT; 
+0207    OO.filt = 1;
+0208    OO.fast = 1;
+0209    <span class="keyword">for</span> k=1:M.in(1).neta,
+0210     gg       = <a href="fir.html" class="code" title="function G = fir(Z,M,OPT)">fir</a>([y(:),z(:,k)],Mnew,OO);  
+0211     PSI(:,k) = -gg.phi*g.th;
+0212    <span class="keyword">end</span>
+0213    index = length(g.th)+1;
+0214    
+0215   <span class="keyword">case</span> {<span class="string">'arma'</span>}
+0216    index = 1;    <span class="comment">%  Keep track of where we are up to in filling up columns of PSI.</span>
+0217 
+0218    <span class="comment">% Derivatives w.r.t A</span>
+0219    <span class="keyword">for</span> k=1:length(a)-1,
+0220     num          = [zeros(1,k),1,zeros(1,length(a)-k-1)];
+0221     psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,ygu,Mnew);
+0222     PSI(:,index) = psi(:);
+0223     index        = index+1;
+0224    <span class="keyword">end</span>
+0225    
+0226    <span class="comment">% Derivatives w.r.t C</span>
+0227    <span class="keyword">for</span> k=1:length(c)-1,
+0228     num          = [zeros(1,k),1,zeros(1,length(c)-k-1)];
+0229     psi          = -<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,pe,Mnew);
+0230     PSI(:,index) = psi(:);
+0231     index        = index+1;
+0232    <span class="keyword">end</span>
+0233    
+0234   <span class="keyword">case</span> {<span class="string">'armax'</span>,<span class="string">'narmax'</span>}
+0235    index = 1;    <span class="comment">%  Keep track of where we are up to in filling up columns of PSI.</span>
+0236    
+0237    <span class="comment">% Derivatives w.r.t B</span>
+0238    <span class="keyword">for</span> m = 1:nu  <span class="comment">%  Loop over numerators for each input</span>
+0239     bit=(~strcmp(M.in(m).type,<span class="string">'linear'</span>) &amp; M.nB(m)&lt;1); <span class="comment">% Just estimating a static nonlinearity?</span>
+0240     <span class="keyword">for</span> k=0:M.nB(m)-bit
+0241      num          = [zeros(1,k),1,zeros(1,M.nB(m)-k)];
+0242      psi          = -<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,x(:,m),Mnew);
+0243      PSI(:,index) = psi(:);
+0244      index        = index+1;
+0245     <span class="keyword">end</span>
+0246    <span class="keyword">end</span>
+0247 
+0248    <span class="keyword">for</span> k=1:M.nA
+0249     num          = [zeros(1,k),1,zeros(1,M.nA-k)];
+0250     psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,y,Mnew);
+0251     PSI(:,index) = psi(:);
+0252     index        = index+1;
+0253    <span class="keyword">end</span>
+0254 
+0255    <span class="comment">% Derivatives w.r.t C</span>
+0256    <span class="keyword">for</span> k=1:length(c)-1,
+0257     num          = [zeros(1,k),1,zeros(1,length(c)-k-1)];
+0258     psi          = -<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,pe,Mnew);
+0259     PSI(:,index) = psi(:);
+0260     index        = index+1;
+0261             <span class="keyword">end</span>
+0262    
+0263   <span class="keyword">otherwise</span> <span class="comment">%including nonlinear cases</span>
+0264    index = 1;    <span class="comment">%  Keep track of where we are up to in filling up columns of PSI.</span>
+0265    
+0266    <span class="comment">% Derivatives w.r.t B</span>
+0267    <span class="keyword">if</span> ~strcmp(lower(M.type),<span class="string">'arma'</span>),
+0268     <span class="keyword">for</span> m = 1:nu  <span class="comment">%  Loop over numerators for each input</span>
+0269      bit=(~strcmp(M.in(m).type,<span class="string">'linear'</span>) &amp; M.nB(m)&lt;1); <span class="comment">% Just estimating a static nonlinearity?</span>
+0270      ac=conv(a(m,1:M.nA(m)+1),c);
+0271      <span class="keyword">for</span> k=0:M.nB(m)-bit
+0272       num          = [zeros(1,k),1,zeros(1,M.nB(m)-k)];
+0273       psi          = -w.*<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(conv(num,d),ac,x(:,m),Mnew);
+0274       PSI(:,index) = psi(:);
+0275       index        = index+1;
+0276      <span class="keyword">end</span>
+0277     <span class="keyword">end</span>
+0278 
+0279     <span class="keyword">for</span> m = 1:nu  <span class="comment">%  Loop over denominators for each input</span>
+0280      ac=conv(a(m,1:M.nA(m)+1),c);
+0281      <span class="keyword">for</span> k=1:M.nA(m)
+0282       num          = [zeros(1,k),1,zeros(1,M.nA(m)-k)];
+0283       psi          = w.*<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(conv(d,num),ac,pex(:,m),Mnew);
+0284       PSI(:,index) = psi(:);
+0285       index        = index+1;
+0286      <span class="keyword">end</span>
+0287     <span class="keyword">end</span>
+0288    <span class="keyword">end</span>
+0289 
+0290    <span class="comment">% Derivatives w.r.t C</span>
+0291    <span class="keyword">for</span> k=1:M.nC,
+0292     num          = [zeros(1,k),1,zeros(1,length(c)-k-1)];
+0293     psi          = -<a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,pe,Mnew);
+0294     PSI(:,index) = psi(:);
+0295     index        = index+1;
+0296    <span class="keyword">end</span>
+0297 
+0298    <span class="comment">% Derivatives w.r.t D</span>
+0299    <span class="keyword">for</span> k=1:M.nD,
+0300     num          = [zeros(1,k),1,zeros(1,length(d)-k-1)];
+0301     psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(num,c,ygu,Mnew);
+0302     PSI(:,index) = psi(:);
+0303     index        = index+1;
+0304    <span class="keyword">end</span>
+0305    
+0306  <span class="keyword">end</span> <span class="comment">%END OF SWITCH FOR DIFFERENT MODEL TYPES</span>
+0307 
+0308  <span class="comment">% Now we handle gradient with respect to non-linearities</span>
+0309  zindex = 1; <span class="comment">% Where we are up to in moving through columns of z</span>
+0310  <span class="keyword">for</span> m=1:nu,  <span class="comment">% Loop over all the inputs</span>
+0311   <span class="keyword">if</span> any(strcmpi(M.type,{<span class="string">'ar'</span>,<span class="string">'arma'</span>,<span class="string">'arx'</span>,<span class="string">'armax'</span>})), nua = 1; <span class="keyword">else</span>, nua = m; <span class="keyword">end</span>
+0312   <span class="keyword">for</span> k=1:M.in(m).neta,
+0313    psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(d,c,z(:,zindex),Mnew);
+0314    psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(b(m,:),a(nua,:),psi,Mnew);
+0315    PSI(:,index) = -psi(:);
+0316    zindex       = zindex+1;
+0317    index        = index+1;
+0318   <span class="keyword">end</span>
+0319  <span class="keyword">end</span>
+0320 
+0321  <span class="keyword">for</span> k=1:M.out.neta,
+0322   psi          = <a href="ufilter.html" class="code" title="function y=ufilter(b,a,u,M,x)">ufilter</a>(d,c,zz(:,k),Mnew);
+0323   PSI(:,index) = -psi(:);
+0324   index        = index+1;
+0325  <span class="keyword">end</span>
+0326  
+0327  <span class="comment">%Now prepare gradient and Jacobian terms</span>
+0328  phi  = PSI(OPT.n+1:Ny,:); 
+0329  pe   = pe(OPT.n+1:Ny);
+0330  grad = 2*phi'*pe/(Ny-OPT.n);
+0331 
+0332 <span class="keyword">end</span>;  <span class="comment">% Test on whether div is set</span>
+0333 
+0334 
+0335 
+0336 
+0337</pre></div>
+<hr><address>Generated on Sun 04-May-2025 22:15:31 by <strong><a href="https://github.com/gllmflndn/m2html">m2html</a></strong> &copy; 2003-2022</address>
+</body>
+</html>
