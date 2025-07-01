@@ -1,12 +1,11 @@
-import sys
-eps = sys.float_info.epsilon
 
 from . import demo
 
 from . import _utils
 
-from . import(_est, _gn)
+from . import(_est, _estmap, _gn)
 est         = _est.est
+estmap      = _estmap.estmap
 gn          = _gn.gn
 
 from . import(_startZ, _startNL, _startM, _startOPT)

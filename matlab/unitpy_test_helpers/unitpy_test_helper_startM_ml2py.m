@@ -17,6 +17,22 @@ if isfield(m, 'in')
     end
 end
 
+% if isfield(m, 'out')
+%     nout = length(m.out);
+
+%     M = m;
+%     M = rmfield(M, 'out');
+%     % M = rmfield(M, 'out');
+
+%     M.out = cell(1,nout);
+%     for k=1:nout
+%         fn = fieldnames(m.out(k));
+%         for i=1:length(fn)
+%             M.out{k} = setfield(M.out{k}, fn{i}, getfield(m.out(k), fn{i}));
+%         end
+%     end
+% end
+
 if isfield(m, 'out')
     fn = fieldnames(m.out);
     for i=1:length(fn)

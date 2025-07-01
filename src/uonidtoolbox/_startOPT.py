@@ -18,7 +18,7 @@ def startOPT(OPTin=[], Min=[]):
     o['step']   = 1
     o['smits']  = 5
     o['cost']   = 'trace'
-    o['subtol'] = np.sqrt(np.sqrt(unit.eps))
+    o['subtol'] = np.sqrt(np.sqrt(unit._utils.eps))
     o['delta']  = 1
     o['adapt']  = 1
     o['dir']    = 'trust'

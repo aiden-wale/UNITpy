@@ -173,33 +173,61 @@
 #   written by Brett Ninness, School of EE & CS
 #              Adrian Wills   University of Newcastle
 #             		          Australia.
-
-
+# 
+# 
 # Copyright (C) Brett Ninness
+
+import numpy as np
+import uonidtoolbox as unit
 
 
 def est(Z, M, OPT):
 
     G = 0
 
-    # Check that Z is supplied and error if none
+    # # ignore GUI for time being
+    # if not Z:
+    #     raise Exception("Need to specify data (Z)!")
+    # elif not M:
+    #     Z = unit.startZ(Z)
+    #     m['nx'] = min(20, np.ceil(Z['Ny']/10))
+    #     gsid = unit.subspace(Z, m)
+    #     lsin = length(gsid.sing)
+    #     vv = linspace(0, (lsin-1)/lsin, lsin); gsid.sing(:).T/.gsid.sing(1)
+    #     [mv,mi] = min(sum(vv.*vv))
+    #     M['A'] = mi + 1
+    #     OPT = []
+    # elif not OPT:
+    #     OPT = []
+    # #endif
 
-    # Check that M is supplied and perform subspace algo to determine model structure if none
+    # # Detect if GUI running
+    # gui = 0
+    # guih = []
+    # if 'gui' in OPT:
+    #     if not isempty(OPT['gui']):
+    #         gui = 1
+    #         guih = OPT['gui']
+    #     #endif
+    # #endif
 
-    # Check that OPT is supplied and set OPT=[] if none
+    Z   = unit.startZ(Z)
+    M   = unit.startM(Z,M)
+    OPT = unit.startOPT(OPT,M)
+    ep  = unit.estmap(Z,M,OPT)
 
-
-    # Check the contents of Z are sane and set the remaining fields to default
-    
-    # Check the contents of M are sany and set the remaining fields to default
-
-    # Check the contents of OPT are sane and set remaining fields default
-
-    
-    # Call ep = estmap(Z,M,OPT) to determine the appropriate estimator given the model type and datatype
-
+    if OPT['dsp']:
+        dblines = "===================================================================="
+        unit._utils.udisp("\n" + dblines)
+        unit._utils.udisp("START ESTIMATION PROCESS:")
+        unit._utils.udisp("Estimating parameters for " + M['type'].upper() + " model structure using " + M['op'].upper() + " operator.")
+        unit._utils.udisp(ep['modelEquations'])
+        unit._utils.udisp("INITIALISAION:")
+    #endif
 
     # Init nonlinear parts of model if necessary
+    # if not isempty(ep.startNL):
+    #     M = 
 
     # Init estimate of system dynamics if necessary
 
@@ -210,7 +238,12 @@ def est(Z, M, OPT):
 
     # Fill in components of returned (estimated) model structure
 
-    
+
+    if OPT['dsp']:
+        unit._utils.udisp("END ESTIMATION PROCESS")
+        unit._utils.udisp(dblines + "\n")
+    #endif
+
     return G
 
 

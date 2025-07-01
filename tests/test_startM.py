@@ -9,11 +9,11 @@ def test_repeatedCall():
 
     Z = unit.startZ(Z)
 
-    M   = unit.startM(Z)
-    M_r = unit.startM(M)
+    M_0 = unit.startM(Z)
+    M_1 = unit.startM(M_0)
 
-    np.testing.assert_equal(M.keys(), M_r.keys())
-    np.testing.assert_equal(M, M_r)
+    np.testing.assert_equal(M_0.keys(), M_1.keys())
+    np.testing.assert_equal(M_0, M_1)
 #endfunction
 
 @pytest.mark.matlab

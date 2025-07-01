@@ -728,7 +728,7 @@ def startM(*args):
                     M['w'] = Z['w']
                 #endif
                 if 'T' not in M:
-                    if M['T']*np.max(M['w']) > np.pi + 1000*unit.eps:
+                    if M['T']*np.max(M['w']) > np.pi + 1000*unit._utils.eps:
                         # warning('M.T and Z.w are not compatible for M.op="q", resetting M.T = pi/max(M.w);')
                         M['T'] = np.pi/np.max(M['w'])
                     #endif

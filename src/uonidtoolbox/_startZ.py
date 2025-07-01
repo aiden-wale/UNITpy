@@ -158,7 +158,7 @@ def startZ(Z):
             else:
                 if np.max(np.abs(Z['w'])) > np.pi:
                     if 'T' in Z:
-                        if np.max(np.abs(Z['w'])) > np.pi/Z['T'] + np.sqrt(unit.eps):
+                        if np.max(np.abs(Z['w'])) > np.pi/Z['T'] + np.sqrt(unit._utils.eps):
                             raise Exception("Frequency range is greater than expected, i.e. max(abs(Z.w)) > pi/Z.T.")
                     else: 
                         Z['T'] = 0

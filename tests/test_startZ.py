@@ -8,7 +8,7 @@ def test_repeatedCall():
     Z = unit._utils.getExampleZData()
 
     Z_0 = unit.startZ(Z)
-    Z_1 = pytest.matlabEng.startZ(unit._utils.data_py2ml(Z_0))
+    Z_1 = unit.startZ(Z_0)
 
     np.testing.assert_equal(Z_0.keys(), Z_1.keys())
     np.testing.assert_equal(Z_0, Z_1)
