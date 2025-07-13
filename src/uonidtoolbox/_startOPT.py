@@ -3,7 +3,7 @@ import numpy as np
 import uonidtoolbox as unit
 
 
-def startOPT(OPTin=[], Min=[]):
+def startOPT(OPTin={}, Min={}):
 
     o = {}
 
@@ -35,8 +35,10 @@ def startOPT(OPTin=[], Min=[]):
             o['miter']  = '200'
         else:
             o['alg']    = 'gn'
+        #endif
     else:
         o['alg'] = 'gn'
+    #endif
     
     o['basis']  = 'polyb'
     o['smeth']  = 'bilin'
@@ -46,14 +48,14 @@ def startOPT(OPTin=[], Min=[]):
     o['gradnd'] = 'midpoint'
     o['par']    = 'ddlc'
 
-    if not OPTin:
+    if unit._utils.isempty(OPTin):
         OPT = o.copy()
     else:
         OPT = OPTin
         for k in o.keys():
             if k not in OPT:
                 OPT[k] = o[k]
-            elif not OPT[k]:
+            elif unit._utils.isempty(OPT[k]):
                 OPT[k] = o[k]
             #endif
         #endfor

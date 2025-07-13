@@ -109,7 +109,7 @@ def estmap(Z, M, OPT):
                         #endif
                     #endif
                     for k in range(0, M['ny']):
-                        if not M['out'][k]['type'] == 'linear':
+                        if not M['out']['type'] == 'linear':
                             ep['startNL'] = 'startNL'
                         #endif
                     #endif
@@ -147,7 +147,7 @@ def estmap(Z, M, OPT):
                 #endif
             #endif
             for k in range(0, M['ny']):
-                if not M['out'][k]['type'] == 'linear':
+                if not M['out']['type'] == 'linear':
                     ep['startNL']   = 'startNL'
                     ep['startG']    = 'startG'
                     ep['alg']       = OPT['alg']
@@ -158,12 +158,12 @@ def estmap(Z, M, OPT):
                 g2 = 'sum  B_i(%s)%s' %(M['op'], inp)
                 g3 = 'i=1              '
             else:
-                g1 = '          ' %(M['op'])
+                g1 = '          '
                 g2 = 'B(%s)%s' %(M['op'], inp)
-                g3 = '          ' %(M['op'])
+                g3 = '          '
             #endif
             h1 =         '         '
-            h2 = ' + e(t)' %(M['op'])
+            h2 = ' + e(t)'
             h3 =         '         '
             cr = '\n'
             s1 = '            ' + g1 + h1
@@ -197,7 +197,7 @@ def estmap(Z, M, OPT):
                 #endif
             #endif
             for k in range (0, M['ny']):
-                if not M['out'][k]['type'] == 'linear':
+                if not M['out']['type'] == 'linear':
                     ep['startNL'] = 'startNL'
                 #endif
             #endif
@@ -295,10 +295,10 @@ def estmap(Z, M, OPT):
 
         case 'ss' | 'bilin' | 'bilinear' | 'lpv':
             match OPT['alg']:
-                case ('sid','n4sid','cca','subspace'):
+                case 'sid' | 'n4sid' | 'cca' | 'subspace':
                     ep['alg'] = 'subspace'
 
-                case ('gn', 'em'):
+                case 'gn' | 'em':
                     ep['startG'] = 'startG'
                     ep['startH'] = 'startH'
                     ep['alg'] = OPT['alg']
@@ -356,7 +356,7 @@ def estmap(Z, M, OPT):
                     '\n     %sx(t) = Ax(t)' %(M['op']) + Bu + Ke + '   ' + \
                     'nx = %i,  nu = %i,  ny = %i' %(M['nx'], M['nu'], M['ny']) + \
                     '\n      y(t) = Cx(t)' + Du + \
-                    ' +  e(t)\n' %(M['op'])
+                    ' +  e(t)\n'
                 #endif
             #endif
 
