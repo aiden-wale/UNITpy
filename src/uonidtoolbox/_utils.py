@@ -1,8 +1,9 @@
 
 import numpy as np
 import pytest
-# import uonidtoolbox as unit
+import uonidtoolbox as unit
 import warnings
+import os
 
 import sys
 eps = sys.float_info.epsilon
@@ -24,25 +25,39 @@ def getExampleZData():
     return Z
 #endfunction
 
+
 def data_py2ml(din):
     if isinstance(din, dict):
-        dout = din.copy()
-        for k in dout.keys():
-            dout[k] = data_py2ml(dout[k])
+        for k in din.keys():
+            din[k] = data_py2ml(din[k])
         #endfor
     elif isinstance(din, np.ndarray):
-        dout = din.copy()
-        if 'int' in str(dout.dtype): # accounts for any type with 'int', i.e. int32, int64...
-            dout = np.array(dout, dtype='float64')
+        if 'int' in str(din.dtype): # accounts for any type with 'int', i.e. int32, int64...
+            din = np.array(din, dtype='float64')
         #endif
     elif isinstance(din, int):
-        dout = float(din)
+        din = float(din)
     else:
-        # raise Exception("unexpected data type" + str(type(din)))
-        dout = din
+        # din = din
+        pass
     #endif
-    return dout
+    return din
 #endfunction
+
+# def data_ml2py(din):
+#     if isinstance(din, dict):
+#         for k in din.keys():
+#             din[k] = data_ml2py(din[k])
+#         #endfor
+#     elif isinstance(din, matlab.double):
+#         din = np.array(din, dtype='float64')
+#     else:
+#         # raise Exception("unexpected data type" + str(type(din)))
+#         din = din
+#     #endif
+#     return din
+# #endfunction
+
 
 def helper_callMatlab_startZ(Z_py):
     pytest.matlabEng.workspace['Z'] = data_py2ml(Z_py)
@@ -99,8 +114,49 @@ def udisp(msg, guiRunning=0, guiHandle=[]):
 
 
 def uwarning(msg):
-    warnings.warn("estmap: 3 inputs should be supplied")
+    warnings.warn(msg)
 #endfunction
 
 
+def path_to_pkg():
+    # path\to\UNITpy
+    return os.path.abspath(os.path.join(os.path.dirname(unit.__file__), os.pardir, os.pardir))
+#endfunction
+
+
+
+import scipy
+
+def loadmat(filename):
+    '''
+    this function should be called instead of direct scipy.io.loadmat
+    as it cures the problem of not properly recovering python dictionaries
+    from mat files. It calls the function check keys to cure all entries
+    which are still mat-objects
+    '''
+    data = scipy.io.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    return _check_keys(data)
+
+def _check_keys(dict):
+    '''
+    checks if entries in dictionary are mat-objects. If yes
+    todict is called to change them to nested dictionaries
+    '''
+    for key in dict:
+        if isinstance(dict[key], scipy.io.matlab.mat_struct):
+            dict[key] = _todict(dict[key])
+    return dict        
+
+def _todict(matobj):
+    '''
+    A recursive function which constructs from matobjects nested dictionaries
+    '''
+    dict = {}
+    for strg in matobj._fieldnames:
+        elem = matobj.__dict__[strg]
+        if isinstance(elem, scipy.io.matlab.mat_struct):
+            dict[strg] = _todict(elem)
+        else:
+            dict[strg] = elem
+    return dict
 
