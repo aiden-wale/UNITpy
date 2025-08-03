@@ -5,6 +5,12 @@ import uonidtoolbox as unit
 
 def startZ(Z):
 
+    for k in ['Ny','ny','nu','passed_startZ']:
+        if k in Z:
+            Z[k] = int(Z[k])
+        #endif
+    #endfor
+
     if 'passed_startZ' in Z:
         return Z
 
@@ -173,3 +179,31 @@ def startZ(Z):
 
 
     return Z;
+
+
+
+
+def Z2data(Z):
+    Z = startZ(Z)
+
+    match Z['type']:
+        case 'time':
+            y   = Z['y']
+            u   = Z['u']
+            ny  = Z['ny']
+            nu  = Z['nu']
+            Ny  = Z['Ny']
+
+        case 'frequency':
+            y   = Z['y']
+            u   = Z['w']
+            ny  = Z['ny']
+            nu  = Z['nu']
+            Ny  = Z['Ny']
+
+        case _:
+            raise Exception("Value in Z.type not known.")
+    #endmatch
+
+    return y,u,ny,nu,Ny,Z
+#endfunction

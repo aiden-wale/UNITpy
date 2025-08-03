@@ -61,4 +61,6 @@ def startOPT(OPTin={}, Min={}):
         #endfor
     #endif
 
+    OPT['n'] = int(OPT['n'])
+
     return OPT

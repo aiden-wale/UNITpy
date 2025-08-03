@@ -66,6 +66,8 @@ def startM(*args):
     # ==========================================================================
 
     M = _inputCleanse_M(M)
+    if 'nu' in M: nu = M['nu']
+    if 'ny' in M: ny = M['ny']
 
 
     # ================== THE DEFAULT MODEL STRUCTURE ===========================
@@ -123,7 +125,7 @@ def startM(*args):
     else:
         m['w'] = np.logspace(np.log10(np.pi/m['T']/1000), np.log10(np.pi/m['T']), 1000).reshape(1, 1000)
     #endif
-    m['delay'] = np.zeros([np.max([nu,1]), 1])
+    m['delay'] = np.zeros([np.max([nu,1])])
     # ==========================================================================
 
 
@@ -700,10 +702,10 @@ def startM(*args):
         M['B']  = np.array([[0.0]])
         M['C']  = np.array([[0.0]])
         M['D']  = np.array([[0.0]])
-        M['nA'] = np.array([1.0])
-        M['nB'] = np.array([0.0])
-        M['nC'] = np.array([1.0])
-        M['nD'] = np.array([1.0])
+        M['nA'] = np.array([1])
+        M['nB'] = np.array([0])
+        M['nC'] = np.array([1])
+        M['nD'] = np.array([1])
     #endif
     # --------------------------------------------------------------------------
 
@@ -773,10 +775,12 @@ def startM(*args):
         #endif
 
         # Make sure the delays are of the correct orientation and size.
-        M['delay'] = M['delay'].reshape(M['delay'].size, 1)
-        if M['delay'].shape[0] != M['nu']:
-            M['delay'] = np.vstack((M['delay'], np.zeros([np.max([0, M['nu'] - M['delay'].shape[0]]), 1])))
+        M['delay'] = M['delay'].reshape(M['delay'].size)
+        if M['delay'].size != M['nu'] and M['nu'] > 0:
+            # M['delay'] = np.hstack([M['delay'], np.zeros([np.max([0, M['nu'] - M['delay'].shape[0]]), 1])])
+            M['delay'] = np.array([M['delay'], np.zeros([M['nu']-M['delay'].size])]).reshape(nu)
         #endif
+        M['delay'] = np.array(M['delay'], dtype='int')
 
         # Initialise Hammerstein and Wiener NL blocks
         M = unit.startNL(Z,M)
@@ -789,29 +793,38 @@ def startM(*args):
 
 
 def _inputCleanse_M(M):
-    # Ensure any given M.{A,B,C,D} are 2D NumPy arrays
+    # Ensure any given M.{A,B,C,D} are 2D numpy arrays
     for k in ['A', 'B', 'C', 'D']:
         if k in M:
             if not isinstance(M[k], np.ndarray):
-                M[k] = np.array(M[k]).reshape([1,1])
+                if isempty(M[k]):
+                    M[k] = np.array([])
+                else:
+                    M[k] = np.array([M[k]]).reshape([1,1])
+                #endif
             elif M[k].ndim > 2:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception("M['"+k+"'] must be a 2D NumPy array")
+                    raise Exception("M['"+k+"'] must be a 2D numpy array")
                 #endif
             #endif
         #endif
     #endfor
 
-    # Ensure any given M.{nA,nB,nC,nD} are 1D NumPy arrays
+    # Ensure any given M.{nA,nB,nC,nD} are 1D numpy arrays
     for k in ['nA', 'nB', 'nC', 'nD']:
         if k in M:
             if not isinstance(M[k], np.ndarray):
-                M[k] = np.array(M[k]).reshape([1])
+                if isempty(M[k]):
+                    M[k] = np.array([])
+                else:
+                    M[k] = np.array([M[k]]).reshape([1,1])
+                #endif
             elif M[k].ndim > 1:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception("M['"+k+"'] must be a 1D NumPy array")
+                    raise Exception("M['"+k+"'] must be a 1D numpy array")
                 #endif
             #endif
+            M[k] = np.array(M[k], dtype='int')
         #endif
     #endfor
 
@@ -819,7 +832,15 @@ def _inputCleanse_M(M):
         M['w'] = M['w'].reshape([1, M['w'].size])
     #endif
     if 'delay' in M:
-        M['delay'] = M['delay'].reshape([1, M['delay'].size])
+        M['delay'] = np.array([M['delay']], dtype='int')
+        M['delay'] = M['delay'].reshape([M['delay'].size])
     #endif
+
+    for k in ['estD','estF','estG','estK','estX1','nu','nx','ny']:
+        if k in M:
+            M[k] = int(M[k])
+        #endif
+    #endfor
+
 
     return M
