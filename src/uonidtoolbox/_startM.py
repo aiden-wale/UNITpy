@@ -421,6 +421,7 @@ def startM(*args):
             if 'B' not in M:
                 M['nB'] = M['nA']
             else:
+                M['nB'] = np.zeros(nu)
                 for i in range(0,nu):
                     if np.floor(M['B']) == M['B']:
                         M['nB'][i] = M['B'][i]
@@ -479,6 +480,7 @@ def startM(*args):
             if 'A' not in M:
                 M['nA'] = gord
             else:
+                M['nA'] = np.zeros(nu)
                 for i in range(0,nu):
                     if np.floor(M['A']) == M['A']:
                         M['nA'][i] = M['A'][i]
@@ -493,6 +495,7 @@ def startM(*args):
             if 'B' not in M:
                 M['nB'] = M['nA']
             else:
+                M['nB'] = np.zeros(nu)
                 for i in range(0,nu):
                     if np.floor(M['B']) == M['B']:
                         M['nB'][i] = M['B'][i]
@@ -543,6 +546,7 @@ def startM(*args):
             if 'A' not in M:
                 M['nA'] = gord
             else:
+                M['nA'] = np.zeros(M['A'].shape[0])
                 for i in range(0, M['A'].shape[0]):
                     if np.floor(M['A']) == M['A']:
                         M['nA'][i] = M['A'][i]
@@ -557,6 +561,7 @@ def startM(*args):
             if 'B' not in M:
                 M['nB'] = M['nA']
             else:
+                M['nB'] = np.zeros(M['B'].shape[0])
                 for i in range(0, M['B'].shape[0]):
                     if np.floor(M['B']) == M['B']:
                         M['nB'][i] = M['B'][i]
@@ -637,7 +642,7 @@ def startM(*args):
                 M['nx'] = M['nA']
             elif 'A' in M:
                 if np.floor(M['A']) == M['A']:
-                    M['nx'] = np.max(M['A']) # TOCHECK: (supremum of matrix elements?)
+                    M['nx'] = np.max(M['A']) # TODO: Check this (supremum of matrix elements?)
                 else:
                     M['nx'] = m['nx']
                 #endif

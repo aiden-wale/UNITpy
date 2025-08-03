@@ -22,7 +22,7 @@ def test_matlabResult_Mtype_AR():
     OPT = unit.startOPT(OPT,M)
 
     ep_py = unit.estmap(Z,M,OPT)
-    ep_ml = unit._utils.helper_callMatlab_estmap(Z,M,OPT)
+    ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
     for k in ep_py.keys():
@@ -56,7 +56,7 @@ def test_matlabResult_Mtype_ARMA():
     OPT = unit.startOPT(OPT,M)
 
     ep_py = unit.estmap(Z,M,OPT)
-    ep_ml = unit._utils.helper_callMatlab_estmap(Z,M,OPT)
+    ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
     for k in ep_py.keys():
@@ -90,7 +90,7 @@ def test_matlabResult_Mtype_FIR():
     OPT = unit.startOPT(OPT,M)
 
     ep_py = unit.estmap(Z,M,OPT)
-    ep_ml = unit._utils.helper_callMatlab_estmap(Z,M,OPT)
+    ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
     for k in ep_py.keys():
@@ -124,7 +124,7 @@ def test_matlabResult_Mtype_SS():
     OPT = unit.startOPT(OPT,M)
 
     ep_py = unit.estmap(Z,M,OPT)
-    ep_ml = unit._utils.helper_callMatlab_estmap(Z,M,OPT)
+    ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
     for k in ep_py.keys():

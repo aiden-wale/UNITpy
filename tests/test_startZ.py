@@ -5,7 +5,7 @@ import numpy as np
 
 
 def test_repeatedCall():
-    Z = unit._utils.getExampleZData()
+    Z = unit.testing._utils.getExampleZData()
 
     Z_0 = unit.startZ(Z)
     Z_1 = unit.startZ(Z_0)
@@ -16,10 +16,10 @@ def test_repeatedCall():
 
 @pytest.mark.matlab
 def test_matlabResult():
-    Z = unit._utils.getExampleZData()
+    Z = unit.testing._utils.getExampleZData()
 
     Z_py = unit.startZ(Z)
-    Z_ml = pytest.matlabEng.startZ(unit._utils.data_py2ml(Z))
+    Z_ml = pytest.matlabEng.startZ(unit.testing._utils.data_py2ml(Z))
 
     np.testing.assert_equal(Z_py.keys(), Z_ml.keys())
     np.testing.assert_equal(Z_py, Z_ml)

@@ -34,7 +34,7 @@ def fir(Z,M={},OPT={}):
         u[:,r:r+1] = np.vstack([ np.zeros([M['delay'][r], 1]) , u[0:Ny-M['delay'][r], r:r+1] ])
     #endfor
 
-    # TODO: Pass input through a non-linearity if required by model structure
+    # # TODO: Pass input through a non-linearity if required by model structure
     # x = unit.u2x(u,M)
     x = u
 
@@ -62,22 +62,22 @@ def fir(Z,M={},OPT={}):
     #endfor
 
 
-#  % Do luxurious extras (if not doing fast version)
-# if ~OPT.fast
-#  % Parameter space variance of estimates:
-#  pe    = y(OPT.n+1:length(y)) - PHI(OPT.n+1:length(y),:)*G.th;
-#  G.var = pe'*pe/length(pe);
-#  G.P   = G.var*pinv(PHI(OPT.n+1:length(y),:)'*PHI(OPT.n+1:length(y),:));
- 
-#  % Now load up matrix specifying standard deviations
-#  P = real(sqrt(diag(G.P))); 
-#  P = P(:); 
-#  d = 0;
-#  for r=1:nu 
-#   G.SD.th(:,r) = [P(d+1:d+M.nB(r)+1);  zeros(mxB-M.nB(r),1)];
-#   d = d + M.nB(r)+1;
-#  end
-# end
+    # # TODO: Do luxurious extras (if not doing fast version)
+    # if ~OPT.fast
+    #     # Parameter space variance of estimates:
+    #     pe    = y(OPT.n+1:length(y)) - PHI(OPT.n+1:length(y),:)*G.th;
+    #     G.var = pe'*pe/length(pe);
+    #     G.P   = G.var*pinv(PHI(OPT.n+1:length(y),:)'*PHI(OPT.n+1:length(y),:));
+
+    #     # Now load up matrix specifying standard deviations
+    #     P = real(sqrt(diag(G.P))); 
+    #     P = P(:); 
+    #     d = 0;
+    #     for r=1:nu 
+    #         G.SD.th(:,r) = [P(d+1:d+M.nB(r)+1);  zeros(mxB-M.nB(r),1)];
+    #         d = d + M.nB(r)+1;
+    #     #endfor
+    # #endif
 
 
     # Load up output with model properties

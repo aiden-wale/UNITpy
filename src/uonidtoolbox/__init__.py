@@ -2,6 +2,7 @@
 from . import demo
 
 from . import _utils
+from . import testing
 
 from . import(_est, _estmap)
 est         = _est.est

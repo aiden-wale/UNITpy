@@ -19,7 +19,7 @@ def test_matlabResult():
     M = unit.startM(Z,M)
 
     M_py = unit.startNL(Z,M)
-    M_ml = unit._utils.helper_callMatlab_startM(Z,M)
+    M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     print(M_ml)
 
