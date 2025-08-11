@@ -1,22 +1,3 @@
-#   This function provides a mapping from Model type (M.type) and Data type
-#   (Z.type) to different initialisation and estimation algorithms within the toolbox.
-#
-#   The intention is to provide one definitive place where the functionality
-#   of est.m is specified. So that, adding new Model types or Data types is a
-#   matter of supplying the underlying routines and then updating estmap.m to
-#   tell est.m what to do with them.
-#
-#   This routine is never meant to be called directly by the user - it is
-#   called by est.m
-#
-#   Usage:   ep = estmap(Z,M,OPT);
-#
-#   written by Brett Ninness, School of EE & CS
-#              Adrian Wills   University of Newcastle
-#                               Australia.
-# 
-# 
-# Copyright (C) Brett Ninness
 
 import numpy as np
 import uonidtoolbox as unit

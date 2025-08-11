@@ -4,8 +4,7 @@ import uonidtoolbox as unit
 import numpy as np
 
 
-# @pytest.mark.matlab
-def test_alg_fir():
+def test_alg_fir_fir():
 
     path_to_testdata = 'tests/_testdata/fir_fir.mat'
 
@@ -33,20 +32,26 @@ def test_alg_fir():
     # #endfor
 #endfunction
 
-# @pytest.mark.matlab
-@pytest.mark.skip
-def test_alg_barx():
+def test_alg_barx_arx():
 
     path_to_testdata = 'tests/_testdata/barx_arx.mat'
 
-    Z,M,OPT = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT'])
-    G_py = unit.arx(Z,M,OPT)
+    Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
+    G_py = unit.barx(Z,M,OPT)
 
-    pytest.matlabEng.eval('load("../../' + path_to_testdata + '");', nargout=0)
-    pytest.matlabEng.eval('G = arx(Z,M,OPT);', nargout=0)
-    G_ml = pytest.matlabEng.workspace['G']
+    np.testing.assert_allclose(G_py['th'], G_ml['th'].reshape(G_ml['th'].size,1))
+    # np.testing.assert_allclose(G_py['phi'], G_ml['phi'])
+#endfunction
 
-    np.testing.assert_allclose(G_py['th'], G_ml['th'])
+def test_alg_barx_ar():
+
+    path_to_testdata = 'tests/_testdata/barx_ar.mat'
+
+    Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
+    G_py = unit.barx(Z,M,OPT)
+
+    np.testing.assert_allclose(G_py['th'], G_ml['th'].reshape(G_ml['th'].size,1))
+    # np.testing.assert_allclose(G_py['phi'], G_ml['phi'])
 #endfunction
 
 

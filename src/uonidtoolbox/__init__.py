@@ -19,6 +19,9 @@ startOPT    = _startOPT.startOPT
 from . import(_fir)
 fir         = _fir.fir
 
+from . import(_barx)
+barx         = _barx.barx
+
 from . import(_subspace, _sid)
 subspace    = _subspace.subspace
 sid         = _sid.sid

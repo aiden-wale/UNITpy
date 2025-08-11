@@ -6,8 +6,6 @@ import copy
 
 
 def fir(Z,M={},OPT={}):
-    G = 0
-    
     Z = unit.startZ(Z)
     y,u,ny,nu,Ny,Z = unit._startZ.Z2data(Z)
 
@@ -41,9 +39,9 @@ def fir(Z,M={},OPT={}):
     # Form regressor matrix
     PHI = np.empty([Ny, np.sum(M['nB']+1)])
     idx = 0
-    for idu in range(0,nu):
-        PHI[:, idx:idx+M['nB'][idu,0]+1] = scipy.linalg.toeplitz(x[:,idu], np.hstack([x[0:1,idu:idu+1], np.zeros([1, M['nB'][idu,0]])]))
-        idx += M['nB'][idu,0]+1
+    for r in range(0,nu):
+        PHI[:, idx:idx+M['nB'][r,0]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M['nB'][r,0])]))
+        idx += M['nB'][r,0]+1
     #endfor
 
     # Save initial model into G
@@ -56,9 +54,9 @@ def fir(Z,M={},OPT={}):
     mxB = np.max(M['nB'])
     G['B'] = np.empty([nu, mxB+1])
     idx = 0
-    for idu in range(0,nu):
-        G['B'][idu,:] = np.hstack([G['th'][idx:idx+M['nB'][idu,0]+1].T, np.zeros([1, mxB-M['nB'][idu,0]])])
-        idx += M['nB'][idu,0]+1
+    for r in range(0,nu):
+        G['B'][r,:] = np.hstack([G['th'][idx:idx+M['nB'][r,0]+1].T, np.zeros([1, mxB-M['nB'][r,0]])])
+        idx += M['nB'][r,0]+1
     #endfor
 
 
