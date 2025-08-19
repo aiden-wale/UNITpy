@@ -24,7 +24,7 @@ def length(o):
 def isempty(obj):
     if isinstance(obj, np.ndarray):
         return True if obj.size == 0 else False
-    elif isinstance(obj, (list, dict)):
+    elif isinstance(obj, (list, dict, unit.struct)):
         return True if len(obj) == 0 else False
     else:
         return False
@@ -32,7 +32,7 @@ def isempty(obj):
 #endfunction
 
 
-def udisp(msg, guiRunning=0, guiHandle=[]):
+def udisp(msg, guiRunning=0, guiHandle=None):
     if guiRunning:
         #send message to GUI
         print(msg)

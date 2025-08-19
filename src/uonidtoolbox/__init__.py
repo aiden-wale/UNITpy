@@ -2,7 +2,10 @@
 from . import demo
 
 from . import _utils
+from . import _types
 from . import testing
+
+struct = _types.struct
 
 from . import(_est, _estmap)
 est         = _est.est

@@ -3,11 +3,11 @@ import numpy as np
 import uonidtoolbox as unit
 
 
-def subspace(Z,M={},OPT={}):
+def subspace(Z,M=unit.struct(),OPT=unit.struct()):
 
     Z = unit.startZ(Z)
 
-    match Z['type']:
+    match Z.type:
         case 'time':
             G = unit.sid(Z,M,OPT)
 

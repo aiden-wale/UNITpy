@@ -98,18 +98,22 @@ def getFieldsFromMatFile(path_to_data, fieldnames):
                 Z['y'] = Z['y'].reshape(Z['y'].size, 1)
             case 'M':
                 M = data[fn]
-                M['in'] = np.array([M['in']])
-                M['in'] = M['in'].reshape(M['in'].size)
+                M['inp'] = M['in']
+                del M['in']
+                M['inp'] = np.array([M['inp']])
+                M['inp'] = M['inp'].reshape(M['inp'].size)
             case 'OPT':
                 OPT = data[fn]
             case 'G':
                 G = data[fn]
-                G['in'] = np.array([G['in']])
-                G['in'] = G['in'].reshape(G['in'].size)
+                G['inp'] = G['in']
+                del G['in']
+                G['inp'] = np.array([G['inp']])
+                G['inp'] = G['inp'].reshape(G['inp'].size)
             case _:
                 raise Exception("Unexpected field name. Could not retrieve data")
         #endmatch
-        fields += (data[fn],)
+        fields += (unit.struct(data[fn]),)
     #endfor
         
     if len(fields) == 1:
@@ -134,33 +138,33 @@ def loadmat(filename):
     return _check_keys(data)
 #endfunction
 
-def _check_keys(dict):
+def _check_keys(d):
     '''
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     '''
-    for key in dict:
-        if isinstance(dict[key], scipy.io.matlab.mat_struct):
-            dict[key] = _todict(dict[key])
+    for key in d:
+        if isinstance(d[key], scipy.io.matlab.mat_struct):
+            d[key] = _todict(d[key])
         #endif
     #endfor
-    return dict
+    return d
 #endfunction       
 
 def _todict(matobj):
     '''
     A recursive function which constructs from matobjects nested dictionaries
     '''
-    dict = {}
+    d = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
         if isinstance(elem, scipy.io.matlab.mat_struct):
-            dict[strg] = _todict(elem)
+            d[strg] = _todict(elem)
         else:
-            dict[strg] = elem
+            d[strg] = elem
         #endif
     #endfor
-    return dict
+    return d
 #endfunction
 # =================================================================================
 

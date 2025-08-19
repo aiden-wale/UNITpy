@@ -5,19 +5,19 @@ import uonidtoolbox as unit
 import copy
 
 
-def fir(Z,M={},OPT={}):
+def fir(Z,M=unit.struct(),OPT=unit.struct()):
     Z = unit.startZ(Z)
     y,u,ny,nu,Ny,Z = unit._startZ.Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
     OPT = unit.startOPT(OPT)
-    if 'type' not in OPT['alg']:
-        OPT['alg'] = {}
-        OPT['alg']['type'] = 'block'
+    if 'type' not in OPT.alg:
+        OPT.alg = unit.struct()
+        OPT.alg.type = 'block'
     #endif
 
     # Unspecified parts of M -> defaults
-    if OPT['n'] >= Ny:
+    if OPT.n >= Ny:
         raise Exception("Cannot have OPT.n larger than height of Z!")
     #endif
 
@@ -29,7 +29,7 @@ def fir(Z,M={},OPT={}):
 
     # Include delays specified in model structure on inputs
     for r in range(0,nu):
-        u[:,r:r+1] = np.vstack([ np.zeros([M['delay'][r], 1]) , u[0:Ny-M['delay'][r], r:r+1] ])
+        u[:,r:r+1] = np.vstack([ np.zeros([M.delay[r], 1]) , u[0:Ny-M.delay[r], r:r+1] ])
     #endfor
 
     # # TODO: Pass input through a non-linearity if required by model structure
@@ -37,26 +37,26 @@ def fir(Z,M={},OPT={}):
     x = u
 
     # Form regressor matrix
-    PHI = np.empty([Ny, np.sum(M['nB']+1)])
+    PHI = np.empty([Ny, np.sum(M.nB+1)])
     idx = 0
     for r in range(0,nu):
-        PHI[:, idx:idx+M['nB'][r,0]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M['nB'][r,0])]))
-        idx += M['nB'][r,0]+1
+        PHI[:, idx:idx+M.nB[r,0]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M.nB[r,0])]))
+        idx += M.nB[r,0]+1
     #endfor
 
     # Save initial model into G
     G = copy.deepcopy(M)
 
     # Now get the estimate via least squares (block) or some recursive method
-    G['th'] = np.linalg.lstsq(PHI[OPT['n']:Ny, :], y[OPT['n']:Ny])[0]
+    G.th = np.linalg.lstsq(PHI[OPT.n:Ny, :], y[OPT.n:Ny])[0]
 
     # Put theta into model structure
-    mxB = np.max(M['nB'])
-    G['B'] = np.empty([nu, mxB+1])
+    mxB = np.max(M.nB)
+    G.B = np.empty([nu, mxB+1])
     idx = 0
     for r in range(0,nu):
-        G['B'][r,:] = np.hstack([G['th'][idx:idx+M['nB'][r,0]+1].T, np.zeros([1, mxB-M['nB'][r,0]])])
-        idx += M['nB'][r,0]+1
+        G.B[r,:] = np.hstack([G.th[idx:idx+M.nB[r,0]+1].T, np.zeros([1, mxB-M.nB[r,0]])])
+        idx += M.nB[r,0]+1
     #endfor
 
 
@@ -79,17 +79,17 @@ def fir(Z,M={},OPT={}):
 
 
     # Load up output with model properties
-    G['phi'] = PHI
+    G.phi = PHI
 
     # Record that validate should use VN as the cost function to obtain prediction errors
-    G['costfcn'] = 'VN'
-    G['OPT'] = copy.deepcopy(OPT)
+    G.costfcn = 'VN'
+    G.OPT = copy.deepcopy(OPT)
 
     # Add legend for prospective plotting
-    G['disp'] = {}
-    G['disp']['legend'] = 'Estimated n_b=' + str(mxB) + 'th order FIR model'
-    G['alg'] = {}
-    G['alg']['type'] = 'block' # Record that block solution was used # TODO: this should reflect actual solve type used
+    G.disp = unit.struct()
+    G.disp.legend = 'Estimated n_b=' + str(mxB) + 'th order FIR model'
+    G.alg = unit.struct()
+    G.alg.type = 'block' # Record that block solution was used # TODO: this should reflect actual solve type used
 
 
 
