@@ -1,18 +1,18 @@
 function M = unitpy_test_helper_startM_ml2py(m)
 
+M = m;
 
 if isfield(m, 'in')
     nin  = length(m.in);
 
-    M = m;
     M = rmfield(M, 'in');
     % M = rmfield(M, 'out');
 
-    M.in = cell(1,nin);
+    M.inp = cell(1,nin);
     for k=1:nin
         fn = fieldnames(m.in(k));
         for i=1:length(fn)
-            M.in{k} = setfield(M.in{k}, fn{i}, getfield(m.in(k), fn{i}));
+            M.inp{k} = setfield(M.inp{k}, fn{i}, getfield(m.in(k), fn{i}));
         end
     end
 end

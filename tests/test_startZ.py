@@ -21,6 +21,7 @@ def test_matlabResult():
     Z_py = unit.startZ(Z)
     Z_ml = pytest.matlabEng.startZ(unit.testing._utils.data_py2ml(Z))
 
+    Z_py = Z_py.asdict()
     np.testing.assert_equal(Z_py.keys(), Z_ml.keys())
     np.testing.assert_equal(Z_py, Z_ml)
 #endfunction

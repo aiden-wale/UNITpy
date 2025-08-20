@@ -7,7 +7,7 @@ isempty = unit._utils.isempty
 
 def estmap(Z, M, OPT):
 
-    ep = {}
+    ep = unit.struct()
 
     ep.startG    = ""
     ep.startH    = ""
@@ -22,7 +22,7 @@ def estmap(Z, M, OPT):
 
     if isempty(M):
         return ep
-    elif not isinstance(M, dict):
+    elif not isinstance(M, (dict, unit.struct)):
         return ep
     elif 'type' not in M:
         return ep
@@ -344,7 +344,7 @@ def estmap(Z, M, OPT):
 
         case 'nlss':
             # Set empty model equations
-            ep.modelEquations = []
+            ep.modelEquations = ''
 
             # Make est call the main routine emnlss
             ep.alg     = 'emnlss'

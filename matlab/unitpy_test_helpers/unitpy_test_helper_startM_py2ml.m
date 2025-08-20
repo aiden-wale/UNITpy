@@ -1,15 +1,15 @@
 function M = unitpy_test_helper_startM_py2ml(m)
 
+M = m;
 
-if isfield(m, 'in')
-    nin  = length(m.in);
+if isfield(m, 'inp')
+    nin  = length(m.inp);
 
-    M = m;
-    M = rmfield(M, 'in');
+    M = rmfield(M, 'inp');
     % M = rmfield(M, 'out');
 
     for k=1:nin
-        M.in(k) = m.in{k};
+        M.in(k) = m.inp{k};
     end
 end
 

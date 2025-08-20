@@ -17,6 +17,7 @@ def test_matlabResult():
     OPT_py = unit.startOPT()
     OPT_ml = pytest.matlabEng.startOPT()
 
+    OPT_py = OPT_py.asdict()
     np.testing.assert_equal(OPT_py.keys(), OPT_ml.keys())
     np.testing.assert_equal(OPT_py, OPT_ml)
 #endfunction

@@ -16,6 +16,9 @@ def data_py2ml(din):
         for k in din.keys():
             din[k] = data_py2ml(din[k])
         #endfor
+    elif isinstance(din, unit.struct):
+        tmp = data_py2ml(din.asdict())
+        din = tmp
     elif isinstance(din, np.ndarray):
         if 'int' in str(din.dtype): # accounts for any type with 'int', i.e. int32, int64...
             din = np.array(din, dtype='float64')
@@ -64,6 +67,10 @@ def helper_callMatlab_startM(*args):
     #endif
     pytest.matlabEng.eval('M = unitpy_test_helper_startM_ml2py(M);', nargout=0)
     M_ml = pytest.matlabEng.workspace['M']
+    if 'in' in M_ml:
+        M_ml['inp'] = M_ml['in']
+        del M_ml['in']
+    #endif
     return M_ml
 #endfunction
 

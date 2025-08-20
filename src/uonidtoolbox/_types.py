@@ -66,6 +66,12 @@ class struct:
         for k in d.keys():
             if isinstance(d[k], struct):
                 d[k] = d[k].asdict()
+            elif isinstance(d[k], (list, np.ndarray)):
+                for i in range(0, len(d[k])):
+                    if isinstance(d[k][i], unit.struct):
+                        d[k][i] = d[k][i].asdict()
+                    #endif
+                #endfor
             #endif
         #endfor
         return d
