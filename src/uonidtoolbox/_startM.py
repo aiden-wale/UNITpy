@@ -392,7 +392,7 @@ def startM(*args):
         if length(M.nA) > 1: M.nA = M.nA[0]
         if 'A' in M:
             if not isempty(M.A):
-                M.A = np.array(M.A)
+                # M.A = np.array(M.A)
                 M.A = M.A[0,:]
             #endif
         #endif
@@ -807,10 +807,12 @@ def _inputCleanse_M(M):
         if k in M:
             if not isinstance(M[k], np.ndarray):
                 if isempty(M[k]):
-                    M[k] = np.array([])
+                    M[k] = np.array([[]])
                 else:
-                    M[k] = np.array([M[k]]).reshape([1,1])
+                    M[k] = np.array([M[k]]).reshape(1,1)
                 #endif
+            elif M[k].ndim == 1:
+                M[k] = M[k].reshape(1, M[k].size)
             elif M[k].ndim > 2:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
                     raise Exception("M['"+k+"'] must be a 2D numpy array")
@@ -826,7 +828,7 @@ def _inputCleanse_M(M):
                 if isempty(M[k]):
                     M[k] = np.array([])
                 else:
-                    M[k] = np.array([M[k]]).reshape([1,1])
+                    M[k] = np.array([M[k]]).reshape(1,1) # TODO: these are meant to be 1D...
                 #endif
             elif M[k].ndim > 1:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
@@ -838,11 +840,11 @@ def _inputCleanse_M(M):
     #endfor
 
     if 'w' in M:
-        M.w = M.w.reshape([1, M.w.size])
+        M.w = M.w.reshape(1, M.w.size)
     #endif
     if 'delay' in M:
         M.delay = np.array([M.delay], dtype='int')
-        M.delay = M.delay.reshape([M.delay.size])
+        M.delay = M.delay.reshape(M.delay.size)
     #endif
 
     for k in ['estD','estF','estG','estK','estX1','nu','nx','ny']:

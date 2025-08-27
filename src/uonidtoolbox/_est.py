@@ -5,7 +5,7 @@ import uonidtoolbox as unit
 
 def est(Z, M, OPT):
 
-    G = 0
+    G = unit.struct()
 
     if not Z:
         raise Exception("Need to specify data (Z)!")
@@ -18,9 +18,9 @@ def est(Z, M, OPT):
         mi = np.argmin(np.sum(vv*vv, 0))
         mv = np.sum(vv*vv, 0)[mi]
         M.A = mi + 1
-        OPT = {}
+        OPT = unit.struct()
     elif not OPT:
-        OPT = {}
+        OPT = unit.struct()
     #endif
 
     Z   = unit.startZ(Z)
@@ -47,6 +47,7 @@ def est(Z, M, OPT):
 
     
     # Now call appropriate estimation algorithm
+    G = getattr(unit, ep.alg)(Z,M,OPT)
 
     # Fill in components of returned (estimated) model structure
 
