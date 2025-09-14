@@ -77,3 +77,25 @@ def test_utils_isempty_nonempty_npfloat64():
     assert res == False
 #endfunction
 
+def test_utils_blockhankel_2x8_4():
+    u = np.empty([2,8])
+    u[0,:] = np.array([1,2,3,4,5,6,7,8])
+    u[1,:] = np.array([1,2,3,4,5,6,7,8])+10
+
+    nu = u.shape[0]
+    N = u.shape[1]
+
+    nr = 4
+
+    exp = np.empty([nu*nr, N-nr+1])
+    for i in range(0, nr):
+        exp[nu*i:nu*(i+1), :] = u[:, i:i+N-nr+1]
+    #endfor
+
+    res = unit._utils.blockhankel(u, nr)
+    np.testing.assert_equal(res, exp)
+#endfunction
+
+
+
+

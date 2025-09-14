@@ -47,7 +47,7 @@ def est(Z, M, OPT):
 
     
     # Now call appropriate estimation algorithm
-    G = getattr(unit, ep.alg)(Z,M,OPT)
+    G = getattr(unit._alg, ep.alg)(Z,M,OPT)
 
     # Fill in components of returned (estimated) model structure
 

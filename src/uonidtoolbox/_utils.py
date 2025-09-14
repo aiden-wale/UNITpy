@@ -1,5 +1,6 @@
 
 import numpy as np
+import scipy
 import uonidtoolbox as unit
 import warnings
 import os
@@ -45,9 +46,44 @@ def uwarning(msg):
     warnings.warn(msg)
 #endfunction
 
-def path_to_pkg():
-    # path\to\UNITpy
-    return os.path.abspath(os.path.join(os.path.dirname(unit.__file__), os.pardir, os.pardir))
+# def path_to_pkg():
+#     # path\to\UNITpy
+#     return os.path.abspath(os.path.join(os.path.dirname(unit.__file__), os.pardir, os.pardir))
+# #endfunction
+
+
+def blockhankel(x, nr):
+    nx = x.shape[0]
+    N = x.shape[1]
+    X = np.empty([nx*nr, N-nr+1])
+    for idx in range(0, nx):
+        X[idx::nx, :] = scipy.linalg.hankel(x[idx, 0:nr], x[idx, nr-1:N])
+    #endfor
+
+    return X
 #endfunction
+
+
+# https://math.stackexchange.com/questions/2739271/similarity-transformation-between-two-state-space-ss-models-of-the-same-system
+def getSimilarityTransform(SS_1, SS_2):
+    nx      = SS_1.A.shape[0]
+    ny,nu   = SS_1.D.shape
+    I       = np.eye(nx,nx)
+
+    M = np.vstack([
+        np.kron(I, SS_2.A) - np.kron(SS_1.A.T, I),
+        np.kron(SS_1.B.T, I),
+        np.kron(I, SS_2.C)
+    ])
+
+    v = np.vstack([
+        np.zeros([nx*nx, 1]),
+        SS_2.B.reshape(nx*nu, 1),
+        SS_1.C.reshape(nx*ny, 1)
+    ])
+
+    T = (np.linalg.pinv(M) @ v).reshape(nx,nx)
+    return T
+#enddef
 
 

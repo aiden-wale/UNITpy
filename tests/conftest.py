@@ -2,6 +2,7 @@
 # py -m pytest -v --tb=short --runmatlab
 
 import pytest
+import numpy
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -28,6 +29,8 @@ def pytest_collection_modifyitems(config, items):
 def pytest_configure(config):    
     config.addinivalue_line("markers", "matlab: mark test as matlab to run")
 
+    numpy.set_printoptions(precision=6, suppress=True)
+
     if config.getoption("--runmatlab"):
         print("\nImporting MATLAB engine into environment... ", end="")
         import matlab.engine
@@ -48,5 +51,6 @@ def pytest_unconfigure(config):
     if config.getoption("--runmatlab"): 
         pytest.matlabEng.quit()
     #endif
+    numpy.set_printoptions() # defaults
 #endfunction
 

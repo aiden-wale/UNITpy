@@ -849,9 +849,38 @@ def _inputCleanse_M(M):
 
     for k in ['estD','estF','estG','estK','estX1','nu','nx','ny']:
         if k in M:
-            M[k] = int(M[k])
+            if isinstance(M[k], np.ndarray):
+                if M[k].size != 1: 
+                    raise Exception("Model variable: M." + k + " must be a scalar integer")
+                #endif
+                M[k] = int(M[k].flatten()[0])
+            else:
+                M[k] = int(M[k])
+            #endif
         #endif
     #endfor
 
 
     return M
+#endfunction
+
+
+def _make2d_SS_matrices(SS,nx,nu,ny):
+
+    for k in ['A','B','C','D','G','R','S']:
+        if not isinstance(SS[k], np.ndarray):
+            SS[k] = np.array([SS[k]])
+        #endif
+    #endfor
+
+    if SS.A.size > 0: SS.A = SS.A.reshape(nx,nx)
+    if SS.B.size > 0: SS.B = SS.B.reshape(nx,nu)
+    if SS.C.size > 0: SS.C = SS.C.reshape(ny,nx)
+    if SS.D.size > 0: SS.D = SS.D.reshape(ny,nu)
+    if SS.G.size > 0: SS.G = SS.G.reshape(nx,nx)
+    if SS.R.size > 0: SS.R = SS.R.reshape(ny,ny)
+    if SS.S.size > 0: SS.S = SS.S.reshape(nx,ny)
+
+    return SS
+#endfunction
+
