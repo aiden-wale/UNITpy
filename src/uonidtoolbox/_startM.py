@@ -193,11 +193,7 @@ def startM(*args):
             if 'A' not in M:
                 M.nA = gord*np.ones([ny])
             else:
-                if np.floor(M.A) == M.A:
-                    M.nA = M.A
-                else:
-                    M.nA = length(M.A)-1
-                #endif
+                M.nA = np.array([length(M.A)-1])
             #endif
         #endif
 
@@ -207,7 +203,7 @@ def startM(*args):
         if 'A' in M:
             if not isempty(M.A):
                 M.A = np.array(M.A)
-                M.A = M.A[0,:].reshape([1,M.A.shape[1]]) # TODO: ints can not be subscripted
+                M.A = M.A[0,:].reshape([1,M.A.shape[1]])
             #endif
         #endif
         M.B = np.array([[0.0]])
@@ -258,14 +254,14 @@ def startM(*args):
         if 'A' in M:
             if not isempty(M.A):
                 M.A = np.array(M.A)
-                M.A = M.A[0,:].reshape([1,M.A.shape[1]]) # TODO: ints can not be subscripted
+                M.A = M.A[0,:].reshape([1,M.A.shape[1]])
             #endif
         #endif
         if length(M.nC) > 1: M.nC = M.nC[0]
         if 'C' in M:
             if not isempty(M.C):
                 M.C = np.array(M.C)
-                M.C = M.C[0,:].reshape([1,M.C.shape[1]]) # TODO: ints can not be subscripted
+                M.C = M.C[0,:].reshape([1,M.C.shape[1]])
             #endif
         #endif
         M.B = np.array([[0.0]])
@@ -351,8 +347,10 @@ def startM(*args):
             elif isempty(M.A):
                 M.nA = gord
             else:
-                if np.floor(M.A) == M.A:
-                    M.nA = M.A
+                if M.A.size == 1:
+                    if np.floor(M.A) == M.A:
+                        M.nA = M.A
+                    #endif
                 else:
                     M.nA = length(M.A)-1
                 #endif
@@ -365,8 +363,10 @@ def startM(*args):
             elif isempty(M.B):
                 M.nB = M.nA
             else:
-                if np.floor(M.B) == M.B:
-                    M.nB = M.B
+                if M.B.size == 1:
+                    if np.floor(M.B) == M.B:
+                        M.nB = M.B
+                    #endif
                 else:
                     for i in range(0,nu):
                         M.nB = length(M.B)-1
@@ -388,7 +388,7 @@ def startM(*args):
         #endif
 
         # Make sure that the nA and A variables have only one entry
-        # M.nA = M.nA[0] # TODO: ints can not be subscripted
+        # M.nA = M.nA[0]
         if length(M.nA) > 1: M.nA = M.nA[0]
         if 'A' in M:
             if not isempty(M.A):
@@ -413,8 +413,10 @@ def startM(*args):
             if 'A' not in M:
                 M.nA = gord
             else:
-                if np.floor(M.A) == M.A:
-                    M.nA = M.A
+                if M.A.size == 1:
+                    if np.floor(M.A) == M.A:
+                        M.nA = M.A
+                    #endif
                 else:
                     M.nA = length(M.A)-1
                 #endif
@@ -461,7 +463,7 @@ def startM(*args):
         #endif
 
         # Make sure that the nA and A variables have only one entry
-        # M.nA = M.nA[0]  # TODO: ints can not be subscripted
+        # M.nA = M.nA[0] 
         if length(M.nA) > 1: M.nA = M.nA[0]
         if 'A' in M:
             if not isempty(M.A):
@@ -815,7 +817,7 @@ def _inputCleanse_M(M):
                 M[k] = M[k].reshape(1, M[k].size)
             elif M[k].ndim > 2:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception("M['"+k+"'] must be a 2D numpy array")
+                    raise Exception(f"M.{k} must be a 2D numpy array")
                 #endif
             #endif
         #endif
@@ -832,7 +834,7 @@ def _inputCleanse_M(M):
                 #endif
             elif M[k].ndim > 1:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception("M['"+k+"'] must be a 1D numpy array")
+                    raise Exception(f"M.{k} must be a 1D numpy array")
                 #endif
             #endif
             M[k] = np.array(M[k], dtype='int')
@@ -840,7 +842,8 @@ def _inputCleanse_M(M):
     #endfor
 
     if 'w' in M:
-        M.w = M.w.reshape(1, M.w.size)
+        M.w = np.squeeze(M.w)
+        if len(M.w.shape) > 1: raise Exception("M.w should be a 1-D array")
     #endif
     if 'delay' in M:
         M.delay = np.array([M.delay], dtype='int')
@@ -851,7 +854,7 @@ def _inputCleanse_M(M):
         if k in M:
             if isinstance(M[k], np.ndarray):
                 if M[k].size != 1: 
-                    raise Exception("Model variable: M." + k + " must be a scalar integer")
+                    raise Exception(f"Model variable: M.{k} must be a scalar integer")
                 #endif
                 M[k] = int(M[k].flatten()[0])
             else:
@@ -859,7 +862,6 @@ def _inputCleanse_M(M):
             #endif
         #endif
     #endfor
-
 
     return M
 #endfunction

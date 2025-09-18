@@ -150,7 +150,7 @@ def estmap(Z, M, OPT):
             s1 = '            ' + g1 + h1
             s2 = '      %s = ' %(out) + g2 + h2
             s3 = '            ' + g3 + h3
-            s4 = 'Order of B: ' + str(M.nB[:].T)
+            s4 = 'Order of B: ' + str(M.nB[:].transpose())
             spc = '       '
             ep.modelEquations = cr + ham + cr + s1 + cr + s2 + spc + s4 + cr + s3 + cr + cr + wen + cr
 
@@ -225,8 +225,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = ' A(%s)%s = ' %(M.op,out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].T) + '    Order of C: ' + str(M.nC)
-                s5 = 'Order of A: ' + str(M.nA[:].T)
+                s4 = 'Order of B: ' + str(M.nB[:].transpose()) + '    Order of C: ' + str(M.nC)
+                s5 = 'Order of A: ' + str(M.nA[:].transpose())
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             elif M.type == 'oe':
@@ -246,8 +246,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = '     %s = ' %(out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].T)
-                s5 = 'Order of A: ' + str(M.nA[:].T)
+                s4 = 'Order of B: ' + str(M.nB[:].transpose())
+                s5 = 'Order of A: ' + str(M.nA[:].transpose())
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             elif M.type == 'bj':
@@ -267,8 +267,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = '     %s = ' %(out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].T) + '    Order of C: ' + str(M.nC)
-                s5 = 'Order of A: ' + str(M.nA[:].T) + '    Order of D: ' + str(M.nD)
+                s4 = 'Order of B: ' + str(M.nB[:].transpose()) + '    Order of C: ' + str(M.nC)
+                s5 = 'Order of A: ' + str(M.nA[:].transpose()) + '    Order of D: ' + str(M.nD)
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             #endif

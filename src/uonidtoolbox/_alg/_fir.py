@@ -55,7 +55,7 @@ def fir(Z,M=unit.struct(),OPT=unit.struct()):
     G.B = np.empty([nu, mxB+1])
     idx = 0
     for r in range(0,nu):
-        G.B[r,:] = np.hstack([G.th[idx:idx+M.nB[r,0]+1].T, np.zeros([1, mxB-M.nB[r,0]])])
+        G.B[r,:] = np.hstack([G.th[idx:idx+M.nB[r,0]+1].transpose(), np.zeros([1, mxB-M.nB[r,0]])])
         idx += M.nB[r,0]+1
     #endfor
 

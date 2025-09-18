@@ -77,7 +77,7 @@ def startZ(Z):
         # --------------------------------------------------------------------------
         case 'time':
             (Ny,p) = Z.y.shape
-            if p>Ny: Z.y = Z.y.T
+            if p>Ny: Z.y = Z.y.transpose()
             (Ny,p) = Z.y.shape
             Z.Ny = Ny
             Z.ny = p
@@ -88,7 +88,7 @@ def startZ(Z):
                 if np.any(Z.y.shape == 0):
                     Z.u = np.array([])
                 else:
-                    if m>Nu: Z.u = Z.u.T
+                    if m>Nu: Z.u = Z.u.transpose()
                     (Nu,m) = Z.u.shape
                     Z.nu = m
                     if Nu != Ny:
@@ -138,7 +138,7 @@ def startZ(Z):
             if Z.y.ndim < 3:
                 (M, N) = Z.y.shape
                 if M>N:
-                    Z.y = Z.y.T
+                    Z.y = Z.y.transpose()
                 (M, N) = Z.y.shape
                 if M<2:
                     Z.y = Z.y.reshape(1,1,Z.y.size)
@@ -156,7 +156,7 @@ def startZ(Z):
                 if Z.u.ndim < 3:
                     (M, N) = Z.u.shape
                     if M>N:
-                        Z.u = Z.u.T
+                        Z.u = Z.u.transpose()
                     (M, N) = Z.u.shape
                     if M<2:
                         Z.u = Z.u.reshape(1,1,Z.u.size)

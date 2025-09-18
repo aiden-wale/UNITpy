@@ -110,7 +110,7 @@ def getFieldsFromMatFile(path_to_data, fieldnames):
                     if k in Z:
                         if Z[k].ndim < 2: Z[k] = Z[k].reshape(Z[k].size, 1)
                         if Z[k].shape[1]>Z[k].shape[0]:
-                            Z[k] = Z[k].T
+                            Z[k] = Z[k].transpose()
             case 'M':
                 M = data[fn]
                 M['inp'] = M['in']

@@ -44,17 +44,20 @@ def test_alg_sid():
     for k in ['nx', 'nu', 'ny']: unit.testing._utils.assert_field_equal(G_py[k], G_ml[k], k, "G_py.", "G_ml.")
 
     # Check dimensions of system matrices
-    for k in ['A', 'B', 'C', 'D']: unit.testing._utils.assert_field_equal(G_py.ss[k].shape, G_ml.ss[k].shape, k, "G_py.ss."+k+".shape", "G_ml.ss."+k+".shape")
+    for k in ['A', 'B', 'C', 'D']: unit.testing._utils.assert_field_equal(G_py.ss[k].shape, G_ml.ss[k].shape, k, f"G_py.ss.{k}.shape", f"G_ml.ss.{k}.shape")
 
     # Get transform between SS systems to disambiguate between representations
-    T = unit._utils.getSimilarityTransform(G_py.ss, G_ml.ss)
+    P,r = unit._utils.getSimilarityTransform(G_py.ss, G_ml.ss)
 
-    G_py.ss.A = T @ G_py.ss.A @ np.linalg.inv(T)
-    G_py.ss.B = T @ G_py.ss.B
-    G_py.ss.C =     G_py.ss.C @ np.linalg.inv(T)
+    # Check residuals are ~= 0
+    np.testing.assert_allclose(0, r.dot(r.transpose()), atol=1e-16)
+
+    G_py.ss.A = P @ G_py.ss.A @ np.linalg.inv(P)
+    G_py.ss.B = P @ G_py.ss.B
+    G_py.ss.C =     G_py.ss.C @ np.linalg.inv(P)
     # G_py.ss.D = G_py.ss.D
 
-    for k in ['A', 'B', 'C', 'D']: np.testing.assert_allclose(G_py.ss[k], G_ml.ss[k], err_msg="G.ss."+k)
+    for k in ['A', 'B', 'C', 'D']: np.testing.assert_allclose(G_py.ss[k], G_ml.ss[k], err_msg=f"G.ss.{k}")
 #endfunction
 
 @pytest.mark.skip

@@ -46,6 +46,8 @@ def barx(Z,M=unit.struct(),OPT=unit.struct()):
 
     # Form regressor matrix for input
     PHI = np.empty([Ny, n+m])
+
+    # Insert u data into PHI
     idx = 0
     for r in range(0,nu):
         # PHIu = toeplitz(u, [u(1), zeros(1,M.nB)])
@@ -53,20 +55,22 @@ def barx(Z,M=unit.struct(),OPT=unit.struct()):
         idx += M.nB[r,0]+1
     #endif
 
-    PHI[0, m:m+n] = np.zeros(n)
-    PHI[1::, m:m+n] = scipy.linalg.toeplitz(-y[0:-1,0], np.hstack([-y[0,0], np.zeros(n-1)]))
-    
-
-    
-
+    # Insert y data into PHI
+    PHI[0,  m:m+n] = np.zeros(n)
+    PHI[1:, m:m+n] = scipy.linalg.toeplitz(-y[0:-1,0], np.hstack([-y[0,0], np.zeros(n-1)]))
 
 
 
     # Save initial model into G
     G = copy.deepcopy(M)
 
-    # Now get the estimate via least squares (block) or some recursive method
+    # Get model estimate via least squares
     G.th = np.linalg.lstsq(PHI[OPT.n:Ny, :], y[OPT.n:Ny])[0]
+
+    # Unpack G.th into A,B
+    # TODO: handle MISO
+    G.B = G.th[0:m, 0]
+    G.A = np.hstack([1, G.th[m:m+n,0]])
 
     G.phi = PHI
     

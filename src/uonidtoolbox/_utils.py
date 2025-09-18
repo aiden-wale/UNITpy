@@ -12,9 +12,7 @@ eps = sys.float_info.epsilon
 def length(o):
     if isinstance(o, np.ndarray):
         l = np.max(o.shape)
-    elif isinstance(o, int):
-        l = 1
-    elif isinstance(o, float):
+    elif isinstance(o, (int, float, np.int64, np.float64)):
         l = 1
     else:
         l = len(o)
@@ -65,14 +63,16 @@ def blockhankel(x, nr):
 
 
 # https://math.stackexchange.com/questions/2739271/similarity-transformation-between-two-state-space-ss-models-of-the-same-system
-def getSimilarityTransform(SS_1, SS_2):
+def getSimilarityTransform(SS_1, SS_2, compute_residuals=True):
+    retvars = ()
+
     nx      = SS_1.A.shape[0]
     ny,nu   = SS_1.D.shape
     I       = np.eye(nx,nx)
 
     M = np.vstack([
-        np.kron(I, SS_2.A) - np.kron(SS_1.A.T, I),
-        np.kron(SS_1.B.T, I),
+        np.kron(I, SS_2.A) - np.kron(SS_1.A.transpose(), I),
+        np.kron(SS_1.B.transpose(), I),
         np.kron(I, SS_2.C)
     ])
 
@@ -82,8 +82,14 @@ def getSimilarityTransform(SS_1, SS_2):
         SS_1.C.reshape(nx*ny, 1)
     ])
 
-    T = (np.linalg.pinv(M) @ v).reshape(nx,nx)
-    return T
+    P = (np.linalg.pinv(M) @ v).reshape(nx,nx)
+
+    if compute_residuals:
+        r = (v - M @ P.reshape(nx*nx,1)).flatten()
+        return P, r
+    else:
+        return P
+    #endif
 #enddef
 
 
