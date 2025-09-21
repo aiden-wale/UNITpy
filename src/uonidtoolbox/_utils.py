@@ -93,3 +93,58 @@ def getSimilarityTransform(SS_1, SS_2, compute_residuals=True):
 #enddef
 
 
+# TODO: implement handling of MIMO, MISO, SIMO systems
+from numpy.polynomial.polynomial import polyval as np_polyval
+import copy
+def m2f(M):
+    if 'finishM' not in M: M = unit.startM(M)
+
+    G = copy.deepcopy(M)
+
+    if M.op == 'q':
+        ww      = np.exp(  1j*M.w*M.T)
+        pdel    = np.exp((-1j*M.w*M.T)*G.delay) # phase lag due to delays on inputs
+    else:
+        raise Exception("M.op == "+str(M.op)+" not implemented")
+    #endif
+
+    match G.type:
+        case "ss":
+            # TODO: implement handling of SS systems
+            raise Exception("m2f() not yet implemented for G.type == ss")
+        case _: # polynomial model
+            if M.type in ['ar','arx','arma','armax']: G.D = copy.deepcopy(G.A)
+            if M.type in ['ar','arma']: G.C = np.array([1.0])
+            if M.type in ['ar','arma']: G.B = np.array([0.0])
+            if M.type in ['fir']: G.A = np.array([1.0])
+            if M.type in ['fir']: G.C = np.array([1.0])
+            if M.type in ['fir']: G.D = copy.deepcopy(G.A)
+
+            # TODO: repair dimensions of A,B,C,D polynomials (unit.startM() ?)
+            tmpG = unit.struct()
+            for p in ['A','B','C','D']:
+                if G[p].ndim > 1:
+                    tmpG[p] = G[p][0,:]
+                else:
+                    tmpG[p] = G[p]
+                #endif
+            #endfor
+
+            A = tmpG.A
+            B = tmpG.B
+
+            G.G = np_polyval(1/ww, B)/np_polyval(1/ww, A)
+            pp = pdel
+            G.G = G.G * pp # pp is responsible for the effect of delay on input
+
+            C = np.hstack([np.zeros(tmpG.D.size - tmpG.C.size), tmpG.C])
+            D = tmpG.D
+            G.H = np_polyval(1/ww, C)/np_polyval(1/ww, D)
+    #endmatch
+
+    # For time series case, noise spectral factor masquerades as dynamic freq resp.
+    if G.nu<1: G.G = G.H
+
+    return G
+#endfunction
+

@@ -1,6 +1,8 @@
 
 from . import _utils
 
+from . import plotting
+
 from . import _types
 struct = _types.struct
 

@@ -4,7 +4,7 @@ import numpy as np
 import scipy
 
 
-def demo_arx(disp=1):
+def demo_fir(disp=1):
 
     OPT = unit.struct()
     OPT.dsp = disp
@@ -12,39 +12,36 @@ def demo_arx(disp=1):
     # ====================================================
     # Specify Experiment Conditions
     # ====================================================
-    T   = 1.0  # Sampling period in seconds
-    N   = 300   # Number of Samples
-    var = 1e-1  # Measurement Noise Variance
+    T   = 0.5   # Sampling period in seconds
+    var = 1e-4  # Measurement Noise Variance
 
 
     # ====================================================
-    # Specify true system
+    # Specify true system - ZOH impulse response of continuous defined system
     # ====================================================
-    den     = np.real(np.poly([-0.1,-1,-0.2]))
-    num     = 1
-    sysd    = scipy.signal.cont2discrete((num, den), T, method='zoh')
-    bq,aq   = sysd[0].ravel(), sysd[1].ravel()
+    den     = np.real(np.poly([-1, -3+1j, -3-1j]))
+    sysc    = scipy.signal.TransferFunction(1, den)
+    sysd    = scipy.signal.cont2discrete((sysc.num, sysc.den), T, method='zoh')
+    bq      = scipy.signal.dimpulse(sysd)[1][0].ravel()
 
 
     # ====================================================
     # Simulate a data record
     # ====================================================
     Z       = unit.struct()
+    N       = 50*bq.shape[0]
     Z.u     = np.random.randn(1, N)
     noise   = np.sqrt(var)*np.random.randn(Z.u.size).reshape(Z.u.shape)
-    noise   = scipy.signal.lfilter(1, aq, noise)
-    Z.y     = scipy.signal.lfilter(bq, aq, Z.u) + noise
+    Z.y     = scipy.signal.lfilter(bq, 1, Z.u) + noise
 
 
     # ====================================================
     # Specify Model Structures
     # ====================================================
     Mq          = unit.struct()
-    Mq.A        = aq.shape[0]-1
-    Mq.B        = bq.shape[0]-2 # delay is catered for elsewhere
+    Mq.nB       = bq.shape[0]-1
     Mq.T        = T
-    Mq.type     = 'arx'
-    Mq.delay    = 1
+    Mq.type     = 'fir'
 
 
     # ====================================================
@@ -59,13 +56,14 @@ def demo_arx(disp=1):
     if OPT.dsp:
         Gt              = unit.struct()
         Gt.disp         = unit.struct()
-        Gt.A            = aq
         Gt.B            = bq
+        Gt.T            = T
         Gt.w            = Gq.w
-        Gt.type         = 'arx'
+        Gt.type         = 'fir'
         # Gt.colour       = 'b'
         Gt.disp.legend  = 'True Response'
-
+        Gt.disp.legend  = Gt.disp.legend + ' q operator'
+        
         unit.plotting.showbode([Gt, Gq])
     #endif
 

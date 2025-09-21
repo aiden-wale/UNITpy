@@ -8,10 +8,8 @@ isempty = unit._utils.isempty
 
 def startM(*args):
 
-    nargin = len(args)
-
     # ============================== Get Z and M ===============================
-    match nargin:
+    match len(args):
         case 0:
             Z = unit.struct()
             M = unit.struct()
@@ -78,7 +76,7 @@ def startM(*args):
     m = unit.struct()
     gord        = 5         # Default order of G dynamics
     hord        = 2         # Default order of H dynamics
-    m.type   = 'arx'     # Default type of model
+    m.type      = 'arx'     # Default type of model
 
     # Transfer function defaults
     m.A      = np.array([]).reshape([0,0])
@@ -106,7 +104,9 @@ def startM(*args):
     m.finishM    = 'finishM'
 
     # If a sample time was given by the data, then use it
-    if 'T' in Z:
+    if 'T' in M:
+        m.T = M.T
+    elif 'T' in Z:
         m.T = Z.T
     else:
         m.T = 1
@@ -287,13 +287,9 @@ def startM(*args):
                 M.nB = gord*np.ones([nu,1])
                 M.nA = np.ones([nu,1])
             else:
+                M.nA = np.zeros([nu,1])
                 for i in range(0,nu):
-                    M.nA = np.zeros([nu,1])
-                    if np.floor(M.B) == M.B:
-                        M.nB[i] = M.B[i]
-                    else:
-                        M.nB[i] = length(M.B[i,:])-1
-                    #endif
+                    M.nB = length(M.B)-1
                 #endfor
             #endif
         #endif

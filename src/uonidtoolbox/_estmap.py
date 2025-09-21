@@ -103,7 +103,7 @@ def estmap(Z, M, OPT):
                 s1 = '                          '
                 s2 = '     A(%s)y(t) = e(t)      ' %(M.op)
                 s3 = '                          '
-                s4 = 'Order of A: ' + str(M.nA[:])
+                s4 = 'Order of A: ' + str(M.nA.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + s1 + spc + s4 + cr + s2 + cr + s3 + cr
             elif M.type in ['arx', 'farx']:
@@ -111,8 +111,8 @@ def estmap(Z, M, OPT):
                 s1 = '                                   '
                 s2 = '     A(%s)y(t) = B(%s)u(t) + e(t)' %(M.op, M.op)
                 s3 = '                                   '
-                s4 = 'Order of A: ' + str(M.nA[:])
-                s5 = 'Order of B: ' + str(M.nB[:])
+                s4 = 'Order of A: ' + str(M.nA.ravel()[0])
+                s5 = 'Order of B: ' + str(M.nB.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr
             #endif
@@ -150,7 +150,7 @@ def estmap(Z, M, OPT):
             s1 = '            ' + g1 + h1
             s2 = '      %s = ' %(out) + g2 + h2
             s3 = '            ' + g3 + h3
-            s4 = 'Order of B: ' + str(M.nB[:].transpose())
+            s4 = 'Order of B: ' + str(M.nB.ravel()[0])
             spc = '       '
             ep.modelEquations = cr + ham + cr + s1 + cr + s2 + spc + s4 + cr + s3 + cr + cr + wen + cr
 
@@ -204,8 +204,8 @@ def estmap(Z, M, OPT):
                 s1 = '                          '
                 s2 = '     A(%s)y(t) = C(%s)e(t)' %(M.op, M.op)
                 s3 = '                          '
-                s4 = 'Order of A: ' + str(M.nA)
-                s5 = 'Order of C: ' + str(M.nC)
+                s4 = 'Order of A: ' + str(M.nA.ravel()[0]) # TODO: fix this indexing hack for non-SISO systems
+                s5 = 'Order of C: ' + str(M.nC.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr
             elif M.type == 'armax':
@@ -225,8 +225,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = ' A(%s)%s = ' %(M.op,out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].transpose()) + '    Order of C: ' + str(M.nC)
-                s5 = 'Order of A: ' + str(M.nA[:].transpose())
+                s4 = 'Order of B: ' + str(M.nB.ravel()[0]) + '    Order of C: ' + str(M.nC.ravel()[0])
+                s5 = 'Order of A: ' + str(M.nA.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             elif M.type == 'oe':
@@ -246,8 +246,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = '     %s = ' %(out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].transpose())
-                s5 = 'Order of A: ' + str(M.nA[:].transpose())
+                s4 = 'Order of B: ' + str(M.nB.ravel()[0])
+                s5 = 'Order of A: ' + str(M.nA.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             elif M.type == 'bj':
@@ -267,8 +267,8 @@ def estmap(Z, M, OPT):
                 s1 = '            ' + g1 + h1
                 s2 = '     %s = ' %(out) + g2 + h2
                 s3 = '            ' + g3 + h3
-                s4 = 'Order of B: ' + str(M.nB[:].transpose()) + '    Order of C: ' + str(M.nC)
-                s5 = 'Order of A: ' + str(M.nA[:].transpose()) + '    Order of D: ' + str(M.nD)
+                s4 = 'Order of B: ' + str(M.nB.ravel()[0]) + '    Order of C: ' + str(M.nC.ravel()[0])
+                s5 = 'Order of A: ' + str(M.nA.ravel()[0]) + '    Order of D: ' + str(M.nD.ravel()[0])
                 spc = '       '
                 ep.modelEquations = cr + ham + cr + s1 + spc + s4 + cr + s2 + cr + s3 + spc + s5 + cr + cr + wen + cr
             #endif
