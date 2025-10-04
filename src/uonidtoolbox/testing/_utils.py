@@ -12,11 +12,6 @@ def assert_field_equal(obj_A, obj_B, fieldname, name_A, name_B):
     np.testing.assert_equal(obj_A, obj_B, err_msg=msg)
 #endfunction
 
-def getExampleZData():
-    Z = np.arange(4*6).reshape(4,6)
-    return Z
-#endfunction
-
 def data_py2ml(din):
     if isinstance(din, dict):
         for k in din.keys():

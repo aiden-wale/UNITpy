@@ -1,14 +1,14 @@
 
+import uonidtoolbox as unit
 import numpy as np
 import scipy
-import uonidtoolbox as unit
 import copy
 
 
-def sid(Z,M=unit.struct(),OPT=unit.struct()):
+def sid(Z, M=unit.struct(), OPT=unit.struct()):
 
     # Extract inputs and outputs specified
-    y,u,ny,nu,N,Z = unit._startZ.Z2data(Z)
+    y,u,ny,nu,N,Z = unit._startZ._Z2data(Z)
 
     # Check which parts of model structure were unspecified and set to defaults.
     if not M:
@@ -61,7 +61,6 @@ def sid(Z,M=unit.struct(),OPT=unit.struct()):
     R = np.tril(R)
 
     R_22_14 = _extract_block_from_R(R, 2, 2, 1, 4, nu, ny, i)
-    R_55_15 = _extract_block_from_R(R, 5, 5, 1, 5, nu, ny, i)
     R_55_14 = _extract_block_from_R(R, 5, 5, 1, 4, nu, ny, i)
 
     R_56_14 = _extract_block_from_R(R, 5, 6, 1, 4, nu, ny, i)

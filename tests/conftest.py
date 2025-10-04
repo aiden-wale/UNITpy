@@ -17,7 +17,7 @@ def pytest_collection_modifyitems(config, items):
         return
     #endif
 
-    skip_matlab = pytest.mark.skip(reason="need --runmatlab option to run")
+    skip_matlab = pytest.mark.skip(reason="use --runmatlab option")
     for item in items:
         if "matlab" in item.keywords:
             item.add_marker(skip_matlab)
@@ -29,7 +29,7 @@ def pytest_collection_modifyitems(config, items):
 def pytest_configure(config):    
     config.addinivalue_line("markers", "matlab: mark test as matlab to run")
 
-    numpy.set_printoptions(precision=6, suppress=True)
+    numpy.set_printoptions(precision=5, suppress=True, edgeitems=200, linewidth=200)
 
     if config.getoption("--runmatlab"):
         print("\nImporting MATLAB engine into environment... ", end="")
@@ -48,7 +48,7 @@ def pytest_configure(config):
     
 
 def pytest_unconfigure(config):
-    if config.getoption("--runmatlab"): 
+    if config.getoption("--runmatlab"):
         pytest.matlabEng.quit()
     #endif
     numpy.set_printoptions() # defaults

@@ -1,13 +1,13 @@
 
+import uonidtoolbox as unit
 import numpy as np
 import scipy
-import uonidtoolbox as unit
 import copy
 
 
-def barx(Z,M=unit.struct(),OPT=unit.struct()):
+def barx(Z, M=unit.struct(), OPT=unit.struct()):
     Z = unit.startZ(Z)
-    y,u,ny,nu,Ny,Z = unit._startZ.Z2data(Z)
+    y,u,ny,nu,Ny,Z = unit._startZ._Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
     OPT = unit.startOPT(OPT)
@@ -51,8 +51,8 @@ def barx(Z,M=unit.struct(),OPT=unit.struct()):
     idx = 0
     for r in range(0,nu):
         # PHIu = toeplitz(u, [u(1), zeros(1,M.nB)])
-        PHI[:, idx:idx+M.nB[r,0]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M.nB[r,0])]))
-        idx += M.nB[r,0]+1
+        PHI[:, idx:idx+M.nB[r]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M.nB[r])]))
+        idx += M.nB[r]+1
     #endif
 
     # Insert y data into PHI

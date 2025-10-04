@@ -71,6 +71,9 @@ def startZ(Z):
             case _:
                 raise Exception("The value in Z.type is not known.")
     
+    if Z.y.ndim < 2: Z.y = Z.y.reshape(Z.y.size, 1)
+    if Z.u.ndim < 2: Z.u = Z.u.reshape(Z.u.size, 1)
+
     match Z.type:
         # --------------------------------------------------------------------------
         #    TIME DOMAIN DATA
@@ -193,20 +196,20 @@ def startZ(Z):
 
 
 
-def Z2data(Z):
+def _Z2data(Z):
     Z = startZ(Z)
 
     match Z.type:
         case 'time':
-            y   = Z.y
-            u   = Z.u
+            y   = Z.y.copy()
+            u   = Z.u.copy()
             ny  = Z.ny
             nu  = Z.nu
             Ny  = Z.Ny
 
         case 'frequency':
-            y   = Z.y
-            u   = Z.w
+            y   = Z.y.copy()
+            u   = Z.w.copy()
             ny  = Z.ny
             nu  = Z.nu
             Ny  = Z.Ny

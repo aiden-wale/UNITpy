@@ -63,9 +63,7 @@ def blockhankel(x, nr):
 
 
 # https://math.stackexchange.com/questions/2739271/similarity-transformation-between-two-state-space-ss-models-of-the-same-system
-def getSimilarityTransform(SS_1, SS_2, compute_residuals=True):
-    retvars = ()
-
+def getSimilarityTransform(SS_1, SS_2):
     nx      = SS_1.A.shape[0]
     ny,nu   = SS_1.D.shape
     I       = np.eye(nx,nx)
@@ -84,12 +82,14 @@ def getSimilarityTransform(SS_1, SS_2, compute_residuals=True):
 
     P = (np.linalg.pinv(M) @ v).reshape(nx,nx)
 
-    if compute_residuals:
-        r = (v - M @ P.reshape(nx*nx,1)).flatten()
-        return P, r
-    else:
-        return P
+    # Check residuals are ~= 0
+    tol = 1e-16
+    r = (v - M @ P.reshape(nx*nx,1)).flatten()
+    if r.dot(r) > tol:
+        raise Exception(f"residuals of similarity transform were above tolerance: {r.dot(r)} > {tol}")
     #endif
+
+    return P
 #enddef
 
 

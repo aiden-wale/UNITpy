@@ -484,10 +484,12 @@ def startM(*args):
             else:
                 M.nA = np.zeros(nu)
                 for i in range(0,nu):
-                    if np.floor(M.A) == M.A:
-                        M.nA[i] = M.A[i]
-                    else:
-                        M.nA[i] = length(M.A[i,:])-1
+                    if M.A.size == 1:
+                        if np.floor(M.A) == M.A:
+                            M.nA[i] = M.A[i]
+                        else:
+                            M.nA[i] = length(M.A[i,:])-1
+                        #endif
                     #endif
                 #endfor
             #endif
@@ -499,10 +501,12 @@ def startM(*args):
             else:
                 M.nB = np.zeros(nu)
                 for i in range(0,nu):
-                    if np.floor(M.B) == M.B:
-                        M.nB[i] = M.B[i]
-                    else:
-                        M.nB[i] = length(M.B[i,:])-1
+                    if M.B.size == 1:
+                        if np.floor(M.B) == M.B:
+                            M.nB[i] = M.B[i]
+                        else:
+                            M.nB[i] = length(M.B[i,:])-1
+                        #endif
                     #endif
                 #endfor
             #endif
@@ -813,7 +817,7 @@ def _inputCleanse_M(M):
                 M[k] = M[k].reshape(1, M[k].size)
             elif M[k].ndim > 2:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception(f"M.{k} must be a 2D numpy array")
+                    raise Exception(f"M.{k} must be a 2-D numpy array")
                 #endif
             #endif
         #endif
@@ -826,11 +830,11 @@ def _inputCleanse_M(M):
                 if isempty(M[k]):
                     M[k] = np.array([])
                 else:
-                    M[k] = np.array([M[k]]).reshape(1,1) # TODO: these are meant to be 1D...
+                    M[k] = np.array([M[k]]).reshape(1)
                 #endif
             elif M[k].ndim > 1:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception(f"M.{k} must be a 1D numpy array")
+                    raise Exception(f"M.{k} must be a 1-D numpy array")
                 #endif
             #endif
             M[k] = np.array(M[k], dtype='int')

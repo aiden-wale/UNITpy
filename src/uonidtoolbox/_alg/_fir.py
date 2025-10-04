@@ -1,13 +1,13 @@
 
+import uonidtoolbox as unit
 import numpy as np
 import scipy
-import uonidtoolbox as unit
 import copy
 
 
-def fir(Z,M=unit.struct(),OPT=unit.struct()):
+def fir(Z, M=unit.struct(), OPT=unit.struct()):
     Z = unit.startZ(Z)
-    y,u,ny,nu,Ny,Z = unit._startZ.Z2data(Z)
+    y,u,ny,nu,Ny,Z = unit._startZ._Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
     OPT = unit.startOPT(OPT)
@@ -40,8 +40,8 @@ def fir(Z,M=unit.struct(),OPT=unit.struct()):
     PHI = np.empty([Ny, np.sum(M.nB+1)])
     idx = 0
     for r in range(0,nu):
-        PHI[:, idx:idx+M.nB[r,0]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M.nB[r,0])]))
-        idx += M.nB[r,0]+1
+        PHI[:, idx:idx+M.nB[r]+1] = scipy.linalg.toeplitz(x[:,r], np.hstack([x[0,r], np.zeros(M.nB[r])]))
+        idx += M.nB[r]+1
     #endfor
 
     # Save initial model into G
@@ -55,8 +55,8 @@ def fir(Z,M=unit.struct(),OPT=unit.struct()):
     G.B = np.empty([nu, mxB+1])
     idx = 0
     for r in range(0,nu):
-        G.B[r,:] = np.hstack([G.th[idx:idx+M.nB[r,0]+1].transpose(), np.zeros([1, mxB-M.nB[r,0]])])
-        idx += M.nB[r,0]+1
+        G.B[r,:] = np.hstack([G.th[idx:idx+M.nB[r]+1].transpose(), np.zeros([1, mxB-M.nB[r]])])
+        idx += M.nB[r]+1
     #endfor
 
 

@@ -1,9 +1,9 @@
 
-import numpy as np
 import uonidtoolbox as unit
+import numpy as np
 
 
-def subspace(Z,M=unit.struct(),OPT=unit.struct()):
+def subspace(Z, M=unit.struct(), OPT=unit.struct()):
 
     Z = unit.startZ(Z)
 
