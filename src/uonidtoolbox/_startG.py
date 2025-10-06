@@ -34,8 +34,8 @@ def _SteiglitzMcBride_Init(Z, M, OPT):
     gfav = copy.deepcopy(g)
     itfav = 0
 
-    th      = unit._alg._gn._m2theta(g)
-    cost    = unit._alg._gn._VN(th, Z, MM, OPT, compute_gradient=False)
+    th      = unit._utils.m2theta(g)
+    cost    = unit._objective.VN(th, Z, MM, OPT, compute_gradient=False)
     if OPT.dsp: unit._utils.udisp(f"iter#: {0:<3} |  cost = {cost:<10.5e}")
 
     for it in range(1, OPT.smits+1):
@@ -49,8 +49,8 @@ def _SteiglitzMcBride_Init(Z, M, OPT):
         g = unit._alg.barx(ZZ, MM, OPT)
         # TODO: Make sure the A polynomial is stable
 
-        th      = unit._alg._gn._m2theta(g)
-        costnew = unit._alg._gn._VN(th, Z, MM, OPT, compute_gradient=False)
+        th      = unit._utils.m2theta(g)
+        costnew = unit._objective.VN(th, Z, MM, OPT, compute_gradient=False)
         if OPT.dsp: unit._utils.udisp(f"iter#: {it:<3} |  cost = {costnew:<10.5e}")
 
         if costnew<cost:

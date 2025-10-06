@@ -148,3 +148,43 @@ def m2f(M):
     return G
 #endfunction
 
+
+
+def theta2m(theta, M):
+    idx = 0
+    M.B = theta[idx:idx+M.nB[0]+1]; idx += M.nB[0]+1
+    M.A = theta[idx:idx+M.nA[0]]; M.A = np.hstack([1, M.A]); idx += M.nA[0]
+
+    return M
+#endfunction
+
+
+def m2theta(M):
+    # TODO: Use information about model structure to determine which objects should be loaded into theta vector
+    # Can be either polynomials or state space matrices
+
+    # In case of SISO OE model type, load B(q) and A(q) polynomials into theta
+    # First, determine if initial polynomial estimates are in M, otherwise they are orders
+    Mt = unit.struct()
+    for p in ['B', 'A']:
+        if isinstance(M[p], np.ndarray):
+            if M[p].size > 1: # its a polynomial
+                Mt[p] = M[p]
+            else: # its an order
+                Mt[p] = np.ones(M[p].ravel()[0])
+            #endif
+        elif isinstance(M[p], (int, float)):
+            Mt[p] = np.ones(M[p].ravel()[0])
+        else:
+            raise Exception(f"M.{p} is neither int nor np.ndarray")
+        #endif
+    #endfor
+
+    M.nA = np.array([Mt.A.size - 1])
+    M.nB = np.array([Mt.B.size - 1])
+
+    # Stack polynomials in vector
+    theta = np.hstack([Mt.B.ravel(), Mt.A.ravel()[1:]])
+
+    return theta
+#endfunction

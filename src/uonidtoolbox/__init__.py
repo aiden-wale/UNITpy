@@ -14,8 +14,10 @@ startOPT    = _startOPT.startOPT
 startG      = _startG.startG
 
 from . import(_est, _estmap)
-est         = _est.est
-estmap      = _estmap.estmap
+est     = _est.est
+estmap  = _estmap.estmap
+
+from . import _objective
 
 from . import _alg
 
