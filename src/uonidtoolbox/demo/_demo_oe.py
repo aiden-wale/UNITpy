@@ -12,8 +12,8 @@ def demo_oe(disp=1):
     # ====================================================
     # Specify Experiment Conditions
     # ====================================================
-    T   = 0.5   # Sampling period in seconds
-    N   = 300   # Number of Samples
+    T   = 1   # Sampling period in seconds
+    N   = 500   # Number of Samples
     var = 1e-1  # Measurement Noise Variance
 
 

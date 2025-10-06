@@ -1,6 +1,6 @@
 
-import numpy as np
 import uonidtoolbox as unit
+import numpy as np
 
 
 def startZ(Z):
@@ -70,9 +70,13 @@ def startZ(Z):
                     raise Exception("startZ:typeInconsistentComplex', 'Z.type is inconsistent with Z.y (Z.y should be complex valued).")
             case _:
                 raise Exception("The value in Z.type is not known.")
-    
-    if Z.y.ndim < 2: Z.y = Z.y.reshape(Z.y.size, 1)
-    if Z.u.ndim < 2: Z.u = Z.u.reshape(Z.u.size, 1)
+
+    for k in ['u', 'y']:
+        if k in Z:
+            if Z[k].ndim < 2: Z[k] = Z[k].reshape(Z[k].size, 1)
+            #endif
+        #endif
+    #endfor
 
     match Z.type:
         # --------------------------------------------------------------------------

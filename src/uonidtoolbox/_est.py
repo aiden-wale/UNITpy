@@ -1,6 +1,6 @@
 
-import numpy as np
 import uonidtoolbox as unit
+import numpy as np
 
 
 def est(Z, M, OPT):
@@ -42,6 +42,9 @@ def est(Z, M, OPT):
     #     M = 
 
     # Init estimate of system dynamics if necessary
+    if ep.startG:
+        M = unit.startG(Z,M,OPT)
+    #endif
 
     # Init noise model if necessary
 

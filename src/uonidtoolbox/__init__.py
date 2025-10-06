@@ -6,11 +6,12 @@ from . import plotting
 from . import _types
 struct = _types.struct
 
-from . import(_startZ, _startNL, _startM, _startOPT)
+from . import(_startZ, _startNL, _startM, _startOPT, _startG)
 startZ      = _startZ.startZ
 startNL     = _startNL.startNL
 startM      = _startM.startM
 startOPT    = _startOPT.startOPT
+startG      = _startG.startG
 
 from . import(_est, _estmap)
 est         = _est.est

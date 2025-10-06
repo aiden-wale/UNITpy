@@ -1,6 +1,6 @@
 
-import numpy as np
 import uonidtoolbox as unit
+import numpy as np
 
 length = unit._utils.length
 isempty = unit._utils.isempty

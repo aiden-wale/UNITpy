@@ -39,11 +39,6 @@ def test_alg_gn_oe():
     path_to_testdata = 'tests/_testdata/gn_oe.mat'
 
     Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
-    for k in ['nA', 'nB', 'nC', 'nD']:
-        if k in M: 
-            if not isinstance(M[k], np.ndarray):
-                M[k] = np.array(M[k])
-            M[k] = M[k].reshape(M[k].size)
 
     OPT.dsp = 0
     G_py = unit._alg.gn(Z,M,OPT)
@@ -51,9 +46,6 @@ def test_alg_gn_oe():
     np.testing.assert_equal(G_py.th.size, G_ml.th.size)
     np.testing.assert_equal(G_py.th.shape, G_ml.th.shape)
 
-    # for k in ['A', 'B']:
-    #     np.testing.assert_allclose(G_py[k], G_ml[k], rtol=1e-2)
-    # #endif
     np.testing.assert_allclose(G_py.th, G_ml.th, rtol=1e-2)
 #endfunction
 
@@ -68,12 +60,12 @@ def test_alg_gn_impl__expcurve():
         if not compute_gradient:
             yh = unit.testing._functions.expcurve(th, t, compute_gradient=False)
             pe = yh - y
-            return 0.5*pe.ravel().dot(pe.ravel())/Ny # cost
+            return 0.5*pe.ravel().dot(pe.ravel()) # cost
         else:
             yh,J    = unit.testing._functions.expcurve(th, t, compute_gradient=True)
             pe      = yh - y
-            cost    = 0.5*pe.ravel().dot(pe.ravel())/Ny
-            g       = J.transpose() @ pe/Ny
+            cost    = 0.5*pe.ravel().dot(pe.ravel())
+            g       = J.transpose() @ pe
             return cost,pe,g,J
         #endif
     #enddef

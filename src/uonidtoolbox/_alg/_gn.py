@@ -29,7 +29,7 @@ def gn(Z, M=unit.struct(), OPT=unit.struct()):
     costfcn = lambda th, compute_gradient=False: _VN(th, Z, M, OPT, compute_gradient=compute_gradient)
 
     # Call the gn routine
-    thetastar = _gn_impl(costfcn, theta0, maxiter=100, disp=OPT.dsp)
+    thetastar = _gn_impl(costfcn, theta0, maxiter=500, disp=OPT.dsp)
 
     G.th = thetastar
     G = _theta2m(G.th, G)
@@ -39,7 +39,12 @@ def gn(Z, M=unit.struct(), OPT=unit.struct()):
 
 
 def _gn_impl(costfcn, theta0, maxiter=100, disp=1):
-    c1 = 1e-4 # Wolf constant c1
+    c1 = 1e-4   # Wolf constant c1
+    c2 = 0.9    # Wolf constant c2
+
+    if disp: unit._utils.udisp("Beginning system estimation via Gauss-Newton...")
+    f = costfcn(theta0, compute_gradient=False)
+    if disp: unit._utils.udisp(f"iter#: {0:<4} |  cost = {f:<10.5e} |  Newton decrement = {'':>12} |  alpha = ")
 
     if not np.all(np.isfinite(theta0)): raise Exception("Initial parameter estimate is not finite.")
 
@@ -51,38 +56,49 @@ def _gn_impl(costfcn, theta0, maxiter=100, disp=1):
 
         if not np.isfinite(f): raise Exception("Cost is not finite at initial parameter estimate.")
 
-        # Compute minimizing direction
-        U,s,V = np.linalg.svd(J, full_matrices=False)
-        rankJ = len(np.where(s > 1e-14)[0])
-        U1 = U[:,0:rankJ]
-        s1 = s[0:rankJ]
-        V1 = V[0:rankJ,:].transpose()
-        p = -V1 @ ((U1.transpose() @ pe) / s1.reshape(s1.size, 1))
-
+        p   = _computeMinimizingDirection(J,pe)
         pTg = p.ravel().dot(g.ravel())
 
         # Check stopping criteria
-        if np.abs(pTg) < 1e-14:
-            if disp: unit._utils.udisp(f"\nLocal minimum found after {it} iterations with cost: {f:<10.5e}")
+        if np.abs(pTg) < 1e-12:
+            if disp: unit._utils.udisp(f"Local minimum found after {it} iteration(s) with cost: {f:<10.5e}\n")
             break
         #endif
 
         # Find a step length which satisfies Wolfe condition
-        alpha = 1.0; alpi  = 0
-        while alpi < 51:
-            fn = costfcn(theta + alpha*p.ravel(), compute_gradient=False)
-            if fn < f + c1*alpha*pTg:
+        alpha = 1.0
+        for i in range(0, 51):
+            f_n = costfcn(theta + alpha*p.ravel(), compute_gradient=False)
+            if f_n < f + c1*alpha*pTg: # Wolfe condition 1
                 break
+                # f_n,_,g_n,_ = costfcn(theta + alpha*p.ravel(), compute_gradient=True)
+                # pTg_n = p.ravel().dot(g_n.ravel())
+                # if np.abs(pTg_n) > c2*np.abs(pTg): # Wolfe condition 2
+                #     break
+                # #endif
             #endif
-            alpha /= 2; alpi += 1
+            alpha /= 2
         #endfor
 
         # Update theta by suitable step and continue
         theta = theta + alpha*p.ravel()
-        if disp: unit._utils.udisp(f"iter#: {it:<4} |  cost = {fn:<10.5e} |  Newton decrement = {pTg:<10.5e} |  alpha = 2^{-alpi}")
+        if disp: unit._utils.udisp(f"iter#: {it:<4} |  cost = {f_n:<10.5e} |  Newton decrement = {pTg:<10.5e} |  alpha = {alpha:<10.5e}")
     #endfor
 
     return theta
+#endfunction
+
+
+def _computeMinimizingDirection(J,pe):
+    # Compute minimizing direction
+    U,s,V = np.linalg.svd(J, full_matrices=False)
+    rankJ = len(np.where(s > 1e-14)[0])
+    U1 = U[:,0:rankJ]
+    s1 = s[0:rankJ]
+    V1 = V[0:rankJ,:].transpose()
+    p = -V1 @ ((U1.transpose() @ pe) / s1.reshape(s1.size, 1))
+
+    return p
 #endfunction
 
 
@@ -107,10 +123,10 @@ def _m2theta(M):
             if M[p].size > 1: # its a polynomial
                 Mt[p] = M[p]
             else: # its an order
-                Mt[p] = np.ones(M[p].ravel()[0]) # TODO: figure out better way to initialize polynomial
+                Mt[p] = np.ones(M[p].ravel()[0])
             #endif
         elif isinstance(M[p], (int, float)):
-            Mt[p] = np.ones(M[p].ravel()[0]) # TODO: figure out better way to initialize polynomial
+            Mt[p] = np.ones(M[p].ravel()[0])
         else:
             raise Exception(f"M.{p} is neither int nor np.ndarray")
         #endif

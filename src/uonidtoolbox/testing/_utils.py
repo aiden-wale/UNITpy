@@ -112,6 +112,19 @@ def getFieldsFromMatFile(path_to_data, fieldnames):
                 del M['in']
                 M['inp'] = np.array([M['inp']])
                 M['inp'] = M['inp'].reshape(M['inp'].size)
+                for k in ['nA', 'nB', 'nC', 'nD']:
+                    if k in M: 
+                        if not isinstance(M[k], np.ndarray):
+                            M[k] = np.array(M[k])
+                        M[k] = M[k].reshape(M[k].size)
+                for k in ['A', 'B', 'C', 'D']:
+                    if k in M: 
+                        if not isinstance(M[k], np.ndarray):
+                            M[k] = np.array(M[k])
+                        M[k] = M[k].reshape(M[k].size)
+                if not isinstance(M['delay'], np.ndarray):
+                    M['delay'] = np.array(M['delay'])
+                M['delay'] = M['delay'].reshape(M['delay'].size)
             case 'OPT':
                 OPT = data[fn]
             case 'G':

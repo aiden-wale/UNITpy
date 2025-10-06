@@ -11,9 +11,11 @@ def barx(Z, M=unit.struct(), OPT=unit.struct()):
 
     # Unspecified parts of OPT -> defaults
     OPT = unit.startOPT(OPT)
-    if 'type' not in OPT.alg:
+    if 'alg' not in OPT:
         OPT.alg = unit.struct()
-        OPT.alg.type = 'block'
+        if 'type' not in OPT.alg:
+            OPT.alg.type = 'block'
+        #endif
     #endif
 
     # Unspecified parts of M -> defaults

@@ -1,6 +1,6 @@
 
-import numpy as np
 import uonidtoolbox as unit
+import numpy as np
 
 length = unit._utils.length
 isempty = unit._utils.isempty
@@ -823,21 +823,18 @@ def _inputCleanse_M(M):
         #endif
     #endfor
 
-    # Ensure any given M.{nA,nB,nC,nD} are 1D numpy arrays
+    # Ensure any given M.{nA,nB,nC,nD} are 1D numpy int arrays
     for k in ['nA', 'nB', 'nC', 'nD']:
         if k in M:
             if not isinstance(M[k], np.ndarray):
-                if isempty(M[k]):
-                    M[k] = np.array([])
-                else:
-                    M[k] = np.array([M[k]]).reshape(1)
-                #endif
-            elif M[k].ndim > 1:
+                M[k] = np.array(M[k])
+            #endif
+            if M[k].ndim > 1:
                 if np.prod(M[k].shape) != np.max(M[k].shape):
-                    raise Exception(f"M.{k} must be a 1-D numpy array")
+                    raise Exception(f"M.{k} must be a 1-D numpy int array")
                 #endif
             #endif
-            M[k] = np.array(M[k], dtype='int')
+            M[k] = M[k].astype(int).reshape(M[k].size)
         #endif
     #endfor
 
