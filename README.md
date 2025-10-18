@@ -12,8 +12,3 @@ To run tests do
 ```
 py -m pytest -v --tb=short
 ```
-or
-```
-py -m pytest --runmatlab -v --tb=short
-```
-
