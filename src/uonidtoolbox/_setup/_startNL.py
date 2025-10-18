@@ -71,7 +71,7 @@ def startNL(Z, M):
                 #endif
                 M.inp[k].neta = length(M.inp[k].eta)
 
-            case ('saturation', 'deadzone'):
+            case 'saturation' | 'deadzone':
                 if 'eta' in M.inp[k]:         M.inp[k].eta   = np.array([]).reshape([0,0])
                 if 'upper' not in M.inp[k]:   M.inp[k].upper = np.array([]).reshape([0,0])
                 if 'lower' not in M.inp[k]:   M.inp[k].lower = np.array([]).reshape([0,0])
@@ -128,7 +128,7 @@ def startNL(Z, M):
             #endif
             M.out.neta = length(M.out.eta)
 
-        case ('saturation', 'deadzone'):
+        case 'saturation' | 'deadzone':
             if 'eta' in M.out: del M.out.eta
             if 'lower' not in M.out and 'upper' not in M.out:
                 M.out.upper =  0.1

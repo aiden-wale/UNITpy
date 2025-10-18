@@ -45,7 +45,7 @@ def startM(*args):
             #endif
 
         case _: # 2 args
-            Z = unit.startZ(args[0])
+            Z = unit._setup.startZ(args[0])
             nu = Z.nu
             ny = Z.ny
 
@@ -554,10 +554,12 @@ def startM(*args):
             else:
                 M.nA = np.zeros(M.A.shape[0])
                 for i in range(0, M.A.shape[0]):
-                    if np.floor(M.A) == M.A:
-                        M.nA[i] = M.A[i]
-                    else:
-                        M.nA[i] = length(M.A[i,:])-1
+                    if M.A.size == 1:
+                        if np.floor(M.A) == M.A:
+                            M.nA[i] = M.A[i]
+                        else:
+                            M.nA[i] = length(M.A[i,:])-1
+                        #endif
                     #endif
                 #endfor
             #endif
@@ -569,10 +571,12 @@ def startM(*args):
             else:
                 M.nB = np.zeros(M.B.shape[0])
                 for i in range(0, M.B.shape[0]):
-                    if np.floor(M.B) == M.B:
-                        M.nB[i] = M.B[i]
-                    else:
-                        M.nB[i] = length(M.B[i,:])-1
+                    if M.B.size == 1:
+                        if np.floor(M.B) == M.B:
+                            M.nB[i] = M.B[i]
+                        else:
+                            M.nB[i] = length(M.B[i,:])-1
+                        #endif
                     #endif
                 #endfor
             #endif
@@ -585,10 +589,12 @@ def startM(*args):
                 #endif
                 M.nC = hord
             else:
-                if np.floor(M.C) == M.C and length(M.C) < 2:
-                    M.nC = M.C
-                else:
-                    M.nC = length(M.C)-1
+                if M.C.size == 1:
+                    if np.floor(M.C) == M.C and length(M.C) < 2:
+                        M.nC = M.C
+                    else:
+                        M.nC = length(M.C)-1
+                    #endif
                 #endif
             #endif
         #endif
@@ -597,10 +603,12 @@ def startM(*args):
             if 'D' not in M:
                 M.nD = M.nC
             else:
-                if np.floor(M.D) == M.D:
-                    M.nD = M.D
-                else:
-                    M.nD = length(M.D)-1
+                if M.D.size == 1:
+                    if np.floor(M.D) == M.D:
+                        M.nD = M.D
+                    else:
+                        M.nD = length(M.D)-1
+                    #endif
                 #endif
             #endif
         #endif
@@ -794,7 +802,7 @@ def startM(*args):
         M.delay = np.array(M.delay, dtype='int')
 
         # Initialise Hammerstein and Wiener NL blocks
-        M = unit.startNL(Z,M)
+        M = unit._setup.startNL(Z,M)
 
     #endif
 

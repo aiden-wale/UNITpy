@@ -97,7 +97,7 @@ def getSimilarityTransform(SS_1, SS_2):
 from numpy.polynomial.polynomial import polyval as np_polyval
 import copy
 def m2f(M):
-    if 'finishM' not in M: M = unit.startM(M)
+    if 'finishM' not in M: M = unit._setup.startM(M)
 
     G = copy.deepcopy(M)
 
@@ -120,7 +120,7 @@ def m2f(M):
             if M.type in ['fir']: G.C = np.array([1.0])
             if M.type in ['fir']: G.D = copy.deepcopy(G.A)
 
-            # TODO: repair dimensions of A,B,C,D polynomials (unit.startM() ?)
+            # TODO: repair dimensions of A,B,C,D polynomials (unit._setup.startM() ?)
             tmpG = unit.struct()
             for p in ['A','B','C','D']:
                 if G[p].ndim > 1:
@@ -132,7 +132,6 @@ def m2f(M):
 
             A = tmpG.A
             B = tmpG.B
-
             G.G = np_polyval(1/ww, B)/np_polyval(1/ww, A)
             pp = pdel
             G.G = G.G * pp # pp is responsible for the effect of delay on input
@@ -155,6 +154,10 @@ def theta2m(theta, M):
     M.B = theta[idx:idx+M.nB[0]+1]; idx += M.nB[0]+1
     M.A = theta[idx:idx+M.nA[0]]; M.A = np.hstack([1, M.A]); idx += M.nA[0]
 
+    if M.type=='bj':
+        M.C = theta[idx:idx+M.nA[0]]; M.C = np.hstack([1, M.C]); idx += M.nC[0]
+        M.D = theta[idx:idx+M.nA[0]]; M.D = np.hstack([1, M.D]); idx += M.nD[0]
+
     return M
 #endfunction
 
@@ -166,25 +169,37 @@ def m2theta(M):
     # In case of SISO OE model type, load B(q) and A(q) polynomials into theta
     # First, determine if initial polynomial estimates are in M, otherwise they are orders
     Mt = unit.struct()
-    for p in ['B', 'A']:
+    for p in ['B', 'A', 'C', 'D']:
         if isinstance(M[p], np.ndarray):
             if M[p].size > 1: # its a polynomial
                 Mt[p] = M[p]
             else: # its an order
-                Mt[p] = np.ones(M[p].ravel()[0])
+                Mt[p] = np.ones(int(M[p].ravel()[0]))
             #endif
         elif isinstance(M[p], (int, float)):
-            Mt[p] = np.ones(M[p].ravel()[0])
+            Mt[p] = np.ones(int(M[p].ravel()[0]))
         else:
             raise Exception(f"M.{p} is neither int nor np.ndarray")
         #endif
+
+        M['n'+p] = np.array([Mt[p].size - 1])
     #endfor
 
-    M.nA = np.array([Mt.A.size - 1])
-    M.nB = np.array([Mt.B.size - 1])
-
     # Stack polynomials in vector
-    theta = np.hstack([Mt.B.ravel(), Mt.A.ravel()[1:]])
+    if M.type == 'oe':
+        theta = np.hstack([
+                Mt.B.ravel(), 
+                Mt.A.ravel()[1:]
+            ])
+    elif M.type == 'bj':
+        theta = np.hstack([
+                Mt.B.ravel(), 
+                Mt.A.ravel()[1:], 
+                Mt.C.ravel()[1:], 
+                Mt.D.ravel()[1:]
+            ])
+    else:
+        raise Exception("Unknown model type")
 
     return theta
 #endfunction

@@ -222,5 +222,5 @@ def _Z2data(Z):
             raise Exception("Value in Z.type not known.")
     #endmatch
 
-    return y,u,ny,nu,Ny,Z
+    return y,u,ny,nu,Ny
 #endfunction

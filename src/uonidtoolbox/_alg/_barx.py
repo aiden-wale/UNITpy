@@ -6,11 +6,11 @@ import copy
 
 
 def barx(Z, M=unit.struct(), OPT=unit.struct()):
-    Z = unit.startZ(Z)
-    y,u,ny,nu,Ny,Z = unit._startZ._Z2data(Z)
+    Z = unit._setup.startZ(Z)
+    y,u,ny,nu,Ny = unit._setup._startZ._Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
-    OPT = unit.startOPT(OPT)
+    OPT = unit._setup.startOPT(OPT)
     if 'alg' not in OPT:
         OPT.alg = unit.struct()
         if 'type' not in OPT.alg:
@@ -26,7 +26,7 @@ def barx(Z, M=unit.struct(), OPT=unit.struct()):
     if unit._utils.isempty(M):
         raise Exception("Need to specify initial model structure M!")
     else:
-        M = unit.startM(Z,M)
+        M = unit._setup.startM(Z,M)
     #endif
 
     # Include delays specified in model structure on inputs

@@ -40,7 +40,8 @@ def test_alg_gn_oe():
 
     Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
 
-    OPT.dsp = 0
+    OPT.dsp   = 0
+    OPT.miter = 200
     G_py = unit._alg.gn(Z,M,OPT)
 
     np.testing.assert_equal(G_py.th.size, G_ml.th.size)
@@ -71,19 +72,35 @@ def test_alg_gn_impl__expcurve():
     #enddef
 
     theta0 = np.array([0.8,-0.3, 1.6])
-    thetastar = unit._alg._gn._gn_impl(objfunc, theta0, maxiter=100, disp=1)
+    thetastar = unit._alg._gn._gn_impl(objfunc, theta0, maxiter=100, disp=0)
 
     np.testing.assert_allclose(thetastar, theta_true, rtol=1e-6)
 #endfunction
 
 
-def test_alg_sid_n4sid():
-    path_to_testdata = 'tests/_testdata/sid_n4sid.mat'
+def test_alg_gn_bj():
+    path_to_testdata = 'tests/_testdata/gn_bj.mat'
+
+    Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
+
+    OPT.dsp   = 0
+    OPT.miter = 200
+    G_py = unit._alg.gn(Z,M,OPT)
+
+    np.testing.assert_equal(G_py.th.size, G_ml.th.size)
+    np.testing.assert_equal(G_py.th.shape, G_ml.th.shape)
+
+    np.testing.assert_allclose(G_py.th, G_ml.th, rtol=1e-2)
+#endfunction
+
+
+def test_alg_sid_n4sid_ss():
+    path_to_testdata = 'tests/_testdata/sid_n4sid_ss.mat'
 
     Z,M,OPT,G_ml = unit.testing._utils.getFieldsFromMatFile(path_to_testdata, ['Z', 'M', 'OPT', 'G'])
     G_py = unit._alg.sid(Z,M,OPT)
 
-    G_ml.ss = unit._startM._make2d_SS_matrices(G_ml.ss, G_ml.nx, G_ml.nu, G_ml.ny)
+    G_ml.ss = unit._setup._startM._make2d_SS_matrices(G_ml.ss, G_ml.nx, G_ml.nu, G_ml.ny)
 
     # Check model variables {nx, nu, ny} are equal between models
     for k in ['nx', 'nu', 'ny']: unit.testing._utils.assert_field_equal(G_py[k], G_ml[k], k, "G_py.", "G_ml.")

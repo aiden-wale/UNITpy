@@ -15,10 +15,10 @@ def test_matlabResult():
     M.T      = 1
     M.type   = 'ss'
 
-    Z = unit.startZ(Z)
-    M = unit.startM(Z,M)
+    Z = unit._setup.startZ(Z)
+    M = unit._setup.startM(Z,M)
 
-    M_py = unit.startNL(Z,M)
+    M_py = unit._setup.startNL(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()

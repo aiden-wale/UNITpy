@@ -5,13 +5,14 @@ import numpy as np
 
 def subspace(Z, M=unit.struct(), OPT=unit.struct()):
 
-    Z = unit.startZ(Z)
+    Z = unit._setup.startZ(Z)
 
     match Z.type:
         case 'time':
             G = unit.sid(Z,M,OPT)
 
         case 'frequency':
+            raise Exception("Subspace Identification not yet implemented for frequency data.")
             G = unit.fsid(Z,M,OPT)
 
         case _:

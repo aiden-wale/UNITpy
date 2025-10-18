@@ -8,7 +8,7 @@ import copy
 def sid(Z, M=unit.struct(), OPT=unit.struct()):
 
     # Extract inputs and outputs specified
-    y,u,ny,nu,N,Z = unit._startZ._Z2data(Z)
+    y,u,ny,nu,N = unit._setup._startZ._Z2data(Z)
 
     # Check which parts of model structure were unspecified and set to defaults.
     if not M:
@@ -16,7 +16,7 @@ def sid(Z, M=unit.struct(), OPT=unit.struct()):
     #endif
     
     M.type = 'ss'
-    M = unit.startM(Z,M)
+    M = unit._setup.startM(Z,M)
     order = M.nx
 
     # Start with G = M
@@ -28,7 +28,7 @@ def sid(Z, M=unit.struct(), OPT=unit.struct()):
     #endfor
 
     # Check what options not specified explicitly by user and then set to defaults
-    OPT = unit.startOPT(OPT)
+    OPT = unit._setup.startOPT(OPT)
     if 'bw' not in OPT: OPT.bw = 0.5/M.T
     if 'horizon' not in OPT:
         OPT.horizon = np.min(np.floor( np.array([2.5*order, (N+1-ny)/(2*nu+ny+2)]) ))

@@ -9,10 +9,10 @@ def test_repeatedCall():
     Z['u'] = np.array([-0.3731,0.8155,0.7989,0.1202,0.5712,0.4128,-0.9870,0.7596,-0.6572,-0.6039]).reshape(1,10)
     Z['y'] = np.array([0.1769,-0.3075,-0.1318,0.5954,1.0468,-0.1980,0.3277,-0.2383,0.2296,0.4400]).reshape(1,10)
 
-    Z = unit.startZ(Z)
+    Z = unit._setup.startZ(Z)
 
-    M_0 = unit.startM(Z)
-    M_1 = unit.startM(Z, M_0)
+    M_0 = unit._setup.startM(Z)
+    M_1 = unit._setup.startM(Z, M_0)
 
     np.testing.assert_equal(M_0.keys(), M_1.keys())
     # np.testing.assert_equal(M_0, M_1)
@@ -27,7 +27,7 @@ def test_repeatedCall():
 
 @pytest.mark.matlab
 def test_matlabResult_inputEmpty():
-    M_py = unit.startM()
+    M_py = unit._setup.startM()
     M_ml = unit.testing._utils.helper_callMatlab_startM()
 
     M_py = M_py.asdict()
@@ -51,7 +51,7 @@ def test_matlabResult_Mtype_AR():
     M.T      = 1
     M.type   = 'ar'
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -70,7 +70,7 @@ def test_matlabResult_Mtype_ARMA():
     M.T      = 1
     M.type   = 'arma'
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -89,7 +89,7 @@ def test_matlabResult_Mtype_FIR():
     M.T      = 0.1
     M.type   = 'fir'
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -110,7 +110,7 @@ def test_matlabResult_Mtype_ARX():
     M.type   = 'arx'
     M.delay  = 1
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -131,7 +131,7 @@ def test_matlabResult_Mtype_ARMAX():
     M.type   = 'armax'
     M.delay  = 1
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -152,7 +152,7 @@ def test_matlabResult_Mtype_OE():
     M.type   = 'oe'
     M.delay  = 1
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -175,7 +175,7 @@ def test_matlabResult_Mtype_BJ():
     M.delay  = 1
     M.type   = 'bj'
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()
@@ -194,9 +194,9 @@ def test_matlabResult_Mtype_SS():
     M.T      = 1
     M.type   = 'ss'
 
-    Z = unit.startZ(Z)
+    Z = unit._setup.startZ(Z)
 
-    M_py = unit.startM(Z,M)
+    M_py = unit._setup.startM(Z,M)
     M_ml = unit.testing._utils.helper_callMatlab_startM(Z,M)
 
     M_py = M_py.asdict()

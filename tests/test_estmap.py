@@ -17,11 +17,11 @@ def test_matlabResult_Mtype_AR():
     OPT = unit.struct()
     OPT.dsp = 0
 
-    Z   = unit.startZ(Z)
-    M   = unit.startM(Z,M)
-    OPT = unit.startOPT(OPT,M)
+    Z   = unit._setup.startZ(Z)
+    M   = unit._setup.startM(Z,M)
+    OPT = unit._setup.startOPT(OPT,M)
 
-    ep_py = unit.estmap(Z,M,OPT)
+    ep_py = unit._setup.estmap(Z,M,OPT)
     ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
@@ -51,11 +51,11 @@ def test_matlabResult_Mtype_ARMA():
     OPT = unit.struct()
     OPT.dsp = 0
 
-    Z   = unit.startZ(Z)
-    M   = unit.startM(Z,M)
-    OPT = unit.startOPT(OPT,M)
+    Z   = unit._setup.startZ(Z)
+    M   = unit._setup.startM(Z,M)
+    OPT = unit._setup.startOPT(OPT,M)
 
-    ep_py = unit.estmap(Z,M,OPT)
+    ep_py = unit._setup.estmap(Z,M,OPT)
     ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
@@ -85,11 +85,11 @@ def test_matlabResult_Mtype_FIR():
     OPT = unit.struct()
     OPT.dsp = 0
 
-    Z   = unit.startZ(Z)
-    M   = unit.startM(Z,M)
-    OPT = unit.startOPT(OPT,M)
+    Z   = unit._setup.startZ(Z)
+    M   = unit._setup.startM(Z,M)
+    OPT = unit._setup.startOPT(OPT,M)
 
-    ep_py = unit.estmap(Z,M,OPT)
+    ep_py = unit._setup.estmap(Z,M,OPT)
     ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())
@@ -119,11 +119,11 @@ def test_matlabResult_Mtype_SS():
     OPT = unit.struct()
     OPT.dsp = 0
 
-    Z   = unit.startZ(Z)
-    M   = unit.startM(Z,M)
-    OPT = unit.startOPT(OPT,M)
+    Z   = unit._setup.startZ(Z)
+    M   = unit._setup.startM(Z,M)
+    OPT = unit._setup.startOPT(OPT,M)
 
-    ep_py = unit.estmap(Z,M,OPT)
+    ep_py = unit._setup.estmap(Z,M,OPT)
     ep_ml = unit.testing._utils.helper_callMatlab_estmap(Z,M,OPT)
 
     np.testing.assert_equal(ep_py.keys(), ep_ml.keys())

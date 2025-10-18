@@ -30,12 +30,14 @@ def showbode(G: list):
         axs[1].semilogx(G[i].w*rad_2_hz, np.rad2deg(np.unwrap(np.angle(G[i].G))))
     #endfor
 
-    axs[0].set_title("Estimated system: u_1 to y_1")
+    axs[0].set_title("Estimated system: $u_1$ to $y_1$")
     axs[0].set_ylabel("Magnitude [dB]")
     axs[1].set_ylabel("Phase [deg]")
     x_axis_label = "Frequency [Hz]" if use_hertz else "Frequency [rad/s]"
     axs[1].set_xlabel(x_axis_label)
 
+    axs[0].grid(True, which='both')
+    axs[1].grid(True, which='both')
     plt.show()
 #endfunction
 

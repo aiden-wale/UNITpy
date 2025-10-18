@@ -6,8 +6,8 @@ import copy
 
 
 def startG(Z,M,OPT):
-    OPT = unit.startOPT(OPT)
-    Z   = unit.startZ(Z)
+    OPT = unit._setup.startOPT(OPT)
+    Z   = unit._setup.startZ(Z)
 
     if M.type in ['oe', 'bj']:
         g_SM = _SteiglitzMcBride_Init(Z, M, OPT)
@@ -35,7 +35,7 @@ def _SteiglitzMcBride_Init(Z, M, OPT):
     itfav = 0
 
     th      = unit._utils.m2theta(g)
-    cost    = unit._objective.VN(th, Z, MM, OPT, compute_gradient=False)
+    cost    = unit._optimisation.VN(th, Z, MM, OPT, compute_gradient=False)
     if OPT.dsp: unit._utils.udisp(f"iter#: {0:<3} |  cost = {cost:<10.5e}")
 
     for it in range(1, OPT.smits+1):
@@ -50,7 +50,7 @@ def _SteiglitzMcBride_Init(Z, M, OPT):
         # TODO: Make sure the A polynomial is stable
 
         th      = unit._utils.m2theta(g)
-        costnew = unit._objective.VN(th, Z, MM, OPT, compute_gradient=False)
+        costnew = unit._optimisation.VN(th, Z, MM, OPT, compute_gradient=False)
         if OPT.dsp: unit._utils.udisp(f"iter#: {it:<3} |  cost = {costnew:<10.5e}")
 
         if costnew<cost:

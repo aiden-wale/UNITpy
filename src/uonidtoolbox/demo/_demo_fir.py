@@ -21,7 +21,8 @@ def demo_fir(disp=1):
     # ====================================================
     den     = np.real(np.poly([-1, -3+1j, -3-1j]))
     sysc    = scipy.signal.TransferFunction(1, den)
-    sysd    = scipy.signal.cont2discrete((sysc.num, sysc.den), T, method='zoh')
+    sysd_   = scipy.signal.cont2discrete((sysc.num, sysc.den), T, method='zoh')
+    sysd    = scipy.signal.TransferFunction(sysd_[0][:,1:], sysd_[1], dt=T)
     bq      = scipy.signal.dimpulse(sysd)[1][0].ravel()
 
 

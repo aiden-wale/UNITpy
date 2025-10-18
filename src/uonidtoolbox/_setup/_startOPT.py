@@ -16,7 +16,7 @@ def startOPT(OPTin=unit.struct(), Min=unit.struct()):
     o.fast   = 0
     o.filt   = 0
     o.step   = 1
-    o.smits  = 10
+    o.smits  = 5
     o.cost   = 'trace'
     o.subtol = np.sqrt(np.sqrt(unit._utils.eps))
     o.delta  = 1

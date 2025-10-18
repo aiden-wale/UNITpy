@@ -5,7 +5,7 @@ import scipy
 import copy
 
 
-def gn(Z, M=unit.struct(), OPT=unit.struct()):
+def bfgs(Z, M=unit.struct(), OPT=unit.struct()):
     M = unit._setup.startM(M)
 
     # Construct parameter vector from system polynomials
@@ -17,15 +17,16 @@ def gn(Z, M=unit.struct(), OPT=unit.struct()):
     costfcn = lambda th, compute_gradient=False: unit._optimisation.VN(th, Z, M, OPT, compute_gradient=compute_gradient)
 
     # Call the gn routine
-    G.th = _gn_impl(costfcn, theta0, maxiter=OPT.miter, disp=OPT.dsp)
+    thetastar = _bfgs_impl(costfcn, theta0, maxiter=500, disp=OPT.dsp)
 
+    G.th = thetastar
     G = unit._utils.theta2m(G.th, G)
 
     return G
 #endfunction
 
 
-def _gn_impl(costfcn, theta0, maxiter=100, disp=1):
+def _bfgs_impl(costfcn, theta0, maxiter=100, disp=1):
     c1 = 1e-4   # Wolf constant c1
     c2 = 0.9    # Wolf constant c2
 
@@ -62,7 +63,7 @@ def _gn_impl(costfcn, theta0, maxiter=100, disp=1):
         if np.abs(pTg) < 1e-12:
             if disp:
                 infotable.finishTable()
-                unit._utils.udisp(f"Local minimum found after {it-1} iteration(s) with cost: {f:<10.5e}\n")
+                unit._utils.udisp(f"Local minimum found after {it} iteration(s) with cost: {f:<10.5e}\n")
             #endif
             break
         #endif
@@ -93,5 +94,3 @@ def _gn_impl(costfcn, theta0, maxiter=100, disp=1):
 
     return theta
 #endfunction
-
-

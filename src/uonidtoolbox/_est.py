@@ -10,7 +10,7 @@ def est(Z, M, OPT):
     if not Z:
         raise Exception("Need to specify data (Z)!")
     elif not M:
-        Z = unit.startZ(Z)
+        Z = unit._setup.startZ(Z)
         m.nx = np.min([20, np.ceil(Z.Ny/10)])
         gsid = unit.subspace(Z, m)
         lsin = length(gsid.sing)
@@ -23,10 +23,10 @@ def est(Z, M, OPT):
         OPT = unit.struct()
     #endif
 
-    Z   = unit.startZ(Z)
-    M   = unit.startM(Z,M)
-    OPT = unit.startOPT(OPT,M)
-    ep  = unit.estmap(Z,M,OPT)
+    Z   = unit._setup.startZ(Z)
+    M   = unit._setup.startM(Z,M)
+    OPT = unit._setup.startOPT(OPT,M)
+    ep  = unit._setup.estmap(Z,M,OPT)
 
     if OPT.dsp:
         dblines = "===================================================================="
@@ -43,10 +43,13 @@ def est(Z, M, OPT):
 
     # Init estimate of system dynamics if necessary
     if ep.startG:
-        M = unit.startG(Z,M,OPT)
+        M = unit._setup.startG(Z,M,OPT)
     #endif
 
     # Init noise model if necessary
+    if ep.startH:
+        M = unit._setup.startH(Z,M,OPT)
+    #endif
 
     
     # Now call appropriate estimation algorithm
