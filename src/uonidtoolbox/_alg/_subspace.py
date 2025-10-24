@@ -3,7 +3,7 @@ import uonidtoolbox as unit
 import numpy as np
 
 
-def subspace(Z, M=unit.struct(), OPT=unit.struct()):
+def subspace(Z, M=unit._struct(), OPT=unit._struct()):
 
     Z = unit._setup.startZ(Z)
 

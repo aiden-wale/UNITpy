@@ -4,47 +4,46 @@ import numpy as np
 import scipy
 
 
-def demo_arx(disp=1):
+def demo_ar(disp=1):
 
-    OPT = unit.struct()
+    OPT = unit._struct()
     OPT.dsp = disp
 
     # ====================================================
     # Specify Experiment Conditions
     # ====================================================
-    T   = 1.0  # Sampling period in seconds
-    N   = 300   # Number of Samples
+    T   = 0.5   # Sampling period in seconds
+    N   = 500   # Number of Samples
     var = 1e-1  # Measurement Noise Variance
 
 
     # ====================================================
-    # Specify true system
+    # Specify Noise Colouring
     # ====================================================
-    den     = np.real(np.poly([-0.1,-1,-0.2]))
-    num     = 1
-    sysd    = scipy.signal.cont2discrete((num, den), T, method='zoh')
-    bq,aq   = sysd[0].ravel(), sysd[1].ravel()
+    aq = np.real(np.poly([
+        0.5, 
+        0.7, 
+        0.9, 
+        0.9*np.exp( 1j*np.pi/6), 
+        0.9*np.exp(-1j*np.pi/6)
+    ]))
 
 
     # ====================================================
     # Simulate a data record
     # ====================================================
-    Z       = unit.struct()
-    Z.u     = np.random.randn(1, N)
-    noise   = np.sqrt(var)*np.random.randn(Z.u.size).reshape(Z.u.shape)
-    noise   = scipy.signal.lfilter(1, aq, noise)
-    Z.y     = scipy.signal.lfilter(bq, aq, Z.u) + noise
+    Z       = unit._struct()
+    noise   = np.sqrt(var)*np.random.randn(1,N)
+    Z.y     = scipy.signal.lfilter(1, aq, noise)
 
 
     # ====================================================
     # Specify Model Structures
     # ====================================================
-    Mq          = unit.struct()
-    Mq.A        = aq.shape[0]-1
-    Mq.B        = bq.shape[0]-2 # delay is catered for elsewhere
+    Mq          = unit._struct()
+    Mq.nA       = aq.shape[0]-1
     Mq.T        = T
-    Mq.type     = 'arx'
-    Mq.delay    = 1
+    Mq.type     = 'ar'
 
 
     # ====================================================
@@ -57,15 +56,15 @@ def demo_arx(disp=1):
     # Plot the results
     # ====================================================
     if OPT.dsp:
-        Gt              = unit.struct()
-        Gt.disp         = unit.struct()
+        Gt              = unit._struct()
+        Gt.disp         = unit._struct()
         Gt.A            = aq
-        Gt.B            = bq
+        Gt.T            = T
         Gt.w            = Gq.w
-        Gt.type         = 'arx'
+        Gt.type         = 'ar'
         # Gt.colour       = 'b'
-        Gt.disp.legend  = 'True Response'
-
+        Gt.disp.legend  = 'True Spectral Factor'
+        
         unit.plotting.showbode([Gt, Gq])
     #endif
 

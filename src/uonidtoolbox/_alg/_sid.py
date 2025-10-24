@@ -5,7 +5,7 @@ import scipy
 import copy
 
 
-def sid(Z, M=unit.struct(), OPT=unit.struct()):
+def sid(Z, M=unit._struct(), OPT=unit._struct()):
 
     # Extract inputs and outputs specified
     y,u,ny,nu,N = unit._setup._startZ._Z2data(Z)
@@ -87,7 +87,7 @@ def sid(Z, M=unit.struct(), OPT=unit.struct()):
     # \mathcal{L} = [X_ip1; Y_ii] @ pinv([X_i; U_ii])
     ABCD = np.vstack([X_ip1, R_55_14]) @ np.linalg.pinv(np.vstack([X_i, R_22_14]))
 
-    G.ss = unit.struct()
+    G.ss = unit._struct()
     G.ss.A = ABCD[0:order, 0:order].reshape(order, order)
     G.ss.B = ABCD[0:order, order:order+nu].reshape(order, nu)
     G.ss.C = ABCD[order:order+ny, 0:order].reshape(ny, order)

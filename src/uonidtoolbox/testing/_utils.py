@@ -17,7 +17,7 @@ def data_py2ml(din):
         for k in din.keys():
             din[k] = data_py2ml(din[k])
         #endfor
-    elif isinstance(din, unit.struct):
+    elif isinstance(din, unit._struct):
         tmp = data_py2ml(din.asdict())
         din = tmp
     elif isinstance(din, np.ndarray):
@@ -136,7 +136,7 @@ def getFieldsFromMatFile(path_to_data, fieldnames):
             case _:
                 raise Exception("Unexpected field name. Could not retrieve data")
         #endmatch
-        fields += (unit.struct(data[fn]),)
+        fields += (unit._struct(data[fn]),)
     #endfor
         
     if len(fields) == 1:

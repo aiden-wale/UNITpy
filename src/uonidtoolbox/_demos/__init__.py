@@ -1,11 +1,5 @@
 
-# from . import(_rosenbrock)
-# rosenbrock = _rosenbrock.rosenbrock
-
-
-# from . import(_demo_rosenbrock)
-# demo_rosenbrock = _demo_rosenbrock.demo_rosenbrock
-
+from . import _demo
 
 from . import(_demo_ar, _demo_arx, _demo_fir, _demo_oe, _demo_bj)
 demo_ar     = _demo_ar.demo_ar

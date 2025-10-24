@@ -6,7 +6,7 @@ import scipy
 
 def demo_fir(disp=1):
 
-    OPT = unit.struct()
+    OPT = unit._struct()
     OPT.dsp = disp
 
     # ====================================================
@@ -29,7 +29,7 @@ def demo_fir(disp=1):
     # ====================================================
     # Simulate a data record
     # ====================================================
-    Z       = unit.struct()
+    Z       = unit._struct()
     N       = 50*bq.shape[0]
     Z.u     = np.random.randn(1, N)
     noise   = np.sqrt(var)*np.random.randn(Z.u.size).reshape(Z.u.shape)
@@ -39,7 +39,7 @@ def demo_fir(disp=1):
     # ====================================================
     # Specify Model Structures
     # ====================================================
-    Mq          = unit.struct()
+    Mq          = unit._struct()
     Mq.nB       = bq.shape[0]-1
     Mq.T        = T
     Mq.type     = 'fir'
@@ -55,8 +55,8 @@ def demo_fir(disp=1):
     # Plot the results
     # ====================================================
     if OPT.dsp:
-        Gt              = unit.struct()
-        Gt.disp         = unit.struct()
+        Gt              = unit._struct()
+        Gt.disp         = unit._struct()
         Gt.B            = bq
         Gt.T            = T
         Gt.w            = Gq.w

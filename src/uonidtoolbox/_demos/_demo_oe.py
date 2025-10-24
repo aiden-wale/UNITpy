@@ -6,7 +6,7 @@ import scipy
 
 def demo_oe(disp=1):
 
-    OPT = unit.struct()
+    OPT = unit._struct()
     OPT.dsp = disp
 
     # ====================================================
@@ -31,7 +31,7 @@ def demo_oe(disp=1):
     # ====================================================
     # Simulate a data record
     # ====================================================
-    Z       = unit.struct()
+    Z       = unit._struct()
     t       = np.arange(0, N, 1)
     Z.u     = np.sign(np.sin(3*np.pi*t/N))
     # Z.u    += 0.2*np.sin(5.2*np.pi*t/N)
@@ -43,7 +43,7 @@ def demo_oe(disp=1):
     # ====================================================
     # Specify Model Structures
     # ====================================================
-    Mq          = unit.struct()
+    Mq          = unit._struct()
     Mq.A        = aq.shape[0]-2
     Mq.B        = Mq.A-1
     Mq.T        = T
@@ -61,8 +61,8 @@ def demo_oe(disp=1):
     # Plot the results
     # ====================================================
     if OPT.dsp:
-        Gt              = unit.struct()
-        Gt.disp         = unit.struct()
+        Gt              = unit._struct()
+        Gt.disp         = unit._struct()
         Gt.A            = aq
         Gt.B            = bq
         Gt.T            = T

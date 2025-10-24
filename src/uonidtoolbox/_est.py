@@ -5,7 +5,7 @@ import numpy as np
 
 def est(Z, M, OPT):
 
-    G = unit.struct()
+    G = unit._struct()
 
     if not Z:
         raise Exception("Need to specify data (Z)!")
@@ -18,9 +18,9 @@ def est(Z, M, OPT):
         mi = np.argmin(np.sum(vv*vv, 0))
         mv = np.sum(vv*vv, 0)[mi]
         M.A = mi + 1
-        OPT = unit.struct()
+        OPT = unit._struct()
     elif not OPT:
-        OPT = unit.struct()
+        OPT = unit._struct()
     #endif
 
     Z   = unit._setup.startZ(Z)

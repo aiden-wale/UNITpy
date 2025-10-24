@@ -3,11 +3,11 @@ import uonidtoolbox as unit
 import numpy as np
 
 
-class struct:
+class _struct:
     def __init__(self, existing: dict = {}):
 
-        if not isinstance(existing, (dict, struct)):
-            raise Exception("unit.struct can only be created from 'dict' or another unit.struct")
+        if not isinstance(existing, (dict, _struct)):
+            raise Exception("unit._struct can only be created from 'dict' or another unit._struct")
         #endif
 
         if not existing:
@@ -18,17 +18,17 @@ class struct:
             self.__dict__ = existing.copy()
             for k in self.__dict__.keys():
                 if isinstance(self.__dict__[k], dict):
-                    self.__dict__[k] = struct(self.__dict__[k])
+                    self.__dict__[k] = _struct(self.__dict__[k])
                 elif isinstance(self.__dict__[k], (list, np.ndarray)):
                     for i in range(0, len(self.__dict__[k])):
                         if isinstance(self.__dict__[k][i], dict):
-                            self.__dict__[k][i] = struct(self.__dict__[k][i])
+                            self.__dict__[k][i] = _struct(self.__dict__[k][i])
                         #endif
                     #endfor
                 #endif
             #endfor
-        elif isinstance(existing, struct):
-            tmp = struct(existing.__dict__)
+        elif isinstance(existing, _struct):
+            tmp = _struct(existing.__dict__)
             self.__dict__ = tmp.__dict__
         #endif
     #enddef
@@ -64,11 +64,11 @@ class struct:
     def asdict(self):
         d = self.__dict__.copy()
         for k in d.keys():
-            if isinstance(d[k], struct):
+            if isinstance(d[k], _struct):
                 d[k] = d[k].asdict()
             elif isinstance(d[k], (list, np.ndarray)):
                 for i in range(0, len(d[k])):
-                    if isinstance(d[k][i], unit.struct):
+                    if isinstance(d[k][i], unit._struct):
                         d[k][i] = d[k][i].asdict()
                     #endif
                 #endfor

@@ -3,9 +3,9 @@ import uonidtoolbox as unit
 import numpy as np
 
 
-def startOPT(OPTin=unit.struct(), Min=unit.struct()):
+def startOPT(OPTin=unit._struct(), Min=unit._struct()):
 
-    o = unit.struct()
+    o = unit._struct()
 
     o.n      = 0
     o.dsp    = 1

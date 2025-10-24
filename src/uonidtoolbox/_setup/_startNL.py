@@ -11,12 +11,12 @@ def startNL(Z, M):
     if 'inp' not in M:
         M.inp = []
         for k in range(0, M.nu):
-            M.inp.append(unit.struct())
+            M.inp.append(unit._struct())
             M.inp[k].type = 'linear'
         #endfor
     elif isempty(M.inp):
         for k in range(0, M.nu):
-            M.inp.append(unit.struct())
+            M.inp.append(unit._struct())
             M.inp[k].type = 'linear'
         #endfor
     else:
@@ -27,7 +27,7 @@ def startNL(Z, M):
         #endfor
     #endif
     if 'out' not in M:
-        M.out = unit.struct()
+        M.out = unit._struct()
         M.out.type = 'linear'
     elif 'type' not in M.out:
         M.out.type = 'linear'

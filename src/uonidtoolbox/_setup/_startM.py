@@ -11,27 +11,27 @@ def startM(*args):
     # ============================== Get Z and M ===============================
     match len(args):
         case 0:
-            Z = unit.struct()
-            M = unit.struct()
+            Z = unit._struct()
+            M = unit._struct()
             nu = 1
             ny = 1
 
         case 1: # input should be pertaining to M
-            Z = unit.struct()
-            M = unit.struct()
+            Z = unit._struct()
+            M = unit._struct()
             nu = 1
             ny = 1
 
             if isinstance(args[0], str):
                 M.type = args[0]
-            elif isinstance(args[0], (unit.struct, dict)):
+            elif isinstance(args[0], (unit._struct, dict)):
                 if 'type' in args[0]:
                     if args[0]['type'] in ['time', 'frequency']:
                         # then args[0] pertains to Z
-                        Z = unit.struct(args[0])
-                        M = unit.struct()
+                        Z = unit._struct(args[0])
+                        M = unit._struct()
                     else:
-                        M = unit.struct(args[0])
+                        M = unit._struct(args[0])
                         if 'nu' in M: nu = M.nu
                         if 'ny' in M: ny = M.ny
                     #endif
@@ -49,15 +49,15 @@ def startM(*args):
             nu = Z.nu
             ny = Z.ny
 
-            if isinstance(args[1], unit.struct):
+            if isinstance(args[1], unit._struct):
                 M = args[1]
             if isinstance(args[1], dict):
-                M = unit.struct(args[1])
+                M = unit._struct(args[1])
             elif isinstance(args[1], str):
-                M = unit.struct()
+                M = unit._struct()
                 M.type = args[1]
             elif isinstance(args[1], (int, float, complex)):
-                M = unit.struct()
+                M = unit._struct()
                 if args[1] >= 0:
                     M.nA = args[1]
                 #endif
@@ -73,7 +73,7 @@ def startM(*args):
 
 
     # ================== THE DEFAULT MODEL STRUCTURE ===========================
-    m = unit.struct()
+    m = unit._struct()
     gord        = 5         # Default order of G dynamics
     hord        = 2         # Default order of H dynamics
     m.type      = 'arx'     # Default type of model
@@ -806,7 +806,7 @@ def startM(*args):
 
     #endif
 
-    M = unit.struct(dict(sorted(M.items())))
+    M = unit._struct(dict(sorted(M.items())))
 
     return M;
 

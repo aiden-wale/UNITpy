@@ -5,14 +5,14 @@ import scipy
 import copy
 
 
-def fir(Z, M=unit.struct(), OPT=unit.struct()):
+def fir(Z, M=unit._struct(), OPT=unit._struct()):
     Z = unit._setup.startZ(Z)
     y,u,ny,nu,Ny = unit._setup._startZ._Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
     OPT = unit._setup.startOPT(OPT)
     if 'type' not in OPT.alg:
-        OPT.alg = unit.struct()
+        OPT.alg = unit._struct()
         OPT.alg.type = 'block'
     #endif
 
@@ -86,9 +86,9 @@ def fir(Z, M=unit.struct(), OPT=unit.struct()):
     G.OPT = copy.deepcopy(OPT)
 
     # Add legend for prospective plotting
-    G.disp = unit.struct()
+    G.disp = unit._struct()
     G.disp.legend = 'Estimated n_b=' + str(mxB) + 'th order FIR model'
-    G.alg = unit.struct()
+    G.alg = unit._struct()
     G.alg.type = 'block' # Record that block solution was used # TODO: this should reflect actual solve type used
 
 

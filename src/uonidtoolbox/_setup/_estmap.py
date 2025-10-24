@@ -7,7 +7,7 @@ isempty = unit._utils.isempty
 
 def estmap(Z, M, OPT):
 
-    ep = unit.struct()
+    ep = unit._struct()
 
     ep.startG    = ""
     ep.startH    = ""
@@ -22,7 +22,7 @@ def estmap(Z, M, OPT):
 
     if isempty(M):
         return ep
-    elif not isinstance(M, (dict, unit.struct)):
+    elif not isinstance(M, (dict, unit._struct)):
         return ep
     elif 'type' not in M:
         return ep

@@ -5,7 +5,7 @@ import scipy
 import copy
 
 
-def gn(Z, M=unit.struct(), OPT=unit.struct()):
+def gn(Z, M=unit._struct(), OPT=unit._struct()):
     M = unit._setup.startM(M)
 
     # Construct parameter vector from system polynomials

@@ -5,14 +5,14 @@ import numpy as np
 
 def startZ(Z):
 
-    if not isinstance(Z, (unit.struct, dict, np.ndarray)):
-        raise Exception("Z must be a unit.struct, dictionary or numpy.ndarray")
+    if not isinstance(Z, (unit._struct, dict, np.ndarray)):
+        raise Exception("Z must be a unit._struct, dictionary or numpy.ndarray")
 
     if isinstance(Z, dict):
-        Z = unit.struct(Z)
+        Z = unit._struct(Z)
     #endif
 
-    if isinstance(Z, (unit.struct, dict)):
+    if isinstance(Z, (unit._struct, dict)):
         if 'passed_startZ' in Z:
             if Z.passed_startZ == 1:
                 return Z
@@ -26,7 +26,7 @@ def startZ(Z):
         #endfor
     #endif
 
-    if isinstance(Z, (unit.struct, dict)):
+    if isinstance(Z, (unit._struct, dict)):
         if 'y' not in Z:
             raise Exception("Must have a Z.y field")
     else:
@@ -36,7 +36,7 @@ def startZ(Z):
             (N, nin) = Z.shape
 
         Zm = Z
-        Z = unit.struct()
+        Z = unit._struct()
         y = Zm[:, 0]
         y = y.reshape(y.size,1)
         if nin>1:

@@ -5,14 +5,14 @@ import scipy
 import copy
 
 
-def barx(Z, M=unit.struct(), OPT=unit.struct()):
+def barx(Z, M=unit._struct(), OPT=unit._struct()):
     Z = unit._setup.startZ(Z)
     y,u,ny,nu,Ny = unit._setup._startZ._Z2data(Z)
 
     # Unspecified parts of OPT -> defaults
     OPT = unit._setup.startOPT(OPT)
     if 'alg' not in OPT:
-        OPT.alg = unit.struct()
+        OPT.alg = unit._struct()
         if 'type' not in OPT.alg:
             OPT.alg.type = 'block'
         #endif

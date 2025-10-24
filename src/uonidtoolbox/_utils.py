@@ -23,7 +23,7 @@ def length(o):
 def isempty(obj):
     if isinstance(obj, np.ndarray):
         return True if obj.size == 0 else False
-    elif isinstance(obj, (list, dict, unit.struct)):
+    elif isinstance(obj, (list, dict, unit._struct)):
         return True if len(obj) == 0 else False
     else:
         return False
@@ -121,7 +121,7 @@ def m2f(M):
             if M.type in ['fir']: G.D = copy.deepcopy(G.A)
 
             # TODO: repair dimensions of A,B,C,D polynomials (unit._setup.startM() ?)
-            tmpG = unit.struct()
+            tmpG = unit._struct()
             for p in ['A','B','C','D']:
                 if G[p].ndim > 1:
                     tmpG[p] = G[p][0,:]
@@ -168,7 +168,7 @@ def m2theta(M):
 
     # In case of SISO OE model type, load B(q) and A(q) polynomials into theta
     # First, determine if initial polynomial estimates are in M, otherwise they are orders
-    Mt = unit.struct()
+    Mt = unit._struct()
     for p in ['B', 'A', 'C', 'D']:
         if isinstance(M[p], np.ndarray):
             if M[p].size > 1: # its a polynomial
