@@ -6,7 +6,7 @@ barx        = _barx.barx
 from . import(_gn)
 gn          = _gn.gn
 
-from . import(_subspace, _sid)
+from . import(_subspace, _n4sid)
 subspace    = _subspace.subspace
-sid         = _sid.sid
+n4sid       = _n4sid.n4sid
 

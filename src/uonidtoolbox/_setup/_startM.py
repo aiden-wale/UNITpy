@@ -7,7 +7,11 @@ isempty = unit._utils.isempty
 
 
 def startM(*args):
+    return startM_old(*args)
+#enddef startM
 
+
+def startM_old(*args):
     # ============================== Get Z and M ===============================
     match len(args):
         case 0:
@@ -656,7 +660,7 @@ def startM(*args):
                 M.nx = M.nA
             elif 'A' in M:
                 if np.floor(M.A) == M.A:
-                    M.nx = np.max(M.A) # TODO: Check this (supremum of matrix elements?)
+                    M.nx = np.max(M.A)
                 else:
                     M.nx = m.nx
                 #endif
@@ -808,7 +812,8 @@ def startM(*args):
 
     M = unit._struct(dict(sorted(M.items())))
 
-    return M;
+    return M
+#enddef startM
 
 
 def _inputCleanse_M(M):

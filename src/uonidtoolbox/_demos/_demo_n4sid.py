@@ -1,0 +1,84 @@
+
+import uonidtoolbox as unit
+import numpy as np
+import scipy
+
+
+def demo_n4sid(disp=1):
+
+    OPT = unit._struct()
+    OPT.dsp = disp
+
+    # ====================================================
+    # Specify Experiment Conditions
+    # ====================================================
+    T   = 1   # Sampling period in seconds
+    N   = 500   # Number of Samples
+    var = 1e-1  # Measurement Noise Variance
+
+
+    # ====================================================
+    # Specify true (linear) system
+    # ====================================================
+    den         = np.real(np.poly([-0.1,-0.2,-0.3,-0.5]))
+    num         = 10*den[-1]
+    sysc        = scipy.signal.TransferFunction(num, den).to_ss()
+    A,B,C,D,_   = scipy.signal.cont2discrete((sysc.A, sysc.B, sysc.C, sysc.D), T, method='zoh')
+    bq,aq       = scipy.signal.ss2tf(A, B, C, D, 0)
+    bq,aq       = np.squeeze(bq), np.squeeze(aq)
+
+
+    # ====================================================
+    # Simulate a data record
+    # ====================================================
+    Z       = unit._struct()
+    t       = np.arange(0, N, 1)
+    Z.u     = np.sign(np.sin(5*np.pi*t/N))
+    # Z.u    += 0.2*np.sin(5.2*np.pi*t/N)
+    # Z.u    += 0.2*np.random.randn(Z.u.size).reshape(Z.u.shape)
+    noise   = np.sqrt(var)*np.random.randn(Z.u.size).reshape(Z.u.shape)
+    Z.y     = scipy.signal.lfilter(bq, aq, Z.u) + noise
+
+
+    # ====================================================
+    # Specify Model Structures
+    # ====================================================
+    Mq          = unit._struct()
+    Mq.nx       = aq.shape[0]-1
+    Mq.T        = T
+    Mq.delay    = 1
+    Mq.type     = 'ss'
+
+
+    # ====================================================
+    # Specify Optional parts about how estimation procedure runs
+    # ====================================================
+    OPT.horizon = 2*Mq.nx
+    OPT.alg     = 'n4sid'
+
+
+    # ====================================================
+    # Estimate on basis of noise corrupted data
+    # ====================================================
+    Gq = unit.est(Z,Mq,OPT)
+
+
+    # ====================================================
+    # Plot the results
+    # ====================================================
+    if OPT.dsp:
+        Gt              = unit._struct()
+        Gt.disp         = unit._struct()
+        Gt.A            = aq
+        Gt.B            = bq
+        Gt.T            = T
+        Gt.w            = Gq.w
+        Gt.type         = 'ss'
+        # Gt.colour       = 'b'
+        Gt.disp.legend  = 'True Response'
+        
+        unit.plotting.showbode([Gt, Gq])
+    #endif
+
+#endfunction
+

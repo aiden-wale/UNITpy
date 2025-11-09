@@ -1,25 +1,25 @@
 
-import uonidtoolbox as unit
-import numpy as np
+from numpy import ndarray
+from copy import deepcopy
 
 
 class _struct:
-    def __init__(self, existing: dict = {}):
+    def __init__(self, given_data = {}):
 
-        if not isinstance(existing, (dict, _struct)):
-            raise Exception("unit._struct can only be created from 'dict' or another unit._struct")
-        #endif
+        if not isinstance(given_data, (dict, _struct)):
+            raise Exception("uonidtoolbox._struct can only be created from 'dict' or another uonidtoolbox._struct")
 
-        if not existing:
+        if not given_data:
             return
-        #endif
 
-        if isinstance(existing, dict):
-            self.__dict__ = existing.copy()
+        _data = deepcopy(given_data)
+
+        if isinstance(_data, dict):
+            self.__dict__ = _data.copy()
             for k in self.__dict__.keys():
                 if isinstance(self.__dict__[k], dict):
                     self.__dict__[k] = _struct(self.__dict__[k])
-                elif isinstance(self.__dict__[k], (list, np.ndarray)):
+                elif isinstance(self.__dict__[k], (list, ndarray)):
                     for i in range(0, len(self.__dict__[k])):
                         if isinstance(self.__dict__[k][i], dict):
                             self.__dict__[k][i] = _struct(self.__dict__[k][i])
@@ -27,38 +27,31 @@ class _struct:
                     #endfor
                 #endif
             #endfor
-        elif isinstance(existing, _struct):
-            tmp = _struct(existing.__dict__)
+        elif isinstance(_data, _struct):
+            tmp = _struct(_data.__dict__)
             self.__dict__ = tmp.__dict__
         #endif
-    #enddef
+    #enddef __init__
+
+    def __len__(self): return len(self.__dict__)
+    def __getitem__(self, key): return self.__dict__[key]
+    def __setitem__(self, key, value): self.__dict__[key] = value
+    def __delitem__(self, key): del self.__dict__[key]
+    def __repr__(self): return repr(self.__dict__)
 
     def __iter__(self):
         for item in self.__dict__:
             yield item
         #endfor
-    #enddef
 
-    def __len__(self):
-        return len(self.__dict__)
-    #enddef
+    def keys(self): return self.__dict__.keys()
+    def items(self): return self.__dict__.items()
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
-    #enddef
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
-    #enddef
-
-    def __delitem__(self, key):
-        del self.__dict__[key]
-    #enddef
-
-    def __repr__(self):
-        return repr(self.__dict__)
-    #enddef
-
+    def copy(self, deep=False):
+        if deep:
+            return deepcopy(self)
+        else:
+            return self.__dict__.copy()
 
 
     def asdict(self):
@@ -66,29 +59,22 @@ class _struct:
         for k in d.keys():
             if isinstance(d[k], _struct):
                 d[k] = d[k].asdict()
-            elif isinstance(d[k], (list, np.ndarray)):
+            elif isinstance(d[k], (list, ndarray)):
                 for i in range(0, len(d[k])):
-                    if isinstance(d[k][i], unit._struct):
+                    if isinstance(d[k][i], _struct):
                         d[k][i] = d[k][i].asdict()
                     #endif
                 #endfor
             #endif
         #endfor
         return d
-    #enddef
+#endclass _struct
 
-    def keys(self):
-        return self.__dict__.keys()
-    #enddef
 
-    def items(self):
-        return self.__dict__.items()
-    #enddef
+# class _Z_structure(_struct):
+#     def __init__(self, _data):
+#         super().__init__(_data)
 
-    def copy(self):
-        return struct(self.__dict__.copy())
-    #enddef
-
-#endclass
+        
 
 

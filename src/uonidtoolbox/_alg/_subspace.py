@@ -9,11 +9,11 @@ def subspace(Z, M=unit._struct(), OPT=unit._struct()):
 
     match Z.type:
         case 'time':
-            G = unit.sid(Z,M,OPT)
+            G = unit._alg.n4sid(Z,M,OPT)
 
-        case 'frequency':
-            raise Exception("Subspace Identification not yet implemented for frequency data.")
-            G = unit.fsid(Z,M,OPT)
+        # case 'frequency':
+        #     raise Exception("Subspace Identification not yet implemented for frequency data.")
+        #     G = unit._alg.fsid(Z,M,OPT)
 
         case _:
             unit._utils.uwarning('Data type (Z.type) not known')

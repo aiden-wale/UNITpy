@@ -5,7 +5,7 @@ import scipy
 import copy
 
 
-def sid(Z, M=unit._struct(), OPT=unit._struct()):
+def n4sid(Z, M=unit._struct(), OPT=unit._struct()):
 
     # Extract inputs and outputs specified
     y,u,ny,nu,N = unit._setup._startZ._Z2data(Z)
